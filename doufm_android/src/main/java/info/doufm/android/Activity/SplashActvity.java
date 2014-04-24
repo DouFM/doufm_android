@@ -1,9 +1,11 @@
-package info.doufm.android;
+package info.doufm.android.Activity;
 
 import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
+
+import info.doufm.android.R;
 
 
 public class SplashActvity extends ActionBarActivity {
