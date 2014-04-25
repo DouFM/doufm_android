@@ -1,10 +1,14 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
+import android.widget.Button;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,7 +19,7 @@ import info.doufm.android.ResideMenu.ResideMenuItem;
 /**
  * Created with Android Studio.
  * Date 2014-04-26
- *
+ * <p/>
  * Reside Menu的初始化和设置
  *
  * @author Qichao Chen
@@ -36,12 +40,30 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private List<String> mRightResideMenuItemTitleList;
     private List<Integer> mRightResideMenuItemIconList;
 
+    private Button btnPlayMusic, btnNextSong;
+
+    //Test Music URL
+
+    private String URL = "http://abv.cn/music/%E5%85%89%E8%BE%89%E5%B2%81%E6%9C%88.mp3";
+    private MediaPlayer mediaPlayer;
+
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
+        initView();
         InitResideMenu();
+        initPlayer();
+    }
+
+
+    private void initView() {
+        btnPlayMusic = (Button) findViewById(R.id.btnPlayMusic);
+        btnNextSong = (Button) findViewById(R.id.btnNextSong);
+        btnPlayMusic.setOnClickListener(this);
+        btnNextSong.setOnClickListener(this);
     }
 
     private void InitResideMenu() {
@@ -60,12 +82,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
         mLeftResideMenuItemTitleList.add("测试");
         mLeftResideMenuItemIconList.add(new Integer(R.drawable.rm_icon_home));
         for (int i = 0; i < mLeftResideMenuItemTitleList.size(); i++) {
-            mLeftResideMenuItemList.add(new ResideMenuItem(this,mLeftResideMenuItemIconList.get(i), mLeftResideMenuItemTitleList.get(i)));
+            mLeftResideMenuItemList.add(new ResideMenuItem(this, mLeftResideMenuItemIconList.get(i), mLeftResideMenuItemTitleList.get(i)));
         }
 
         //禁用右侧ResideMenu
         mResideMenu.setDirectionDisable(ResideMenu.DIRECTION_RIGHT);
-        mResideMenu.setMenuItems(mLeftResideMenuItemList,ResideMenu.DIRECTION_LEFT);
+        mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_LEFT);
         findViewById(R.id.btn_open_left_reside_menu).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -75,12 +97,40 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     }
 
-    @Override
-    public void onClick(View view) {
+    private void initPlayer() {
+        try {
+            mediaPlayer = new MediaPlayer();
+            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
+            mediaPlayer.setDataSource(URL);
+
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
 
     }
 
-    private class ResideMenuListener implements ResideMenu.OnMenuListener{
+
+    @Override
+    public void onClick(View view) {
+
+        switch (view.getId()) {
+            case R.id.btnPlayMusic:
+            try {
+                mediaPlayer.prepare();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            mediaPlayer.start();
+
+            break;
+            case R.id.btnNextSong:
+                break;
+        }
+
+    }
+
+    private class ResideMenuListener implements ResideMenu.OnMenuListener {
 
         @Override
         public void openMenu() {
@@ -98,7 +148,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
         return super.dispatchTouchEvent(ev) || mResideMenu.onInterceptTouchEvent(ev);
     }
 
-    public ResideMenu getResideMenu(){
+    public ResideMenu getResideMenu() {
         return mResideMenu;
     }
 }
