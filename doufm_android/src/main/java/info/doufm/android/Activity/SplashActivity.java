@@ -19,7 +19,7 @@ import info.doufm.android.R;
  * Created with Android Studio.
  * Date 2014-04-24
  *
- * 启动画面和网络状态判断
+ * 启动画面加载和网络状态判断
  *
  * @author Qichao Chen
  * @version 1.0
@@ -74,6 +74,7 @@ public class SplashActivity extends Activity {
                     finish();
                 }
             });
+            aletDialog.show();
 
         }
     }
@@ -105,6 +106,4 @@ public class SplashActivity extends Activity {
             }
         },3000);
     }
-
-
 }
