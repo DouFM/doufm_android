@@ -16,7 +16,9 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name="info.doufm.android.Activity.MainActivity"></activity>
+        <activity
+            android:name="info.doufm.android.Activity.MainActivity"
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen"></activity>
     </application>
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE"></uses-permission>
