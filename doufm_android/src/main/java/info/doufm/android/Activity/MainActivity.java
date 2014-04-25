@@ -4,16 +4,14 @@ import android.support.v7.app.ActionBarActivity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
 import info.doufm.android.R;
 
-
-public class SplashActvity extends ActionBarActivity {
+public class MainActivity extends ActionBarActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_splash_actvity);
+        setContentView(R.layout.activity_main);
     }
 
 
@@ -21,7 +19,7 @@ public class SplashActvity extends ActionBarActivity {
     public boolean onCreateOptionsMenu(Menu menu) {
         
         // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.splash_actvity, menu);
+        getMenuInflater().inflate(R.menu.main, menu);
         return true;
     }
 
