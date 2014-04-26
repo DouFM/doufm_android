@@ -22,7 +22,7 @@
             android:scrollbars="none"
             android:paddingLeft="30dp"
             android:layout_width="150dp"
-            android:layout_height="fill_parent"
+            android:layout_height="match_parent"
             android:visibility="gone">
         <LinearLayout
                 android:id="@+id/layout_left_menu"
