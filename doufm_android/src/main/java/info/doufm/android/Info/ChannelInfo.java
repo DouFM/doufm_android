@@ -2,7 +2,7 @@ package info.doufm.android.Info;
 
 /**
  * Created with Android Studio.
- * Date 2014-04-26r
+ * Date 2014-04-26
  * Channel Information
  * @author Qichao Chen
  * @version 1.0

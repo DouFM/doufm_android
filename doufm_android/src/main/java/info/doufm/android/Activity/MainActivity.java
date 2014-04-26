@@ -1,17 +1,18 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
 
-import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 
+import info.doufm.android.Play.PlayMusic;
 import info.doufm.android.R;
 import info.doufm.android.ResideMenu.ResideMenu;
 import info.doufm.android.ResideMenu.ResideMenuItem;
@@ -40,13 +41,16 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private List<String> mRightResideMenuItemTitleList;
     private List<Integer> mRightResideMenuItemIconList;
 
+    //播放和下一首按钮
     private Button btnPlayMusic, btnNextSong;
 
     //Test Music URL
-
     private String URL = "http://abv.cn/music/%E5%85%89%E8%BE%89%E5%B2%81%E6%9C%88.mp3";
     private MediaPlayer mediaPlayer;
 
+
+    private PlayMusic player; //播放器
+    private String musicURL = "";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -98,16 +102,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void initPlayer() {
-        try {
-            mediaPlayer = new MediaPlayer();
-            mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC);
-            mediaPlayer.setDataSource(URL);
-
-
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-
+        player = new PlayMusic();
     }
 
 
@@ -116,15 +111,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         switch (view.getId()) {
             case R.id.btnPlayMusic:
-            try {
-                mediaPlayer.prepare();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            mediaPlayer.start();
-
-            break;
+                try {
+                    musicURL = URLEncoder.encode(URL, "UTF-8");
+                } catch (UnsupportedEncodingException e) {
+                    e.printStackTrace();
+                }
+                player.PlayOnline("http://abv.cn/music/%E5%85%89%E8%BE%89%E5%B2%81%E6%9C%88.mp3");
+                break;
             case R.id.btnNextSong:
+                player.pause();
                 break;
         }
 
@@ -146,6 +141,15 @@ public class MainActivity extends Activity implements View.OnClickListener {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         return super.dispatchTouchEvent(ev) || mResideMenu.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (player != null) {
+            player.stop();
+            player = null;
+        }
     }
 
     public ResideMenu getResideMenu() {

@@ -1,17 +1,12 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
-import android.content.ComponentName;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.provider.Settings;
 
 import info.doufm.android.R;
 
@@ -26,7 +21,7 @@ import info.doufm.android.R;
  */
 public class SplashActivity extends Activity {
 
-    private static final int LOADING_TIME = 2000; //启动画面显示时间
+    private static final int LOADING_TIME = 1000; //启动画面显示时间
 
     private ConnectivityManager connectivityManager;
 
@@ -36,12 +31,18 @@ public class SplashActivity extends Activity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_actvity);
+
         LoadingProcess();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
+    }
+
+    @Override
+    protected void onResume() {
+        super.onResume();
         LoadingProcess();
     }
 
@@ -52,42 +53,37 @@ public class SplashActivity extends Activity {
             StartMainActivity();
         } else {
             //提示用户设置Wifi
-            AlertDialog.Builder aletDialog = new AlertDialog.Builder(this);
-            aletDialog.setTitle("提示");
-            aletDialog.setMessage("当前无法连接到校园网,如果继续使用,请先设置网络");
-            aletDialog.setPositiveButton(R.string.splash_activity_set_wifi,new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    Intent intent = null;
-                    if (Build.VERSION.SDK_INT > 11){
-                        //Android 3.0以上版本跳转至Wifi设置界面
-                        intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                    } else{
-                        //Android 3.0以下版本跳转至Wifi设置界面
-                        intent = new Intent();
-                        ComponentName componentName = new ComponentName("com.android.settings","com.android.settings.WirelessSettings");
-                        intent.setComponent(componentName);
-                        intent.setAction("android.intent.action.VIEW");
-                    }
-                    startActivity(intent);
-                }
-            });
-            aletDialog.setNegativeButton(R.string.splash_activity_quit,new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialogInterface, int i) {
-                    //无法使用网络退出
-                    finish();
-                }
-            });
-            aletDialog.show();
+            StartMainActivity();//方便模拟器测试直接跳过Wifi设置
 
+//            AlertDialog.Builder aletDialog = new AlertDialog.Builder(this);
+//            aletDialog.setTitle("提示");
+//            aletDialog.setMessage("当前无法连接到校园网,如果继续使用,请先设置网络");
+//            aletDialog.setPositiveButton(R.string.splash_activity_set_wifi,new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    Intent intent = null;
+//                    if (Build.VERSION.SDK_INT > 11){
+//                        //Android 3.0以上版本跳转至Wifi设置界面
+//                        intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+//                    } else{
+//                        //Android 3.0以下版本跳转至Wifi设置界面
+//                        intent = new Intent();
+//                        ComponentName componentName = new ComponentName("com.android.settings","com.android.settings.WirelessSettings");
+//                        intent.setComponent(componentName);
+//                        intent.setAction("android.intent.action.VIEW");
+//                    }
+//                    startActivity(intent);
+//                }
+//            });
+//            aletDialog.setNegativeButton(R.string.splash_activity_quit,new DialogInterface.OnClickListener() {
+//                @Override
+//                public void onClick(DialogInterface dialogInterface, int i) {
+//                    //无法使用网络退出
+//                    finish();
+//                }
+//            });
+//            aletDialog.show();
         }
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        LoadingProcess();
     }
 
     private boolean CheckNetworkStatus() {
@@ -109,6 +105,6 @@ public class SplashActivity extends Activity {
                 Intent intent = new Intent(SplashActivity.this,MainActivity.class);
                 startActivity(intent);
             }
-        },3000);
+        },LOADING_TIME);
     }
 }
