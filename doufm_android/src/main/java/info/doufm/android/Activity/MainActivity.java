@@ -1,17 +1,21 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
+import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Button;
+import android.widget.ImageView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 
@@ -19,8 +23,6 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -59,6 +61,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     //播放和下一首按钮
     private Button btnPlayMusic, btnNextSong;
+    private ImageView ivCover;
+    private TextView tvMusicTitle;
 
     //Test Music URL
     private String URL = "http://abv.cn/music/%E5%85%89%E8%BE%89%E5%B2%81%E6%9C%88.mp3";
@@ -68,9 +72,8 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private PlayMusic player; //播放器
     private String musicURL = "";
 
-    private static final String CHANNEL_URL = "http://doufm.info/api/channel/?start=0";
-    private static final String MUSIC_URL = "http://doufm.info/api/channel/?start=0";
-    private static final String PLAYLIST_URL = "http://doufm.info/api/channel/?start=0";
+    private String CHANNEL_URL = "http://doufm.info/api/channel/?start=0";
+    private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
 
     private List<MusicInfo> mMusicInfoList = new ArrayList<MusicInfo>();
     private List<ChannelInfo> mChannelInfoList = new ArrayList<ChannelInfo>();
@@ -81,19 +84,28 @@ public class MainActivity extends Activity implements View.OnClickListener {
     private List<Integer> randomChannel = new ArrayList<Integer>();
     private static final int CHANNEL_MENU_NUM = 6;
 
+    private int randomMusicIndex = new Random().nextInt(2000);
+
+    //音乐文件和封面路径
+    private String MuiscURL = "";
+    private String CoverURL = "";
+    private boolean isPlay = false;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
         mRequstQueue = Volley.newRequestQueue(this);
+        initPlayer();
         initView();
         InitResideMenu();
-        initPlayer();
     }
 
 
     private void initView() {
+        ivCover = (ImageView) findViewById(R.id.ivCover);
+        tvMusicTitle = (TextView) findViewById(R.id.tvMusicTitle);
         btnPlayMusic = (Button) findViewById(R.id.btnPlayMusic);
         btnNextSong = (Button) findViewById(R.id.btnNextSong);
         btnPlayMusic.setOnClickListener(this);
@@ -164,16 +176,37 @@ public class MainActivity extends Activity implements View.OnClickListener {
                     e.printStackTrace();
                 }
             }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-            }
-        });
+        }, errorListener);
         mRequstQueue.add(jaq);
     }
 
     private void initPlayer() {
         player = new PlayMusic();
+        PlayRandomMusic(randomMusicIndex);
+    }
+
+    private void PlayRandomMusic(int randomNum) {
+       String MUSIC_URL = "http://doufm.info/api/music/?start=" + randomNum + "&" + "end=" + (randomNum + 1);
+        JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                //请求随机播放音乐文件信息
+                try {
+                    JSONObject jo = new JSONObject();
+                    jo = jsonArray.getJSONObject(0);
+                    MuiscURL = "http://doufm.info" + jo.getString("audio");
+                    CoverURL = "http://doufm.info" + jo.getString("cover");
+                    GetCoverImageRequest(CoverURL);
+                    tvMusicTitle.setText(jo.getString("title")+" - "+jo.getString("artist"));
+                    player.PlayOnline(MuiscURL);
+                    isPlay = true;
+                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, errorListener);
+        mRequstQueue.add(jaq);
     }
 
 
@@ -182,15 +215,19 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
         switch (view.getId()) {
             case R.id.btnPlayMusic:
-                try {
-                    musicURL = URLEncoder.encode(URL, "UTF-8");
-                } catch (UnsupportedEncodingException e) {
-                    e.printStackTrace();
+                if (isPlay) {
+                    isPlay = false;
+                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_play_press);
+                    player.pause();
+                } else {
+                    isPlay = true;
+                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
+                    player.play();
                 }
-                player.PlayOnline("http://doufm.info/api/fs/535b35aa1d41c866ca673f85");
                 break;
             case R.id.btnNextSong:
-                player.pause();
+                randomMusicIndex = new Random().nextInt(2000);
+                PlayRandomMusic(randomMusicIndex);
                 break;
         }
 
@@ -200,6 +237,20 @@ public class MainActivity extends Activity implements View.OnClickListener {
             }
         }
 
+    }
+
+    private void GetCoverImageRequest(String coverURL) {
+        ImageRequest imageRequest = new ImageRequest(coverURL, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+                ivCover.setImageBitmap(bitmap);
+            }
+        }, 0, 0, null, null);
+        mRequstQueue.add(imageRequest);
+    }
+
+    public void getChannelMusicJsonData() {
+        //获取指定Channel的音乐
     }
 
     private class ResideMenuListener implements ResideMenu.OnMenuListener {
@@ -241,6 +292,13 @@ public class MainActivity extends Activity implements View.OnClickListener {
             player = null;
         }
     }
+
+    private Response.ErrorListener errorListener = new Response.ErrorListener() {
+        @Override
+        public void onErrorResponse(VolleyError volleyError) {
+
+        }
+    };
 
     public ResideMenu getResideMenu() {
         return mResideMenu;
