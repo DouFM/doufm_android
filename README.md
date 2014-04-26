@@ -22,11 +22,11 @@ Dou音乐, 爱生活
 
 ## 开发环境
 
-Mac OS X 10.9.2 + Android Studio(0.5.5) + Gradle(1.11)
+Mac OS X 10.9.2 + Android Studio(0.5.7) + Gradle(1.11)
 
 ## 工程项目导入
 
-项目工程采用的IDE是Android Studio 0.5.5，并且Android SDK已升级至最新版本(Kit Kat 4.4,Support Library 19.1，2014-04-25)，如果你是直接导入Android Studio，确保你的版本匹配，我们不能保证向上或在向下兼容（Google决定的！），需要检查你本地的gradle版本。如果你要导入到eclipse，有可能某些第三库无法试用，建议试用Android Studio！
+项目工程采用的IDE是Android Studio 0.5.7，并且Android SDK已升级至最新版本(Kit Kat 4.4,Support Library 19.1，2014-04-26)，如果你是直接导入Android Studio，确保你的版本匹配，我们不能保证向上或在向下兼容（Google决定的！），需要检查你本地的gradle版本。如果你要导入到eclipse，有可能某些第三库无法试用，建议试用Android Studio！
 
 ## 预览效果
 
