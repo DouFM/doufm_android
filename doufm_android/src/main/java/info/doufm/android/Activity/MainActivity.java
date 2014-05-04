@@ -30,6 +30,7 @@ import java.util.Random;
 import info.doufm.android.Info.ChannelInfo;
 import info.doufm.android.Info.MusicInfo;
 import info.doufm.android.Info.PlaylistInfo;
+import info.doufm.android.Play.OnPlayListener;
 import info.doufm.android.Play.PlayMusic;
 import info.doufm.android.R;
 import info.doufm.android.ResideMenu.ResideMenu;
@@ -44,7 +45,7 @@ import info.doufm.android.ResideMenu.ResideMenuItem;
  * @author Qichao Chen
  * @version 1.0
  */
-public class MainActivity extends Activity implements View.OnClickListener {
+public class MainActivity extends Activity implements View.OnClickListener,OnPlayListener {
 
     private MainActivity mContext;
     private ResideMenu mResideMenu;
@@ -181,7 +182,7 @@ public class MainActivity extends Activity implements View.OnClickListener {
     }
 
     private void initPlayer() {
-        player = new PlayMusic();
+        player = new PlayMusic(this);
         PlayRandomMusic(randomMusicIndex);
     }
 
@@ -251,6 +252,12 @@ public class MainActivity extends Activity implements View.OnClickListener {
 
     public void getChannelMusicJsonData() {
         //获取指定Channel的音乐
+    }
+
+    @Override
+    public void EndOfMusic() {
+        randomMusicIndex = new Random().nextInt(2000);
+        PlayRandomMusic(randomMusicIndex);
     }
 
     private class ResideMenuListener implements ResideMenu.OnMenuListener {

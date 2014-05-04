@@ -22,11 +22,12 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
 
     private MediaPlayer mediaPlay;          //媒体播放器
     private Timer mTimer = new Timer();     //计时器
-    private boolean isEnd = false; //播放是否结束
+    private OnPlayListener onPlayListener;  //播放状态监听器
 
-    public PlayMusic() {
+    public PlayMusic(OnPlayListener onPlayListener) {
 
         try {
+            this.onPlayListener = onPlayListener;
             mediaPlay = new MediaPlayer(); //创建媒体播放器
             mediaPlay.setAudioStreamType(AudioManager.STREAM_MUSIC); //设置媒体流类型
             mediaPlay.setOnBufferingUpdateListener(this);
@@ -101,8 +102,7 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        isEnd = true;
-        mediaPlay.start();
+        this.onPlayListener.EndOfMusic();
         Log.i(LOG_TAG,"onCompletion");
     }
 
