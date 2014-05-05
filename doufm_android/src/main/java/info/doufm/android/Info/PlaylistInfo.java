@@ -9,78 +9,9 @@ package info.doufm.android.Info;
  */
 public class PlaylistInfo {
 
-    private String key;             //歌曲key
-    private String title;           //歌曲名
-    private String artist;          //艺术家
-    private String album;           //专辑
-    private String company;         //唱片公司
-    private String public_time;     //出版年份
-    private String kbps;            //码率
-    private String cover;           //专辑封面URL
-
-    public String getAudio() {
-        return audio;
-    }
-
-    public void setAudio(String audio) {
-        this.audio = audio;
-    }
-
-    public String getCover() {
-        return cover;
-    }
-
-    public void setCover(String cover) {
-        this.cover = cover;
-    }
-
-    public String getKbps() {
-        return kbps;
-    }
-
-    public void setKbps(String kbps) {
-        this.kbps = kbps;
-    }
-
-    public String getPublic_time() {
-        return public_time;
-    }
-
-    public void setPublic_time(String public_time) {
-        this.public_time = public_time;
-    }
-
-    public String getCompany() {
-        return company;
-    }
-
-    public void setCompany(String company) {
-        this.company = company;
-    }
-
-    public String getAlbum() {
-        return album;
-    }
-
-    public void setAlbum(String album) {
-        this.album = album;
-    }
-
-    public String getArtist() {
-        return artist;
-    }
-
-    public void setArtist(String artist) {
-        this.artist = artist;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
+    private String key;            //歌曲key
+    private String name;           //播放列表名字
+    private String music_list;     //分播放列表中歌曲数
 
     public String getKey() {
         return key;
@@ -90,5 +21,19 @@ public class PlaylistInfo {
         this.key = key;
     }
 
-    private String audio;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getMusic_list() {
+        return music_list;
+    }
+
+    public void setMusic_list(String music_list) {
+        this.music_list = music_list;
+    }
 }

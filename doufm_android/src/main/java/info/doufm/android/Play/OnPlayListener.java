@@ -6,5 +6,7 @@ package info.doufm.android.Play;
  * Info:
  */
 public interface OnPlayListener {
+
     public void EndOfMusic();
+
 }

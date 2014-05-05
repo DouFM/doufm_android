@@ -10,7 +10,6 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
-import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -79,11 +78,13 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
     private List<MusicInfo> mMusicInfoList = new ArrayList<MusicInfo>();
     private List<ChannelInfo> mChannelInfoList = new ArrayList<ChannelInfo>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
+    private int mPlayListNum = 0;
 
     //Volley请求
     private RequestQueue mRequstQueue;
     private List<Integer> randomChannel = new ArrayList<Integer>();
     private static final int CHANNEL_MENU_NUM = 6;
+    private static final int PLAYLIST_MENU_NUM = 6;
 
     private int randomMusicIndex = new Random().nextInt(2000);
 
@@ -98,7 +99,7 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
         setContentView(R.layout.activity_main);
         mContext = this;
         mRequstQueue = Volley.newRequestQueue(this);
-        initPlayer();
+
         initView();
         InitResideMenu();
     }
@@ -133,7 +134,7 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
             }
         });
 
-        JsonArrayRequest jaq = new JsonArrayRequest(CHANNEL_URL, new Response.Listener<JSONArray>() {
+        JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
                 //请求channel列表成
@@ -142,37 +143,31 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
                     Log.w("MainActivity", jsonArray.toString(1));
                     for (int i = 0; i < jsonArray.length(); i++) {
                         jo = jsonArray.getJSONObject(i);
-                        ChannelInfo channelInfo = new ChannelInfo();
-                        channelInfo.setKey(jo.getString("key"));
-                        channelInfo.setUpload_date(jo.getString("upload_date"));
-                        channelInfo.setMusic_list(jo.getString("music_list"));
-                        channelInfo.setName(jo.getString("name"));
-                        channelInfo.setPlayable(jo.getString("playable"));
-                        mChannelInfoList.add(channelInfo);
+                        PlaylistInfo playlistInfo = new PlaylistInfo();
+                        playlistInfo.setKey(jo.getString("key"));
+                        playlistInfo.setName(jo.getString("name"));
+                        playlistInfo.setMusic_list(jo.getString("music_list"));
+                        mPlaylistInfoList.add(playlistInfo);
                     }
-                    //随机产生Channel
-                    Random random = new Random();
-                    for (int i = 0; i < CHANNEL_MENU_NUM; i++) {
-                        int num = random.nextInt(mChannelInfoList.size());
-                        if (!randomChannel.contains(num)) {
-                            randomChannel.add(num);
-                            mLeftResideMenuItemTitleList.add(mChannelInfoList.get(num).getName());
-                        }
+                    //生成播放列表菜单
+                    for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
+                        mLeftResideMenuItemTitleList.add(mPlaylistInfoList.get(i).getName());
                     }
                     //添加左侧列表菜单项
-                    for (int i = 0; i < CHANNEL_MENU_NUM; i++) {
+                    for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
                         //图标需要改变
                         mLeftResideMenuItemList.add(new ResideMenuItem(MainActivity.this, R.drawable.channel_logo, mLeftResideMenuItemTitleList.get(i)));
                     }
 
                     //添加监听事件
-                    for (int i = 0; i < CHANNEL_MENU_NUM; i++) {
+                    for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
                         //图标需要改变
                         mLeftResideMenuItemList.get(i).setOnClickListener(MainActivity.this);
                     }
                     //禁用右侧ResideMenu
                     mResideMenu.setDirectionDisable(ResideMenu.DIRECTION_RIGHT);
                     mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_LEFT);
+                    initPlayer();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -183,11 +178,35 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
 
     private void initPlayer() {
         player = new PlayMusic(this);
-        PlayRandomMusic(randomMusicIndex);
+        PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
     private void PlayRandomMusic(int randomNum) {
        String MUSIC_URL = "http://doufm.info/api/music/?start=" + randomNum + "&" + "end=" + (randomNum + 1);
+        JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                //请求随机播放音乐文件信息
+                try {
+                    JSONObject jo = new JSONObject();
+                    jo = jsonArray.getJSONObject(0);
+                    MuiscURL = "http://doufm.info" + jo.getString("audio");
+                    CoverURL = "http://doufm.info" + jo.getString("cover");
+                    GetCoverImageRequest(CoverURL);
+                    tvMusicTitle.setText(jo.getString("title")+" - "+jo.getString("artist"));
+                    player.PlayOnline(MuiscURL);
+                    isPlay = true;
+                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, errorListener);
+        mRequstQueue.add(jaq);
+    }
+
+    private void PlayRandomMusic(String playlist_key) {
+       String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
@@ -227,14 +246,14 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
                 }
                 break;
             case R.id.btnNextSong:
-                randomMusicIndex = new Random().nextInt(2000);
-                PlayRandomMusic(randomMusicIndex);
+                PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
                 break;
         }
 
-        for (int i = 0; i < CHANNEL_MENU_NUM; i++) {
+        for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
             if (view == mLeftResideMenuItemList.get(i)) {
-                Toast.makeText(this, mChannelInfoList.get(randomChannel.get(i)).getName(), Toast.LENGTH_SHORT).show();
+                mPlayListNum = i;
+                PlayRandomMusic(mPlaylistInfoList.get(i).getKey());
             }
         }
 
@@ -256,8 +275,7 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
 
     @Override
     public void EndOfMusic() {
-        randomMusicIndex = new Random().nextInt(2000);
-        PlayRandomMusic(randomMusicIndex);
+        PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
     }
 
     private class ResideMenuListener implements ResideMenu.OnMenuListener {
