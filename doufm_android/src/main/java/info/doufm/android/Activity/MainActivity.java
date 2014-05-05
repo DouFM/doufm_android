@@ -68,7 +68,6 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
     private String URL = "http://abv.cn/music/%E5%85%89%E8%BE%89%E5%B2%81%E6%9C%88.mp3";
     private MediaPlayer mediaPlayer;
 
-
     private PlayMusic player; //播放器
     private String musicURL = "";
 
