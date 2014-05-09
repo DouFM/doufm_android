@@ -129,18 +129,34 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         mReisdeMenulistener = new ResideMenuListener();
         mResideMenu.setMenuListener(mReisdeMenulistener);
 
-        //初始化左侧ResideMenu Item
+        //初始化右侧RESideMenu Item
+        mRightResideMenuItemList = new ArrayList<ResideMenuItem>();
+        mRightResideMenuItemTitleList = new ArrayList<String>();
+        mRightResideMenuItemIconList = new ArrayList<Integer>();
+        mRightResideMenuItemTitleList.add("关于");
+        mRightResideMenuItemIconList.add(new Integer(R.drawable.icon_about));
+        mRightResideMenuItemList.add(new ResideMenuItem(this,mRightResideMenuItemIconList.get(0),mRightResideMenuItemTitleList.get(0)));
+        mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_RIGHT);
+
+        //初始化左侧RESideMenu Item
         mLeftResideMenuItemList = new ArrayList<ResideMenuItem>();
         mLeftResideMenuItemTitleList = new ArrayList<String>();
         mLeftResideMenuItemIconList = new ArrayList<Integer>();
 
+        //左侧打开ResideMenu按钮响应
         findViewById(R.id.btn_open_left_reside_menu).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
                 mResideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
             }
         });
-
+        //右侧打开ResideMenu按钮响应
+        findViewById(R.id.btn_open_right_reside_menu).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                mResideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
+            }
+        });
         JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
@@ -171,8 +187,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                         //图标需要改变
                         mLeftResideMenuItemList.get(i).setOnClickListener(MainActivity.this);
                     }
-                    //禁用右侧ResideMenu
-                    mResideMenu.setDirectionDisable(ResideMenu.DIRECTION_RIGHT);
                     mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_LEFT);
                     initPlayer();
                 } catch (JSONException e) {
