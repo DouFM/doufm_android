@@ -18,15 +18,15 @@
             android:layout_width="fill_parent"
             android:layout_height="wrap_content">
             <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:background="@drawable/icon_open_right_menu"
                 android:layout_gravity="left|center_vertical"
                 android:id="@+id/btn_open_left_reside_menu"
                 android:layout_margin="10dp"/>
             <Button
-                android:layout_width="50dp"
-                android:layout_height="50dp"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
                 android:background="@drawable/icon_open_right_menu"
                 android:layout_gravity="right|center_vertical"
                 android:id="@+id/btn_open_right_reside_menu"

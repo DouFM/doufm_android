@@ -2,6 +2,7 @@ package info.doufm.android.Activity;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -136,7 +137,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         mRightResideMenuItemTitleList.add("关于");
         mRightResideMenuItemIconList.add(new Integer(R.drawable.icon_about));
         mRightResideMenuItemList.add(new ResideMenuItem(this,mRightResideMenuItemIconList.get(0),mRightResideMenuItemTitleList.get(0)));
-        mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_RIGHT);
+        mResideMenu.setMenuItems(mRightResideMenuItemList, ResideMenu.DIRECTION_RIGHT);
+        mRightResideMenuItemList.get(0).setOnClickListener(MainActivity.this);
 
         //初始化左侧RESideMenu Item
         mLeftResideMenuItemList = new ArrayList<ResideMenuItem>();
@@ -154,7 +156,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         findViewById(R.id.btn_open_right_reside_menu).setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                mResideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
+                mResideMenu.openMenu(ResideMenu.DIRECTION_RIGHT);
             }
         });
         JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
@@ -269,6 +271,15 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             case R.id.btnNextSong:
                 PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
                 break;
+        }
+
+        for (int i = 0;i < mRightResideMenuItemList.size();i++){
+            if (view == mRightResideMenuItemList.get(i)){
+                //判断按下那个菜单
+                if ("关于".equals(mRightResideMenuItemTitleList.get(i))){
+                    startActivity(new Intent(MainActivity.this,About.class));
+                }
+            }
         }
 
         for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {

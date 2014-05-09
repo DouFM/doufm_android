@@ -7,5 +7,10 @@
     <string name="title_activity_main">MainActivity</string>
     <string name="splash_activity_set_wifi">设置</string>
     <string name="splash_activity_quit">退出</string>
+    <string name="title_activity_about">DouFM Team出品\n\n
+        Android开发团队:<a href="http://weibo.com/2491729875">@陈启超_V</a>\n\n
+        AndroidUI团队:<a href="http://weibo.com/2491729875">@陈启超_V</a>\n\n
+        Android测试团队:<a href="http://weibo.com/2491729875">@陈启超_V</a>\n\n
+        版本号:1.0</string>
 
 </resources>
