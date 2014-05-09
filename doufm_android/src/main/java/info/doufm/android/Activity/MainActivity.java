@@ -1,9 +1,12 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
+import android.content.Context;
 import android.graphics.Bitmap;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -44,7 +47,7 @@ import info.doufm.android.ResideMenu.ResideMenuItem;
  * @author Qichao Chen
  * @version 1.0
  */
-public class MainActivity extends Activity implements View.OnClickListener,OnPlayListener {
+public class MainActivity extends Activity implements View.OnClickListener, OnPlayListener {
 
     private MainActivity mContext;
     private ResideMenu mResideMenu;
@@ -98,9 +101,14 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
         setContentView(R.layout.activity_main);
         mContext = this;
         mRequstQueue = Volley.newRequestQueue(this);
-
+        PhoneIncomingListener();
         initView();
         InitResideMenu();
+    }
+
+    private void PhoneIncomingListener() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        telephonyManager.listen(new MyPhoneListener(), PhoneStateListener.LISTEN_CALL_STATE);
     }
 
 
@@ -181,7 +189,7 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
     }
 
     private void PlayRandomMusic(int randomNum) {
-       String MUSIC_URL = "http://doufm.info/api/music/?start=" + randomNum + "&" + "end=" + (randomNum + 1);
+        String MUSIC_URL = "http://doufm.info/api/music/?start=" + randomNum + "&" + "end=" + (randomNum + 1);
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
@@ -192,7 +200,7 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
                     MuiscURL = "http://doufm.info" + jo.getString("audio");
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
-                    tvMusicTitle.setText(jo.getString("title")+" - "+jo.getString("artist"));
+                    tvMusicTitle.setText(jo.getString("title") + " - " + jo.getString("artist"));
                     player.PlayOnline(MuiscURL);
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
@@ -205,7 +213,7 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
     }
 
     private void PlayRandomMusic(String playlist_key) {
-       String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
+        String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
@@ -216,7 +224,7 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
                     MuiscURL = "http://doufm.info" + jo.getString("audio");
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
-                    tvMusicTitle.setText(jo.getString("title")+" - "+jo.getString("artist"));
+                    tvMusicTitle.setText(jo.getString("title") + " - " + jo.getString("artist"));
                     player.PlayOnline(MuiscURL);
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
@@ -308,6 +316,14 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
     }
 
     @Override
+    protected void onResume() {
+        super.onResume();
+        if (isPlay = false && player != null) {
+            player.play();
+        }
+    }
+
+    @Override
     protected void onDestroy() {
         super.onDestroy();
         mRequstQueue.cancelAll(this);
@@ -326,5 +342,29 @@ public class MainActivity extends Activity implements View.OnClickListener,OnPla
 
     public ResideMenu getResideMenu() {
         return mResideMenu;
+    }
+
+    private class MyPhoneListener extends PhoneStateListener {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            switch (state) {
+                case TelephonyManager.CALL_STATE_RINGING:
+                    //来电
+                    if (isPlay) {
+                        player.pause();
+                        btnPlayMusic.setBackgroundResource(R.drawable.ktv_play_press);
+                        isPlay = false;
+                    }
+                    break;
+                case TelephonyManager.CALL_STATE_IDLE:
+                    //通话结束
+                    if (isPlay == false && player != null) {
+                        player.play();
+                        btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
+                        isPlay = true;
+                    }
+                    break;
+            }
+        }
     }
 }
