@@ -4,7 +4,6 @@ import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
-import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
@@ -14,6 +13,7 @@ import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -68,11 +68,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private ImageView ivCover;
     private TextView tvMusicTitle;
 
-    //Test Music URL
-    private String URL = "http://abv.cn/music/%E5%85%89%E8%BE%89%E5%B2%81%E6%9C%88.mp3";
-    private MediaPlayer mediaPlayer;
-
-    private PlayMusic player; //播放器
+    //播放器
+    private PlayMusic player;
     private String musicURL = "";
 
     private String CHANNEL_URL = "http://doufm.info/api/channel/?start=0";
@@ -92,9 +89,25 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private int randomMusicIndex = new Random().nextInt(2000);
 
     //音乐文件和封面路径
-    private String MuiscURL = "";
+    private String MusicURL = "";
     private String CoverURL = "";
     private boolean isPlay = false;
+
+    private int mBackPressCount = 1;
+
+    @Override
+    public void finish() {
+        if (mBackPressCount == 2) {
+            if (player != null){
+                player.stop();
+                player = null;
+            }
+            super.finish();
+        } else {
+            mBackPressCount++;
+            Toast.makeText(this,"再按一次退出程序",Toast.LENGTH_SHORT).show();
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -136,7 +149,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         mRightResideMenuItemIconList = new ArrayList<Integer>();
         mRightResideMenuItemTitleList.add("关于");
         mRightResideMenuItemIconList.add(new Integer(R.drawable.icon_about));
-        mRightResideMenuItemList.add(new ResideMenuItem(this,mRightResideMenuItemIconList.get(0),mRightResideMenuItemTitleList.get(0)));
+        mRightResideMenuItemList.add(new ResideMenuItem(this, mRightResideMenuItemIconList.get(0), mRightResideMenuItemTitleList.get(0)));
         mResideMenu.setMenuItems(mRightResideMenuItemList, ResideMenu.DIRECTION_RIGHT);
         mRightResideMenuItemList.get(0).setOnClickListener(MainActivity.this);
 
@@ -213,11 +226,11 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 try {
                     JSONObject jo = new JSONObject();
                     jo = jsonArray.getJSONObject(0);
-                    MuiscURL = "http://doufm.info" + jo.getString("audio");
+                    MusicURL = "http://doufm.info" + jo.getString("audio");
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
                     tvMusicTitle.setText(jo.getString("title") + " - " + jo.getString("artist"));
-                    player.PlayOnline(MuiscURL);
+                    player.PlayOnline(MusicURL);
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
                 } catch (JSONException e) {
@@ -237,11 +250,11 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 try {
                     JSONObject jo = new JSONObject();
                     jo = jsonArray.getJSONObject(0);
-                    MuiscURL = "http://doufm.info" + jo.getString("audio");
+                    MusicURL = "http://doufm.info" + jo.getString("audio");
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
                     tvMusicTitle.setText(jo.getString("title") + " - " + jo.getString("artist"));
-                    player.PlayOnline(MuiscURL);
+                    player.PlayOnline(MusicURL);
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
                 } catch (JSONException e) {
@@ -273,11 +286,11 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 break;
         }
 
-        for (int i = 0;i < mRightResideMenuItemList.size();i++){
-            if (view == mRightResideMenuItemList.get(i)){
+        for (int i = 0; i < mRightResideMenuItemList.size(); i++) {
+            if (view == mRightResideMenuItemList.get(i)) {
                 //判断按下那个菜单
-                if ("关于".equals(mRightResideMenuItemTitleList.get(i))){
-                    startActivity(new Intent(MainActivity.this,About.class));
+                if ("关于".equals(mRightResideMenuItemTitleList.get(i))) {
+                    startActivity(new Intent(MainActivity.this, About.class));
                 }
             }
         }
@@ -361,7 +374,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-
+            Toast.makeText(MainActivity.this,"网络异常,无法加载在线音乐",Toast.LENGTH_SHORT).show();
         }
     };
 
