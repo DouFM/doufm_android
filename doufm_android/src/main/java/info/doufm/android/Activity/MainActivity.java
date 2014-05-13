@@ -393,4 +393,20 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             }
         }
     }
+
+    private int mBackKeyPressedCount = 1;
+    @Override
+    public void onBackPressed() {
+        if (mBackKeyPressedCount == 2){
+            mRequstQueue.cancelAll(this);
+            if (player != null) {
+                player.stop();
+                player = null;
+            }
+            finish();
+        } else {
+            mBackKeyPressedCount++;
+            Toast.makeText(this,"再按一次退出程序", Toast.LENGTH_SHORT).show();
+        }
+    }
 }
