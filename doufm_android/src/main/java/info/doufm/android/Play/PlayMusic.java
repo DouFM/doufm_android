@@ -61,7 +61,7 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
         try{
             mediaPlay.reset();
             mediaPlay.setDataSource(url); //这种url路径
-            mediaPlay.prepare(); //prepare自动播放
+            mediaPlay.prepareAsync(); //prepare自动播放
         } catch (IOException e) {
             e.printStackTrace();
         }

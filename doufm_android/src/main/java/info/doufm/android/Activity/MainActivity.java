@@ -67,6 +67,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private Button btnPlayMusic, btnNextSong;
     private ImageView ivCover;
     private TextView tvMusicTitle;
+    private TextView tvAuthorTitle;
 
     //播放器
     private PlayMusic player;
@@ -93,22 +94,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private String CoverURL = "";
     private boolean isPlay = false;
 
-    private int mBackPressCount = 1;
-
-    @Override
-    public void finish() {
-        if (mBackPressCount == 2) {
-            if (player != null){
-                player.stop();
-                player = null;
-            }
-            super.finish();
-        } else {
-            mBackPressCount++;
-            Toast.makeText(this,"再按一次退出程序",Toast.LENGTH_SHORT).show();
-        }
-    }
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -129,6 +114,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private void initView() {
         ivCover = (ImageView) findViewById(R.id.ivCover);
         tvMusicTitle = (TextView) findViewById(R.id.tvMusicTitle);
+        tvAuthorTitle = (TextView) findViewById(R.id.tvAuthorName);
         btnPlayMusic = (Button) findViewById(R.id.btnPlayMusic);
         btnNextSong = (Button) findViewById(R.id.btnNextSong);
         btnPlayMusic.setOnClickListener(this);
@@ -229,7 +215,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     MusicURL = "http://doufm.info" + jo.getString("audio");
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
-                    tvMusicTitle.setText(jo.getString("title") + " - " + jo.getString("artist"));
+                    tvMusicTitle.setText(jo.getString("title"));
+                    tvAuthorTitle.setText(jo.getString("artist"));
                     player.PlayOnline(MusicURL);
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
@@ -253,7 +240,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     MusicURL = "http://doufm.info" + jo.getString("audio");
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
-                    tvMusicTitle.setText(jo.getString("title") + " - " + jo.getString("artist"));
+                    tvMusicTitle.setText(jo.getString("title"));
+                    tvAuthorTitle.setText(jo.getString("artist"));
                     player.PlayOnline(MusicURL);
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
@@ -264,7 +252,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         }, errorListener);
         mRequstQueue.add(jaq);
     }
-
 
     @Override
     public void onClick(View view) {
@@ -310,7 +297,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             public void onResponse(Bitmap bitmap) {
                 ivCover.setImageBitmap(bitmap);
             }
-        }, 0, 0, null, null);
+        }, 0, 0, null, errorListener);
         mRequstQueue.add(imageRequest);
     }
 
@@ -320,6 +307,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
 
     @Override
     public void EndOfMusic() {
+        //自动播放同一个播放列表的下一首歌
         PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
     }
 
@@ -374,7 +362,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            Toast.makeText(MainActivity.this,"网络异常,无法加载在线音乐",Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐", Toast.LENGTH_SHORT).show();
         }
     };
 
