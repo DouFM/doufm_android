@@ -27,16 +27,13 @@ import info.doufm.android.R;
 public class SplashActivity extends Activity {
 
     private static final int LOADING_TIME = 1000; //启动画面显示时间
-
     private ConnectivityManager connectivityManager;
-
     private boolean bNetWorkStatus = false; //网络连接状态
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash_actvity);
-
         LoadingProcess();
     }
 

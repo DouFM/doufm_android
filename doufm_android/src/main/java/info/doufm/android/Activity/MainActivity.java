@@ -1,6 +1,7 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
@@ -93,6 +94,10 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private String MusicURL = "";
     private String CoverURL = "";
     private boolean isPlay = false;
+
+
+    //加载用户体验处理
+    private ProgressDialog progressDialog;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -199,11 +204,12 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     }
 
     private void initPlayer() {
-        player = new PlayMusic(this);
+        player = new PlayMusic(mContext,this,progressDialog);
         PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
     private void PlayRandomMusic(int randomNum) {
+        progressDialog = ProgressDialog.show(MainActivity.this,"提示","音乐加载中...",true,false);
         String MUSIC_URL = "http://doufm.info/api/music/?start=" + randomNum + "&" + "end=" + (randomNum + 1);
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -395,9 +401,10 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     }
 
     private int mBackKeyPressedCount = 1;
+
     @Override
     public void onBackPressed() {
-        if (mBackKeyPressedCount == 2){
+        if (mBackKeyPressedCount == 2) {
             mRequstQueue.cancelAll(this);
             if (player != null) {
                 player.stop();
@@ -406,7 +413,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             finish();
         } else {
             mBackKeyPressedCount++;
-            Toast.makeText(this,"再按一次退出程序", Toast.LENGTH_SHORT).show();
+            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
         }
     }
 }
