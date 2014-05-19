@@ -16,6 +16,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
@@ -28,7 +29,9 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Random;
 
 import info.doufm.android.Info.ChannelInfo;
@@ -199,7 +202,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     e.printStackTrace();
                 }
             }
-        }, errorListener);
+        }, errorListener){
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                Map<String, String>  params = new HashMap<String, String>();
+                params.put("User-Agent", "Android:1.0:2009chenqc@163.com");
+                return params;
+            }
+        };
         mRequstQueue.add(jaq);
     }
 
