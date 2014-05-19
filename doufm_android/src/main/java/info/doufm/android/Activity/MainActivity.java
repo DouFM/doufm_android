@@ -72,6 +72,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private ImageView ivCover;
     private TextView tvMusicTitle;
     private TextView tvAuthorTitle;
+    private TextView tvTimeLeft;
 
     //播放器
     private PlayMusic player;
@@ -123,6 +124,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         ivCover = (ImageView) findViewById(R.id.ivCover);
         tvMusicTitle = (TextView) findViewById(R.id.tvMusicTitle);
         tvAuthorTitle = (TextView) findViewById(R.id.tvAuthorName);
+        tvTimeLeft = (TextView) findViewById(R.id.tvTimeLeft);
         btnPlayMusic = (Button) findViewById(R.id.btnPlayMusic);
         btnNextSong = (Button) findViewById(R.id.btnNextSong);
         btnPlayMusic.setOnClickListener(this);
@@ -214,7 +216,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     }
 
     private void initPlayer() {
-        player = new PlayMusic(mContext,this,progressDialog);
+        player = new PlayMusic(mContext,this,progressDialog,tvTimeLeft);
         PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
@@ -245,6 +247,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     }
 
     private void PlayRandomMusic(String playlist_key) {
+        tvTimeLeft.setText("00:00");
         String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
