@@ -89,8 +89,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     //Volley请求
     private RequestQueue mRequstQueue;
     private List<Integer> randomChannel = new ArrayList<Integer>();
-    private static final int CHANNEL_MENU_NUM = 6;
-    private static final int PLAYLIST_MENU_NUM = 6;
+    private int CHANNEL_MENU_NUM = 6;
+    private int PLAYLIST_MENU_NUM = 6;
 
     private int randomMusicIndex = new Random().nextInt(2000);
 
@@ -99,9 +99,9 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private String CoverURL = "";
     private boolean isPlay = false;
 
-
     //加载用户体验处理
     private ProgressDialog progressDialog;
+    private boolean isLoadingSuccess = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -175,6 +175,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 JSONObject jo = new JSONObject();
                 try {
                     Log.w("MainActivity", jsonArray.toString(1));
+                    PLAYLIST_MENU_NUM = jsonArray.length();
                     for (int i = 0; i < jsonArray.length(); i++) {
                         jo = jsonArray.getJSONObject(i);
                         PlaylistInfo playlistInfo = new PlaylistInfo();
@@ -200,11 +201,18 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     }
                     mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_LEFT);
                     initPlayer();
+                    isLoadingSuccess = true;
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
         }, errorListener){
+
+            /**
+             * 添加自定义HTTP Header
+             * @return
+             * @throws AuthFailureError
+             */
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
                 Map<String, String>  params = new HashMap<String, String>();
@@ -301,13 +309,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             }
         }
 
-        for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
-            if (view == mLeftResideMenuItemList.get(i)) {
-                mPlayListNum = i;
-                PlayRandomMusic(mPlaylistInfoList.get(i).getKey());
+        if (isLoadingSuccess) {
+            for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
+                if (view == mLeftResideMenuItemList.get(i)) {
+                    mPlayListNum = i;
+                    PlayRandomMusic(mPlaylistInfoList.get(i).getKey());
+                }
             }
         }
-
     }
 
     private void GetCoverImageRequest(String coverURL) {

@@ -8,8 +8,8 @@
               android:paddingTop="30dp">
 
     <ImageView
-            android:layout_width="30dp"
-            android:layout_height="30dp"
+            android:layout_width="20dp"
+            android:layout_height="20dp"
             android:scaleType="centerCrop"
             android:id="@+id/iv_icon"/>
 
