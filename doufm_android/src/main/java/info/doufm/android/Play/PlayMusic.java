@@ -18,13 +18,13 @@ import java.util.TimerTask;
 
 /**
  * Created with Android Studio.
- * Date 2014-04-26r
+ * Date 2014-04-26
  * 封装播放音乐的功能
  *
  * @author Qichao Chen
  * @version 1.0
  */
-public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener {
+public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener,MediaPlayer.OnErrorListener {
 
     private static final String LOG_TAG = "PlayMusic";
 
@@ -38,8 +38,9 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
     private ProgressDialog progressDialog;
     private Context context;
     //自定义消息常量
-    private static final int STOP = 1;
-    private static final int UPDATE_TIME = 2;
+    private static final int STOP = 1000;
+    private static final int UPDATE_TIME = 2000;
+    private static final int STOP_UPDATE = 3000;
 
     //定义Handler对象
     private Handler handler = new Handler() {
@@ -48,7 +49,8 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
             //处理消息
             if (msg.what == STOP) {
                 progressDialog.dismiss();
-            } else if (msg.what == UPDATE_TIME) {
+            }
+            if (msg.what == UPDATE_TIME) {
                 //更新音乐播放状态
                 if (mediaPlay == null) {
                     return;
@@ -58,6 +60,21 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
                 if (mMusicDuration > 0) {
                     //更新剩余时间
                     tvTimeLeft.setText(FormatTime(mMusicDuration - mMusicCurrDuration));
+                }
+            }
+            if (msg.what == STOP_UPDATE) {
+                //更新音乐播放状态
+                if (mediaPlay == null) {
+                    return;
+                }
+                mMusicCurrDuration = mediaPlay.getCurrentPosition();
+                mMusicDuration = mediaPlay.getDuration();
+                if (mMusicDuration > 0) {
+                    //更新剩余时间
+                    tvTimeLeft.setText(FormatTime(mMusicDuration - mMusicCurrDuration));
+                }
+                if(mediaPlay.isPlaying()){
+                    progressDialog.dismiss();
                 }
             }
         }
@@ -123,7 +140,7 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
             if (mediaPlay.isPlaying()) {
                 //处理播放
                 Message msg = new Message();
-                msg.what = UPDATE_TIME;
+                msg.what = STOP_UPDATE;
                 handler.sendMessage(msg);
             }
         }
@@ -140,9 +157,6 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
             mediaPlay.reset();
             mediaPlay.setDataSource(url); //这种url路径
             mediaPlay.prepareAsync(); //prepare自动播放
-            Message msg = new Message();
-            msg.what = STOP;
-            handler.sendMessage(msg);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -193,6 +207,9 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
     @Override
     public void onPrepared(MediaPlayer mp) {
         mp.start();
+        Message msg = new Message();
+        msg.what = STOP;
+        handler.sendMessage(msg);
         Log.i(LOG_TAG, "onPrepared");
     }
 
@@ -200,5 +217,15 @@ public class PlayMusic implements MediaPlayer.OnBufferingUpdateListener, MediaPl
         Date date = new Date(timeMills);
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINA);
         return simpleDateFormat.format(date);
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mediaPlayer, int i, int i2) {
+        if (mediaPlay != null) {
+            mediaPlay.stop();
+            mediaPlay.release();
+            mediaPlay = null;
+        }
+        return true;
     }
 }

@@ -134,7 +134,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private void InitResideMenu() {
         //初始化Reside Menu风格
         mResideMenu = new ResideMenu(this);
-        mResideMenu.setBackground(R.drawable.reside_menu_background);
+        mResideMenu.setBackground(R.drawable.reside_menu_background01);
         mResideMenu.attachToActivity(this);
         mReisdeMenulistener = new ResideMenuListener();
         mResideMenu.setMenuListener(mReisdeMenulistener);
@@ -168,9 +168,12 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 mResideMenu.openMenu(ResideMenu.DIRECTION_RIGHT);
             }
         });
+
         JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
+                btnPlayMusic.setEnabled(true);
+                btnNextSong.setEnabled(true);
                 //请求channel列表成
                 JSONObject jo = new JSONObject();
                 try {
@@ -206,7 +209,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     e.printStackTrace();
                 }
             }
-        }, errorListener){
+        }, errorListener) {
 
             /**
              * 添加自定义HTTP Header
@@ -215,7 +218,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
              */
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String>  params = new HashMap<String, String>();
+                Map<String, String> params = new HashMap<String, String>();
                 params.put("User-Agent", "Android:1.0:2009chenqc@163.com");
                 return params;
             }
@@ -224,12 +227,12 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     }
 
     private void initPlayer() {
-        player = new PlayMusic(mContext,this,progressDialog,tvTimeLeft);
+        player = new PlayMusic(mContext, this, progressDialog, tvTimeLeft);
         PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
     private void PlayRandomMusic(int randomNum) {
-        progressDialog = ProgressDialog.show(MainActivity.this,"提示","音乐加载中...",true,false);
+        progressDialog = ProgressDialog.show(MainActivity.this, "提示", "音乐加载中...", true, false);
         String MUSIC_URL = "http://doufm.info/api/music/?start=" + randomNum + "&" + "end=" + (randomNum + 1);
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -271,7 +274,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     tvAuthorTitle.setText(jo.getString("artist"));
                     player.PlayOnline(MusicURL);
                     isPlay = true;
-                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
+                    btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -287,11 +290,11 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             case R.id.btnPlayMusic:
                 if (isPlay) {
                     isPlay = false;
-                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_play_press);
+                    btnPlayMusic.setBackgroundResource(R.drawable.play_song);
                     player.pause();
                 } else {
                     isPlay = true;
-                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
+                    btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
                     player.play();
                 }
                 break;
@@ -391,6 +394,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         @Override
         public void onErrorResponse(VolleyError volleyError) {
             Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐", Toast.LENGTH_SHORT).show();
+//            btnPlayMusic.setEnabled(false);
+//            btnNextSong.setEnabled(false);
         }
     };
 

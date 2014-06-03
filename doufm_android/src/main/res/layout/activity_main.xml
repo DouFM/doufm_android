@@ -20,17 +20,17 @@
             android:layout_height="wrap_content">
 
             <Button
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/icon_open_right_menu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/left_menu"
                 android:layout_gravity="left|center_vertical"
                 android:id="@+id/btn_open_left_reside_menu"
                 android:layout_margin="10dp" />
 
             <Button
-                android:layout_width="30dp"
-                android:layout_height="30dp"
-                android:background="@drawable/icon_open_right_menu"
+                android:layout_width="40dp"
+                android:layout_height="40dp"
+                android:background="@drawable/right_menu"
                 android:layout_gravity="right|center_vertical"
                 android:id="@+id/btn_open_right_reside_menu"
                 android:layout_margin="10dp" />
@@ -44,8 +44,8 @@
         android:orientation="vertical">
 
         <ImageView
-            android:layout_width="150dp"
-            android:layout_height="150dp"
+            android:layout_width="200dp"
+            android:layout_height="200dp"
             android:layout_gravity="center"
             android:id="@+id/ivCover"
             android:src="@drawable/album_test" />
@@ -58,34 +58,36 @@
             android:layout_marginTop="10dp"
             android:id="@+id/tvMusicTitle"
             android:text="加载中..."
+            android:singleLine="true"
             android:gravity="center"
             android:textSize="25dp"
             android:textColor="#FFFFFF"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="5dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:id="@+id/tvAuthorName"
             android:gravity="center"
+            android:singleLine="true"
             android:textSize="25dp"
             android:textColor="#FFFFFF"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="5dp" />
 
         <TextView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginLeft="30dp"
             android:layout_marginRight="30dp"
-            android:layout_marginTop="10dp"
+            android:layout_marginTop="5dp"
             android:id="@+id/tvTimeLeft"
             android:gravity="center"
             android:textSize="25dp"
             android:textColor="#FFFFFF"
-            android:layout_marginBottom="10dp" />
+            android:layout_marginBottom="5dp" />
 
         <LinearLayout
             android:layout_width="fill_parent"
@@ -94,20 +96,20 @@
             android:orientation="horizontal">
 
             <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:id="@+id/btnPlayMusic"
-                android:background="@drawable/ktv_play_press" />
+                android:background="@drawable/play_song" />
 
             <ImageView
                 android:layout_width="5dp"
                 android:layout_height="fill_parent" />
 
             <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="70dp"
+                android:layout_height="70dp"
                 android:id="@+id/btnNextSong"
-                android:background="@drawable/ktv_next_song" />
+                android:background="@drawable/next_song" />
         </LinearLayout>
     </LinearLayout>
 
