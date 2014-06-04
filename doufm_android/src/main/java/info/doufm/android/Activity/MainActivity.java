@@ -11,6 +11,9 @@ import android.telephony.TelephonyManager;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
+import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -103,12 +106,16 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private ProgressDialog progressDialog;
     private boolean isLoadingSuccess = false;
 
+    //Rotation
+    private Animation animation;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         mContext = this;
         mRequstQueue = Volley.newRequestQueue(this);
+
         PhoneIncomingListener();
         initView();
         InitResideMenu();
@@ -129,6 +136,10 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         btnNextSong = (Button) findViewById(R.id.btnNextSong);
         btnPlayMusic.setOnClickListener(this);
         btnNextSong.setOnClickListener(this);
+        animation = AnimationUtils.loadAnimation(this,R.anim.rotation);
+        LinearInterpolator lin = new LinearInterpolator();
+        animation.setInterpolator(lin);
+        ivCover.startAnimation(animation);
     }
 
     private void InitResideMenu() {
@@ -292,10 +303,12 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     isPlay = false;
                     btnPlayMusic.setBackgroundResource(R.drawable.play_song);
                     player.pause();
+                    animation.cancel();
                 } else {
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
                     player.play();
+                    ivCover.startAnimation(animation);
                 }
                 break;
             case R.id.btnNextSong:
