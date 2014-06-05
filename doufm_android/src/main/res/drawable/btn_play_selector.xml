@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 
 <selector xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:drawable="@drawable/bt_lockscreen_play_press" android:state_pressed="true"></item>
-    <item android:drawable="@drawable/bt_lockscreen_play_nor" android:state_selected="true"></item>
+    <item android:drawable="@drawable/img_theme_detail_goto" android:state_pressed="true"></item>
+    <item android:drawable="@drawable/img_theme_detail_goto_clicked" android:state_selected="true"></item>
 </selector>

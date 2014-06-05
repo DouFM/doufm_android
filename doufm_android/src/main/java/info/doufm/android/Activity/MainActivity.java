@@ -3,7 +3,6 @@ package info.doufm.android.Activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
-import android.content.Intent;
 import android.graphics.Bitmap;
 import android.os.Bundle;
 import android.telephony.PhoneStateListener;
@@ -130,7 +129,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private void initView() {
         ivCover = (ImageView) findViewById(R.id.ivCover);
         tvMusicTitle = (TextView) findViewById(R.id.tvMusicTitle);
-        tvAuthorTitle = (TextView) findViewById(R.id.tvAuthorName);
+        //tvAuthorTitle = (TextView) findViewById(R.id.tvAuthorName);
         tvTimeLeft = (TextView) findViewById(R.id.tvTimeLeft);
         btnPlayMusic = (Button) findViewById(R.id.btnPlayMusic);
         btnNextSong = (Button) findViewById(R.id.btnNextSong);
@@ -138,7 +137,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         btnNextSong.setOnClickListener(this);
         animation = AnimationUtils.loadAnimation(this,R.anim.rotation);
         LinearInterpolator lin = new LinearInterpolator();
-        animation.setInterpolator(lin);
+       // animation.setInterpolator(lin);
         ivCover.startAnimation(animation);
     }
 
@@ -149,16 +148,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         mResideMenu.attachToActivity(this);
         mReisdeMenulistener = new ResideMenuListener();
         mResideMenu.setMenuListener(mReisdeMenulistener);
-
-        //初始化右侧RESideMenu Item
-        mRightResideMenuItemList = new ArrayList<ResideMenuItem>();
-        mRightResideMenuItemTitleList = new ArrayList<String>();
-        mRightResideMenuItemIconList = new ArrayList<Integer>();
-        mRightResideMenuItemTitleList.add("关于");
-        mRightResideMenuItemIconList.add(new Integer(R.drawable.icon_about));
-        mRightResideMenuItemList.add(new ResideMenuItem(this, mRightResideMenuItemIconList.get(0), mRightResideMenuItemTitleList.get(0)));
-        mResideMenu.setMenuItems(mRightResideMenuItemList, ResideMenu.DIRECTION_RIGHT);
-        mRightResideMenuItemList.get(0).setOnClickListener(MainActivity.this);
 
         //初始化左侧RESideMenu Item
         mLeftResideMenuItemList = new ArrayList<ResideMenuItem>();
@@ -173,12 +162,13 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             }
         });
         //右侧打开ResideMenu按钮响应
-        findViewById(R.id.btn_open_right_reside_menu).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                mResideMenu.openMenu(ResideMenu.DIRECTION_RIGHT);
-            }
-        });
+        mResideMenu.setDirectionDisable(ResideMenu.DIRECTION_RIGHT);
+//        findViewById(R.id.btn_open_right_reside_menu).setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View view) {
+//                mResideMenu.openMenu(ResideMenu.DIRECTION_RIGHT);
+//            }
+//        });
 
         JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -242,32 +232,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
-    private void PlayRandomMusic(int randomNum) {
-        progressDialog = ProgressDialog.show(MainActivity.this, "提示", "音乐加载中...", true, false);
-        String MUSIC_URL = "http://doufm.info/api/music/?start=" + randomNum + "&" + "end=" + (randomNum + 1);
-        JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray jsonArray) {
-                //请求随机播放音乐文件信息
-                try {
-                    JSONObject jo = new JSONObject();
-                    jo = jsonArray.getJSONObject(0);
-                    MusicURL = "http://doufm.info" + jo.getString("audio");
-                    CoverURL = "http://doufm.info" + jo.getString("cover");
-                    GetCoverImageRequest(CoverURL);
-                    tvMusicTitle.setText(jo.getString("title"));
-                    tvAuthorTitle.setText(jo.getString("artist"));
-                    player.PlayOnline(MusicURL);
-                    isPlay = true;
-                    btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, errorListener);
-        mRequstQueue.add(jaq);
-    }
-
     private void PlayRandomMusic(String playlist_key) {
         tvTimeLeft.setText("00:00");
         String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
@@ -282,7 +246,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
                     tvMusicTitle.setText(jo.getString("title"));
-                    tvAuthorTitle.setText(jo.getString("artist"));
+                    //tvAuthorTitle.setText(jo.getString("artist"));
                     player.PlayOnline(MusicURL);
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
@@ -303,7 +267,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     isPlay = false;
                     btnPlayMusic.setBackgroundResource(R.drawable.play_song);
                     player.pause();
-                    animation.cancel();
+                    ivCover.clearAnimation();
                 } else {
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
@@ -314,15 +278,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
             case R.id.btnNextSong:
                 PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
                 break;
-        }
-
-        for (int i = 0; i < mRightResideMenuItemList.size(); i++) {
-            if (view == mRightResideMenuItemList.get(i)) {
-                //判断按下那个菜单
-                if ("关于".equals(mRightResideMenuItemTitleList.get(i))) {
-                    startActivity(new Intent(MainActivity.this, About.class));
-                }
-            }
         }
 
         if (isLoadingSuccess) {
@@ -407,8 +362,6 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         @Override
         public void onErrorResponse(VolleyError volleyError) {
             Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐", Toast.LENGTH_SHORT).show();
-//            btnPlayMusic.setEnabled(false);
-//            btnNextSong.setEnabled(false);
         }
     };
 
