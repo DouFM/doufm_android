@@ -50,7 +50,7 @@ public class SplashActivity extends Activity {
     private void SetNetwork() {
         AlertDialog.Builder aletDialog = new AlertDialog.Builder(SplashActivity.this);
         aletDialog.setTitle("提示");
-        aletDialog.setMessage("当前无法连接到服务器,请先检查网络设置");
+        aletDialog.setMessage("当前无法连接至Doufm服务器,请先检查网络设置!");
         aletDialog.setPositiveButton(R.string.splash_activity_set_wifi, new DialogInterface.OnClickListener() {
             @Override
             public void onClick(DialogInterface dialogInterface, int i) {

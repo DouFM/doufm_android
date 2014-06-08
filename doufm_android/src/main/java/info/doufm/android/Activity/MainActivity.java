@@ -3,11 +3,18 @@ package info.doufm.android.Activity;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.Intent;
 import android.graphics.Bitmap;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
@@ -29,14 +36,18 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import info.doufm.android.Info.PlaylistInfo;
-import info.doufm.android.Play.OnPlayListener;
-import info.doufm.android.Play.PlayMusic;
 import info.doufm.android.R;
 import info.doufm.android.ResideMenu.ResideMenu;
 import info.doufm.android.ResideMenu.ResideMenuItem;
@@ -50,30 +61,25 @@ import info.doufm.android.ResideMenu.ResideMenuItem;
  * @author Qichao Chen
  * @version 1.0
  */
-public class MainActivity extends Activity implements View.OnClickListener, OnPlayListener {
+public class MainActivity extends Activity implements View.OnClickListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
 
     private MainActivity mContext;
     private ResideMenu mResideMenu;
     private ResideMenuListener mReisdeMenulistener;
+
     //左侧菜单项
     private List<ResideMenuItem> mLeftResideMenuItemList;
     private List<String> mLeftResideMenuItemTitleList;
     private List<Integer> mLeftResideMenuItemIconList;
 
-    //右侧菜单项
-    private List<ResideMenuItem> mRightResideMenuItemList;
-    private List<String> mRightResideMenuItemTitleList;
-    private List<Integer> mRightResideMenuItemIconList;
-
     //播放和下一首按钮
     private Button btnPlayMusic, btnNextSong;
     private ImageView ivCover;
     private TextView tvMusicTitle;
-    private TextView tvAuthorTitle;
     private TextView tvTimeLeft;
 
     //播放器
-    private PlayMusic player;
+    private MediaPlayer mMainMediaPlayer;
     private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
 
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
@@ -81,7 +87,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
 
     //Volley请求
     private RequestQueue mRequstQueue;
-    private int PLAYLIST_MENU_NUM = 6;
+    private int PLAYLIST_MENU_NUM = 0;
 
     //音乐文件和封面路径
     private String MusicURL = "";
@@ -94,6 +100,35 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
 
     //Rotation
     private Animation animation;
+
+    private long mMusicDuration;            //音乐总时间
+    private long mMusicCurrDuration;        //当前播放时间
+    private Timer mTimer = new Timer();     //计时器
+    private static final int DISSMISS = 1000;
+    private static final int UPDATE_TIME = 2000;
+
+    //定义Handler对象
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            //处理消息
+            if (msg.what == DISSMISS) {
+                progressDialog.dismiss();
+            }
+            if (msg.what == UPDATE_TIME) {
+                //更新音乐播放状态
+                if (mMainMediaPlayer == null) {
+                    return;
+                }
+                mMusicCurrDuration = mMainMediaPlayer.getCurrentPosition();
+                mMusicDuration = mMainMediaPlayer.getDuration();
+                if (mMusicDuration > 0) {
+                    //更新剩余时间
+                    tvTimeLeft.setText(FormatTime(mMusicDuration - mMusicCurrDuration));
+                }
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -121,7 +156,7 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         btnNextSong = (Button) findViewById(R.id.btnNextSong);
         btnPlayMusic.setOnClickListener(this);
         btnNextSong.setOnClickListener(this);
-        animation = AnimationUtils.loadAnimation(this,R.anim.rotation);
+        animation = AnimationUtils.loadAnimation(this, R.anim.rotation);
         ivCover.startAnimation(animation);
     }
 
@@ -182,8 +217,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                         mLeftResideMenuItemList.get(i).setOnClickListener(MainActivity.this);
                     }
                     mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_LEFT);
-                    initPlayer();
                     isLoadingSuccess = true;
+                    initPlayer();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -206,13 +241,20 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     }
 
     private void initPlayer() {
-        player = new PlayMusic(mContext, this, progressDialog, tvTimeLeft);
+        mMainMediaPlayer = new MediaPlayer(); //创建媒体播放器
+        mMainMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC); //设置媒体流类型
+        mMainMediaPlayer.setOnCompletionListener(this);
+        mMainMediaPlayer.setOnErrorListener(this);
+        mMainMediaPlayer.setOnBufferingUpdateListener(this);
+        mMainMediaPlayer.setOnPreparedListener(this);
+        mTimer.schedule(timerTask, 0, 1000);
         PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
     private void PlayRandomMusic(String playlist_key) {
+        progressDialog = ProgressDialog.show(MainActivity.this, "提示", "加载中...", true, false);
         tvTimeLeft.setText("00:00");
-        String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
+        final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
@@ -224,11 +266,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
                     tvMusicTitle.setText(jo.getString("title"));
-                    //tvAuthorTitle.setText(jo.getString("artist"));
-                    player.PlayOnline(MusicURL);
+                    mMainMediaPlayer.reset();
+                    mMainMediaPlayer.setDataSource(MusicURL); //这种url路径
+                    mMainMediaPlayer.prepare(); //prepare自动播放
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
                 } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
                     e.printStackTrace();
                 }
             }
@@ -244,12 +289,12 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 if (isPlay) {
                     isPlay = false;
                     btnPlayMusic.setBackgroundResource(R.drawable.play_song);
-                    player.pause();
+                    mMainMediaPlayer.pause();
                     ivCover.clearAnimation();
                 } else {
                     isPlay = true;
                     btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
-                    player.play();
+                    mMainMediaPlayer.start();
                     ivCover.startAnimation(animation);
                 }
                 break;
@@ -278,14 +323,30 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
         mRequstQueue.add(imageRequest);
     }
 
-    public void getChannelMusicJsonData() {
-        //获取指定Channel的音乐
+    @Override
+    public void onBufferingUpdate(MediaPlayer mediaPlayer, int percent) {
+
     }
 
     @Override
-    public void EndOfMusic() {
-        //自动播放同一个播放列表的下一首歌
+    public void onCompletion(MediaPlayer mediaPlayer) {
         PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mediaPlayer, int i, int i2) {
+        if (mMainMediaPlayer != null) {
+            mMainMediaPlayer.stop();
+            mMainMediaPlayer.release();
+            mMainMediaPlayer = null;
+        }
+        return true;
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mediaPlayer) {
+        mMainMediaPlayer.start();
+        progressDialog.dismiss();
     }
 
     private class ResideMenuListener implements ResideMenu.OnMenuListener {
@@ -321,8 +382,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     @Override
     protected void onResume() {
         super.onResume();
-        if (isPlay = false && player != null) {
-            player.play();
+        if (isPlay = false && mMainMediaPlayer != null) {
+            mMainMediaPlayer.start();
         }
     }
 
@@ -330,16 +391,17 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     protected void onDestroy() {
         super.onDestroy();
         mRequstQueue.cancelAll(this);
-        if (player != null) {
-            player.stop();
-            player = null;
+        if (mMainMediaPlayer != null) {
+            mMainMediaPlayer.stop();
+            mMainMediaPlayer.release();
+            mMainMediaPlayer = null;
         }
     }
 
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -354,16 +416,16 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 case TelephonyManager.CALL_STATE_RINGING:
                     //来电
                     if (isPlay) {
-                        player.pause();
-                        btnPlayMusic.setBackgroundResource(R.drawable.ktv_play_press);
+                        mMainMediaPlayer.pause();
+                        btnPlayMusic.setBackgroundResource(R.drawable.play_song);
                         isPlay = false;
                     }
                     break;
                 case TelephonyManager.CALL_STATE_IDLE:
                     //通话结束
-                    if (isPlay == false && player != null) {
-                        player.play();
-                        btnPlayMusic.setBackgroundResource(R.drawable.ktv_pause_press);
+                    if (isPlay == false && mMainMediaPlayer != null) {
+                        mMainMediaPlayer.start();
+                        btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
                         isPlay = true;
                     }
                     break;
@@ -377,14 +439,53 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     public void onBackPressed() {
         if (mBackKeyPressedCount == 2) {
             mRequstQueue.cancelAll(this);
-            if (player != null) {
-                player.stop();
-                player = null;
+            if (mMainMediaPlayer != null) {
+                mMainMediaPlayer.stop();
+                mMainMediaPlayer.release();
+                mMainMediaPlayer = null;
             }
             finish();
         } else {
             mBackKeyPressedCount++;
             Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
         }
+    }
+
+    //格式化时间
+    private String FormatTime(long timeMills) {
+        Date date = new Date(timeMills);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("mm:ss", Locale.CHINA);
+        return simpleDateFormat.format(date);
+    }
+
+    private TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            if (mMainMediaPlayer == null) {
+                return;
+            }
+            if (mMainMediaPlayer.isPlaying()) {
+                //处理播放
+                Message msg = new Message();
+                msg.what = UPDATE_TIME;
+                handler.sendMessage(msg);
+            }
+        }
+    };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.main, menu);
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.action_app_about:
+                startActivity(new Intent(this, About.class));
+                break;
+        }
+        return true;
     }
 }

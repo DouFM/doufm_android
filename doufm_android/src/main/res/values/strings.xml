@@ -4,13 +4,18 @@
     <string name="app_name">DouFm</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
+    <string name="app_about">关于</string>
     <string name="title_activity_main">MainActivity</string>
     <string name="splash_activity_set_wifi">设置</string>
     <string name="splash_activity_quit">退出</string>
     <string name="title_activity_about">DouFM Team出品\n\n
-        Android开发团队:<a href="http://weibo.com/2491729875">@陈启超_V</a>\n\n
-        AndroidUI团队:<a href="http://weibo.com/2491729875">@陈启超_V</a>\n\n
-        Android测试团队:<a href="http://weibo.com/2491729875">@陈启超_V</a>\n\n
-        版本号:1.0</string>
+        后台:董超\n\n
+        前端:姚亮\n\n
+        Android开发:陈启超_V\n\n
+        UI:纪倩\n\n
+        iOS开发团队:赵洪武\n\n
+        版本号:1.0\n\n
+        反馈意见:admin@doufm.info
+    </string>
 
 </resources>
