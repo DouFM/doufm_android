@@ -12,7 +12,6 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
-import android.view.animation.LinearInterpolator;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -34,10 +33,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 
-import info.doufm.android.Info.ChannelInfo;
-import info.doufm.android.Info.MusicInfo;
 import info.doufm.android.Info.PlaylistInfo;
 import info.doufm.android.Play.OnPlayListener;
 import info.doufm.android.Play.PlayMusic;
@@ -78,23 +74,14 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
 
     //播放器
     private PlayMusic player;
-    private String musicURL = "";
-
-    private String CHANNEL_URL = "http://doufm.info/api/channel/?start=0";
     private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
 
-    private List<MusicInfo> mMusicInfoList = new ArrayList<MusicInfo>();
-    private List<ChannelInfo> mChannelInfoList = new ArrayList<ChannelInfo>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
     private int mPlayListNum = 0;
 
     //Volley请求
     private RequestQueue mRequstQueue;
-    private List<Integer> randomChannel = new ArrayList<Integer>();
-    private int CHANNEL_MENU_NUM = 6;
     private int PLAYLIST_MENU_NUM = 6;
-
-    private int randomMusicIndex = new Random().nextInt(2000);
 
     //音乐文件和封面路径
     private String MusicURL = "";
@@ -129,15 +116,12 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
     private void initView() {
         ivCover = (ImageView) findViewById(R.id.ivCover);
         tvMusicTitle = (TextView) findViewById(R.id.tvMusicTitle);
-        //tvAuthorTitle = (TextView) findViewById(R.id.tvAuthorName);
         tvTimeLeft = (TextView) findViewById(R.id.tvTimeLeft);
         btnPlayMusic = (Button) findViewById(R.id.btnPlayMusic);
         btnNextSong = (Button) findViewById(R.id.btnNextSong);
         btnPlayMusic.setOnClickListener(this);
         btnNextSong.setOnClickListener(this);
         animation = AnimationUtils.loadAnimation(this,R.anim.rotation);
-        LinearInterpolator lin = new LinearInterpolator();
-       // animation.setInterpolator(lin);
         ivCover.startAnimation(animation);
     }
 
@@ -161,14 +145,8 @@ public class MainActivity extends Activity implements View.OnClickListener, OnPl
                 mResideMenu.openMenu(ResideMenu.DIRECTION_LEFT);
             }
         });
-        //右侧打开ResideMenu按钮响应
+        //关闭右侧侧边栏
         mResideMenu.setDirectionDisable(ResideMenu.DIRECTION_RIGHT);
-//        findViewById(R.id.btn_open_right_reside_menu).setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                mResideMenu.openMenu(ResideMenu.DIRECTION_RIGHT);
-//            }
-//        });
 
         JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
             @Override
