@@ -76,6 +76,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
     private Button btnPlayMusic, btnNextSong;
     private ImageView ivCover;
     private TextView tvMusicTitle;
+    private String mMusicTitle;
     private TextView tvTimeLeft;
 
     //播放器
@@ -107,6 +108,8 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
     private static final int DISSMISS = 1000;
     private static final int UPDATE_TIME = 2000;
 
+    private boolean isOpenResideMenu = false;
+
     //定义Handler对象
     private Handler handler = new Handler() {
         @Override
@@ -136,7 +139,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
         setContentView(R.layout.activity_main);
         mContext = this;
         mRequstQueue = Volley.newRequestQueue(this);
-
         PhoneIncomingListener();
         initView();
         InitResideMenu();
@@ -266,10 +268,13 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
                     CoverURL = "http://doufm.info" + jo.getString("cover");
                     GetCoverImageRequest(CoverURL);
                     tvMusicTitle.setText(jo.getString("title"));
+                    mMusicTitle = jo.getString("title");
                     mMainMediaPlayer.reset();
                     mMainMediaPlayer.setDataSource(MusicURL); //这种url路径
                     mMainMediaPlayer.prepare(); //prepare自动播放
                     isPlay = true;
+                    btnNextSong.setEnabled(true);
+                    btnNextSong.setEnabled(true);
                     btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -325,6 +330,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
 
     @Override
     public void onBufferingUpdate(MediaPlayer mediaPlayer, int percent) {
+        if (percent <100){
+            tvMusicTitle.setText(mMusicTitle+" "+percent+"%");
+        } else {
+            tvMusicTitle.setText(mMusicTitle);
+        }
 
     }
 
@@ -402,6 +412,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
         @Override
         public void onErrorResponse(VolleyError volleyError) {
             Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
+            Message msg = new Message();
+            msg.what = DISSMISS;
+            handler.sendMessage(msg);
+            btnNextSong.setEnabled(false);
+            btnNextSong.setEnabled(false);
         }
     };
 

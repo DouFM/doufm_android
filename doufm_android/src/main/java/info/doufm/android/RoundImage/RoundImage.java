@@ -69,9 +69,6 @@ public class RoundImage extends ImageView {
 
         int radius = (w < h ? w : h) / 2 - mBorderThickness;
         Bitmap roundBitmap = getCroppedBitmap(bitmap, radius);
-        // roundBitmap=ImageUtils.setCircularInnerGlow(roundBitmap, 0xFFBAB399,
-        // 4, 1);
-        //canvas.drawBitmap(roundBitmap, w / 2 - radius, 8, null);
 
         final Paint paint = new Paint();
         paint.setAntiAlias(true);
