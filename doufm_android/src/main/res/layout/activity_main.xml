@@ -2,20 +2,31 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/background"
+    android:background="@drawable/reside_menu_background"
     tools:context="info.doufm.android.Activity.MainActivity">
 
-    <Button
-        android:layout_width="50dp"
-        android:layout_height="50dp"
-        android:background="@drawable/btn_openmenu_seletor"
-        android:layout_gravity="left|center_vertical"
-        android:id="@+id/btn_open_left_reside_menu"
-        android:layout_marginTop="10dp"
-        android:layout_marginLeft="10dp"
+    <RelativeLayout
+        android:layout_width="fill_parent"
+        android:layout_height="70dp"
+        android:background="#7d7cd2a0"
         android:layout_alignParentTop="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true" />
+        android:layout_alignParentLeft="true">
+
+        <Button
+            android:layout_width="50dp"
+            android:layout_height="50dp"
+            android:background="@drawable/btn_openmenu_seletor"
+            android:id="@+id/btn_open_left_reside_menu"
+            android:layout_marginTop="10dp"
+            android:layout_marginLeft="10dp"
+            android:layout_alignParentTop="true"
+            android:layout_alignParentLeft="true"
+            android:layout_alignParentStart="true"
+
+            android:layout_gravity="left" />
+
+    </RelativeLayout>
+
 
     <TextView
         android:layout_width="match_parent"
@@ -26,8 +37,10 @@
         android:gravity="center"
         android:textSize="25dp"
         android:textColor="#000"
-        android:layout_above="@+id/tvTimeLeft"
-        android:layout_centerHorizontal="true" />
+        android:layout_below="@+id/ivCover"
+        android:layout_alignRight="@+id/tvTimeLeft"
+        android:layout_alignEnd="@+id/tvTimeLeft"
+        android:layout_marginTop="36dp" />
 
     <TextView
         android:layout_width="match_parent"
@@ -37,8 +50,7 @@
         android:textSize="25dp"
         android:textColor="#000"
         android:layout_above="@+id/ivCover"
-        android:layout_alignLeft="@+id/btn_open_left_reside_menu"
-        android:layout_alignStart="@+id/btn_open_left_reside_menu" />
+        android:layout_alignParentLeft="true" />
 
     <info.doufm.android.RoundImage.RoundImage
         android:layout_width="250dp"
@@ -56,20 +68,19 @@
 
     <LinearLayout
         android:layout_width="fill_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="80dp"
         android:gravity="center"
         android:orientation="horizontal"
-        android:layout_marginBottom="0dp"
-        android:background="#ffd2d2d2"
+        android:background="#7d7cd2a0"
         android:layout_alignParentBottom="true"
-        android:layout_alignParentLeft="true"
-        android:layout_alignParentStart="true">
+        android:layout_alignParentLeft="true">
 
         <Button
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:id="@+id/btnPlayMusic"
-            android:background="@drawable/play_song" />
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/btn_play_selector" />
 
         <ImageView
             android:layout_width="50dp"
@@ -79,7 +90,8 @@
             android:layout_width="70dp"
             android:layout_height="70dp"
             android:id="@+id/btnNextSong"
-            android:background="@drawable/next_song" />
+            android:layout_marginBottom="2dp"
+            android:background="@drawable/btn_next_selector" />
     </LinearLayout>
 
 </RelativeLayout>

@@ -275,7 +275,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
                     isPlay = true;
                     btnNextSong.setEnabled(true);
                     btnNextSong.setEnabled(true);
-                    btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
+                    btnPlayMusic.setBackgroundResource(R.drawable.btn_pause_seletor);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -293,12 +293,12 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
             case R.id.btnPlayMusic:
                 if (isPlay) {
                     isPlay = false;
-                    btnPlayMusic.setBackgroundResource(R.drawable.play_song);
+                    btnPlayMusic.setBackgroundResource(R.drawable.btn_play_selector);
                     mMainMediaPlayer.pause();
                     ivCover.clearAnimation();
                 } else {
                     isPlay = true;
-                    btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
+                    btnPlayMusic.setBackgroundResource(R.drawable.btn_pause_seletor);
                     mMainMediaPlayer.start();
                     ivCover.startAnimation(animation);
                 }
@@ -350,6 +350,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
             mMainMediaPlayer.release();
             mMainMediaPlayer = null;
         }
+        Toast.makeText(this,"播放器异常!",Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -432,7 +433,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
                     //来电
                     if (isPlay) {
                         mMainMediaPlayer.pause();
-                        btnPlayMusic.setBackgroundResource(R.drawable.play_song);
+                        btnPlayMusic.setBackgroundResource(R.drawable.btn_play_selector);
                         isPlay = false;
                     }
                     break;
@@ -440,7 +441,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
                     //通话结束
                     if (isPlay == false && mMainMediaPlayer != null) {
                         mMainMediaPlayer.start();
-                        btnPlayMusic.setBackgroundResource(R.drawable.pause_song);
+                        btnPlayMusic.setBackgroundResource(R.drawable.btn_pause_seletor);
                         isPlay = true;
                     }
                     break;
