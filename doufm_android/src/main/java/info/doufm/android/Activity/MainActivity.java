@@ -5,6 +5,10 @@ import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -110,6 +114,26 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
 
     private boolean isOpenResideMenu = false;
 
+    private SensorManager sensorManager;
+    private SensorEventListener listener = new SensorEventListener() {
+        @Override
+        public void onSensorChanged(SensorEvent event) {
+            float xValue = Math.abs(event.values[0]);
+            float yValue = Math.abs(event.values[1]);
+            float zValue = Math.abs(event.values[2]);
+            if (xValue > 15 || yValue > 15 || zValue > 15) {
+                if (mMainMediaPlayer != null) {
+                    PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+                }
+            }
+        }
+
+        @Override
+        public void onAccuracyChanged(Sensor sensor, int accuracy) {
+
+        }
+    };
+
     //定义Handler对象
     private Handler handler = new Handler() {
         @Override
@@ -137,6 +161,9 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        sensorManager = (SensorManager)getSystemService(Context.SENSOR_SERVICE);
+        Sensor sensor = sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        sensorManager.registerListener(listener,sensor,SensorManager.SENSOR_DELAY_NORMAL);
         mContext = this;
         mRequstQueue = Volley.newRequestQueue(this);
         PhoneIncomingListener();
@@ -330,8 +357,11 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
 
     @Override
     public void onBufferingUpdate(MediaPlayer mediaPlayer, int percent) {
-        if (percent <100){
-            tvMusicTitle.setText(mMusicTitle+" "+percent+"%");
+        if (percent < 100) {
+            tvMusicTitle.setText(mMusicTitle + " " + percent + "%");
+            if (progressDialog.isShowing()){
+                progressDialog.dismiss();
+            }
         } else {
             tvMusicTitle.setText(mMusicTitle);
         }
@@ -350,7 +380,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
             mMainMediaPlayer.release();
             mMainMediaPlayer = null;
         }
-        Toast.makeText(this,"播放器异常!",Toast.LENGTH_SHORT).show();
+        Toast.makeText(this, "播放器异常!", Toast.LENGTH_SHORT).show();
         return true;
     }
 
@@ -504,4 +534,6 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
         }
         return true;
     }
+
+
 }

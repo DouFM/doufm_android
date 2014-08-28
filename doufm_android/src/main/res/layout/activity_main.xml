@@ -3,7 +3,8 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:background="@drawable/reside_menu_background"
-    tools:context="info.doufm.android.Activity.MainActivity">
+    tools:context="info.doufm.android.Activity.MainActivity"
+    android:id="@+id/">
 
     <RelativeLayout
         android:layout_width="fill_parent"
@@ -37,10 +38,11 @@
         android:gravity="center"
         android:textSize="25dp"
         android:textColor="#000"
+        android:layout_marginBottom="20dp"
         android:layout_below="@+id/ivCover"
         android:layout_alignRight="@+id/tvTimeLeft"
         android:layout_alignEnd="@+id/tvTimeLeft"
-        android:layout_marginTop="36dp" />
+        android:layout_marginTop="30dp" />
 
     <TextView
         android:layout_width="match_parent"
