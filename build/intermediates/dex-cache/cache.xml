@@ -9,18 +9,11 @@
         <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-deccf773c1ecb94a880aaeec1372c423849930f1.jar" />
     </item>
     <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\libs\nineoldandroids-library-2.4.0.jar"
+        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.ikimuhendis\ldrawer\0.1\classes.jar"
         jumboMode="false"
         revision="20.0.0"
-        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\nineoldandroids-library-2.4.0-8b17f46cd6f289997531e2559a085b1cc7454f7c.jar" />
-    </item>
-    <item
-        jar="D:\Program Files (x86)\Android Studio\SDK\extras\android\m2repository\com\android\support\support-annotations\21.0.0\support-annotations-21.0.0.jar"
-        jumboMode="false"
-        revision="20.0.0"
-        sha1="1a578b9607b36266c63d43a4fa0ab5664dbe911e">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\support-annotations-21.0.0-b73a123cddcbfbf62c3c673e667c8a67774564d1.jar" />
+        sha1="d3bec8d72ee2aa86e69f66375c31f2161b7bb324">
+        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-0082be1501567dad97310e22e447118b9a34ed46.jar" />
     </item>
     <item
         jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\libs\volley.jar"
@@ -35,6 +28,20 @@
         revision="20.0.0"
         sha1="95fd37732ec852e99f07eeb516a3650172f1d136">
         <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-aee29d9baf8b8bf9411cd3d8b203e2ef108404b1.jar" />
+    </item>
+    <item
+        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\libs\nineoldandroids-library-2.4.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
+        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\nineoldandroids-library-2.4.0-8b17f46cd6f289997531e2559a085b1cc7454f7c.jar" />
+    </item>
+    <item
+        jar="D:\Program Files (x86)\Android Studio\SDK\extras\android\m2repository\com\android\support\support-annotations\21.0.0\support-annotations-21.0.0.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="1a578b9607b36266c63d43a4fa0ab5664dbe911e">
+        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\support-annotations-21.0.0-b73a123cddcbfbf62c3c673e667c8a67774564d1.jar" />
     </item>
     <item
         jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.0\libs\internal_impl-21.0.0.jar"

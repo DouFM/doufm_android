@@ -15,7 +15,11 @@
         UI:纪倩\n\n
         iOS开发团队:赵洪武\n\n
         版本号:1.0\n\n
-        反馈意见:admin@doufm.info
-    </string>
+        反馈意见:admin@doufm.info</string>
+    <string name="title_activity_sample">SampleActivity</string>
+    <string name="drawer_open">drawer_open</string>
+    <string name="drawer_close">drawer_close</string>
+    <string name="app_description">Android drawer icon with material design animation</string>
+    <string name="title_activity_try_listen">TryListenActivity</string>
 
 </resources>

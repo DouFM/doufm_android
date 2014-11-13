@@ -2,15 +2,20 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     package="info.doufm.android" >
 
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.INTERNET" />
+    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
+
     <application
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="info.doufm.android.Activity.SplashActivity"
-
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+            android:name="info.doufm.android.Activity.SampleActivity"
+            android:screenOrientation="portrait"
+            android:theme="@style/AppTheme" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -24,13 +29,16 @@
         <activity
             android:name="info.doufm.android.Activity.About"
             android:label="关于"
-            android:theme="@android:style/Theme.Dialog">
+            android:theme="@android:style/Theme.Dialog" >
+        </activity>
+        <activity
+            android:name="info.doufm.android.Activity.SplashActivity"
+            android:label="@string/title_activity_sample" >
+        </activity>
+        <activity
+            android:name="info.doufm.android.Activity.TryListenActivity"
+            android:label="@string/title_activity_try_listen" >
         </activity>
     </application>
-
-    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
-    <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
-    <uses-permission android:name="android.permission.INTERNET" />
-    <uses-permission android:name="android.permission.READ_PHONE_STATE" />
 
 </manifest>
