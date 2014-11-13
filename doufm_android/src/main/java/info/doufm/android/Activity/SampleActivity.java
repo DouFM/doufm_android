@@ -2,16 +2,20 @@ package info.doufm.android.Activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
@@ -37,8 +41,11 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import info.doufm.android.Info.PlaylistInfo;
+import info.doufm.android.PlayView.MySeekBar;
 import info.doufm.android.PlayView.PlayView;
 import info.doufm.android.R;
 
@@ -51,29 +58,82 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
     private DrawerArrowDrawable drawerArrow;
     private boolean drawerArrowColor;
 
+    private ListListener mListLisener;
     private FrameLayout mContainer;
-    private Button mStartBtn;
-    private Button mStopBtn;
-    private PlayView mPlayView;
+    private Button btnPlay;
+    private Button btnNextSong;
+    private MySeekBar seekBar;
 
+    private PlayView mPlayView;
+    //加载用户体验
+    private ProgressDialog progressDialog;
+
+    private boolean isLoadingSuccess = false;
+    private int mMusicDuration;            //音乐总时间
+    private int mMusicCurrDuration;        //当前播放时间
+    private static final int DISSMISS = 1000;
+    private static final int UPDATE_TIME = 2000;
+
+    private Timer mTimer = new Timer();     //计时器
     private List<String> mLeftResideMenuItemTitleList = new ArrayList<String>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
     private int PLAYLIST_MENU_NUM = 0;
     private int mPlayListNum = 0;
-    private String mPreMusicURL;
 
+    private String mPreMusicURL;
     //音乐文件和封面路径
     private String MusicURL = "";
     private String CoverURL = "";
-    private boolean isPlay = false;
 
+    private boolean isPlay = false;
     //播放器
     private MediaPlayer mMainMediaPlayer;
-    private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
 
+    private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
     //Volley请求
     private RequestQueue mRequstQueue;
+
     private String mMusicTitle;
+    //定义Handler对象
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            //处理消息
+            if (msg.what == DISSMISS) {
+                progressDialog.dismiss();
+            }
+            if (msg.what == UPDATE_TIME) {
+                //更新音乐播放状态
+                if (isPlay) {
+                    if (mMainMediaPlayer == null) {
+                        return;
+                    }
+                    mMusicCurrDuration = mMainMediaPlayer.getCurrentPosition();
+                    mMusicDuration = mMainMediaPlayer.getDuration();
+                    seekBar.setMax(mMusicDuration);
+                    if (mMusicDuration > 0) {
+                        seekBar.setProgress(mMusicCurrDuration);
+                    }
+                }
+            }
+        }
+    };
+
+    private class ListListener implements AdapterView.OnItemClickListener{
+
+        @Override
+        public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+            if (isLoadingSuccess) {
+                mDrawerLayout.closeDrawers();
+                try {
+                    Thread.sleep(500);
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
+                }
+                PlayRandomMusic(mPlaylistInfoList.get(position).getKey());
+            }
+        }
+    }
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -81,22 +141,36 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
         setContentView(R.layout.activity_sample);
 
         mContainer = (FrameLayout) findViewById(R.id.media_container);
-        mStartBtn = (Button) findViewById(R.id.btn_start_play);
-        mStopBtn = (Button) findViewById(R.id.btn_stop_play);
+        btnPlay = (Button) findViewById(R.id.btn_start_play);
+        btnNextSong = (Button) findViewById(R.id.btn_stop_play);
+        seekBar = (MySeekBar) findViewById(R.id.seekbar);
+        mListLisener = new ListListener();
+        seekBar.setProgress(0);
 
         mPlayView = new PlayView(this);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mContainer.addView(mPlayView, lp);
 
-        mStartBtn.setOnClickListener(new View.OnClickListener() {
+        btnPlay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mPlayView.play();
+                if (isPlay) {
+                    isPlay = false;
+                    btnPlay.setBackgroundResource(R.drawable.btn_start_play);
+                    mMainMediaPlayer.pause();
+                    mPlayView.pause();
+                } else {
+                    isPlay = true;
+                    btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
+                    mMainMediaPlayer.start();
+                    mPlayView.play();
+                }
             }
         });
 
-        mStopBtn.setOnClickListener(new View.OnClickListener() {
+        btnNextSong.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 mPlayView.pause();
+                PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
             }
         });
 
@@ -114,7 +188,7 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
                 return false;
             }
         };
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout,drawerArrow, R.string.drawer_open,R.string.drawer_close) {
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, drawerArrow, R.string.drawer_open, R.string.drawer_close) {
 
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -166,6 +240,8 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(SampleActivity.this,
                             android.R.layout.simple_list_item_1, android.R.id.text1, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(adapter);
+                    mDrawerList.setOnItemClickListener(mListLisener);
+                     isLoadingSuccess = true;
                     initPlayer();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -194,10 +270,12 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
         mMainMediaPlayer.setOnErrorListener(this);
         mMainMediaPlayer.setOnBufferingUpdateListener(this);
         mMainMediaPlayer.setOnPreparedListener(this);
+        mTimer.schedule(timerTask, 0, 1000);
         PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
     private void PlayRandomMusic(String playlist_key) {
+        progressDialog = ProgressDialog.show(SampleActivity.this, "提示", "加载中...", true, false);
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -213,6 +291,7 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
                     mMainMediaPlayer.setDataSource(MusicURL); //这种url路径
                     mMainMediaPlayer.prepare(); //prepare自动播放
                     isPlay = true;
+                    btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
                 } catch (JSONException e) {
                     e.printStackTrace();
                 } catch (IOException e) {
@@ -272,12 +351,18 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-
+        if (percent < 100) {
+            if (progressDialog.isShowing()) {
+                progressDialog.dismiss();
+            }
+        }
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         mMainMediaPlayer.start();
+        mPlayView.play();
+        progressDialog.dismiss();
     }
 
     @Override
@@ -291,6 +376,7 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
         super.onStop();
         mRequstQueue.cancelAll(this);
     }
+
     private void PhoneIncomingListener() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(new MyPhoneListener(), PhoneStateListener.LISTEN_CALL_STATE);
@@ -317,4 +403,37 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
             }
         }
     }
+
+    private int mBackKeyPressedCount = 1;
+
+    @Override
+    public void onBackPressed() {
+        if (mBackKeyPressedCount == 2) {
+            mRequstQueue.cancelAll(this);
+            if (mMainMediaPlayer != null) {
+                mMainMediaPlayer.stop();
+                mMainMediaPlayer.release();
+                mMainMediaPlayer = null;
+            }
+            finish();
+        } else {
+            mBackKeyPressedCount++;
+            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    private TimerTask timerTask = new TimerTask() {
+        @Override
+        public void run() {
+            if (mMainMediaPlayer == null) {
+                return;
+            }
+            if (mMainMediaPlayer.isPlaying()) {
+                //处理播放
+                Message msg = new Message();
+                msg.what = UPDATE_TIME;
+                handler.sendMessage(msg);
+            }
+        }
+    };
 }

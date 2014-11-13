@@ -22,10 +22,6 @@ public class MySeekBar extends SeekBar {
     }
 
     public boolean onTouchEvent(MotionEvent event) {
-        // TODO Auto-generated method stub
-        //原来是要将TouchEvent传递下去的,我们不让它传递下去就行了
-        //return super.onTouchEvent(event);
-
         return false ;
     }
 }
