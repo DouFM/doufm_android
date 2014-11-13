@@ -2,9 +2,14 @@ package info.doufm.android.Activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
+import android.content.Context;
 import android.content.res.Configuration;
+import android.media.AudioManager;
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.support.v4.widget.DrawerLayout;
+import android.telephony.PhoneStateListener;
+import android.telephony.TelephonyManager;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.ArrayAdapter;
@@ -27,6 +32,7 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -37,7 +43,7 @@ import info.doufm.android.PlayView.PlayView;
 import info.doufm.android.R;
 
 
-public class SampleActivity extends Activity {
+public class SampleActivity extends Activity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -52,25 +58,34 @@ public class SampleActivity extends Activity {
 
     private List<String> mLeftResideMenuItemTitleList = new ArrayList<String>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
-    private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
     private int PLAYLIST_MENU_NUM = 0;
+    private int mPlayListNum = 0;
+    private String mPreMusicURL;
+
+    //音乐文件和封面路径
+    private String MusicURL = "";
+    private String CoverURL = "";
+    private boolean isPlay = false;
+
+    //播放器
+    private MediaPlayer mMainMediaPlayer;
+    private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
 
     //Volley请求
     private RequestQueue mRequstQueue;
+    private String mMusicTitle;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
 
-        mRequstQueue = Volley.newRequestQueue(this);
         mContainer = (FrameLayout) findViewById(R.id.media_container);
         mStartBtn = (Button) findViewById(R.id.btn_start_play);
         mStopBtn = (Button) findViewById(R.id.btn_stop_play);
 
         mPlayView = new PlayView(this);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(
-                LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mContainer.addView(mPlayView, lp);
 
         mStartBtn.setOnClickListener(new View.OnClickListener() {
@@ -113,12 +128,25 @@ public class SampleActivity extends Activity {
         };
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
+    }
 
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //PhoneIncomingListener();
+        mRequstQueue = Volley.newRequestQueue(this);
+        GetMusicList();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        if (isPlay = false && mMainMediaPlayer != null) {
+            mMainMediaPlayer.start();
+        }
+    }
+
+    private void GetMusicList() {
         JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
@@ -138,6 +166,7 @@ public class SampleActivity extends Activity {
                     ArrayAdapter<String> adapter = new ArrayAdapter<String>(SampleActivity.this,
                             android.R.layout.simple_list_item_1, android.R.id.text1, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(adapter);
+                    initPlayer();
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -146,7 +175,7 @@ public class SampleActivity extends Activity {
             /**
              * 添加自定义HTTP Header
              * @return
-             * @throws AuthFailureError
+             * @throws com.android.volley.AuthFailureError
              */
             @Override
             public Map<String, String> getHeaders() throws AuthFailureError {
@@ -155,6 +184,42 @@ public class SampleActivity extends Activity {
                 return params;
             }
         };
+        mRequstQueue.add(jaq);
+    }
+
+    private void initPlayer() {
+        mMainMediaPlayer = new MediaPlayer(); //创建媒体播放器
+        mMainMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC); //设置媒体流类型
+        mMainMediaPlayer.setOnCompletionListener(this);
+        mMainMediaPlayer.setOnErrorListener(this);
+        mMainMediaPlayer.setOnBufferingUpdateListener(this);
+        mMainMediaPlayer.setOnPreparedListener(this);
+        PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
+    }
+
+    private void PlayRandomMusic(String playlist_key) {
+        final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
+        JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                //请求随机播放音乐文件信息
+                try {
+                    JSONObject jo = new JSONObject();
+                    jo = jsonArray.getJSONObject(0);
+                    MusicURL = "http://doufm.info" + jo.getString("audio");
+                    mPreMusicURL = MusicURL;
+                    mMusicTitle = jo.getString("title");
+                    mMainMediaPlayer.reset();
+                    mMainMediaPlayer.setDataSource(MusicURL); //这种url路径
+                    mMainMediaPlayer.prepare(); //prepare自动播放
+                    isPlay = true;
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, errorListener);
         mRequstQueue.add(jaq);
     }
 
@@ -187,5 +252,69 @@ public class SampleActivity extends Activity {
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
         mDrawerToggle.onConfigurationChanged(newConfig);
+    }
+
+    @Override
+    public void onCompletion(MediaPlayer mp) {
+        PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+    }
+
+    @Override
+    public boolean onError(MediaPlayer mp, int what, int extra) {
+        if (mMainMediaPlayer != null) {
+            mMainMediaPlayer.stop();
+            mMainMediaPlayer.release();
+            mMainMediaPlayer = null;
+        }
+        Toast.makeText(this, "播放器异常!", Toast.LENGTH_SHORT).show();
+        return true;
+    }
+
+    @Override
+    public void onBufferingUpdate(MediaPlayer mp, int percent) {
+
+    }
+
+    @Override
+    public void onPrepared(MediaPlayer mp) {
+        mMainMediaPlayer.start();
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mRequstQueue.cancelAll(this);
+    }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        mRequstQueue.cancelAll(this);
+    }
+    private void PhoneIncomingListener() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        telephonyManager.listen(new MyPhoneListener(), PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    private class MyPhoneListener extends PhoneStateListener {
+        @Override
+        public void onCallStateChanged(int state, String incomingNumber) {
+            switch (state) {
+                case TelephonyManager.CALL_STATE_RINGING:
+                    //来电
+                    if (isPlay) {
+                        mMainMediaPlayer.pause();
+                        isPlay = false;
+                    }
+                    break;
+                case TelephonyManager.CALL_STATE_IDLE:
+                    //通话结束
+                    if (isPlay == false && mMainMediaPlayer != null) {
+                        mMainMediaPlayer.start();
+                        isPlay = true;
+                    }
+                    break;
+            }
+        }
     }
 }

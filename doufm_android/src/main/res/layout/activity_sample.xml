@@ -26,9 +26,9 @@
                 android:id="@+id/btn_start_play"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:background="@drawable/bg_play_previous" />
+                android:background="@drawable/btn_start_play" />
 
-            <SeekBar
+            <info.doufm.android.PlayView.MySeekBar
                 android:id="@+id/seekbar"
                 style="@style/SeekBar"
                 android:layout_width="match_parent"

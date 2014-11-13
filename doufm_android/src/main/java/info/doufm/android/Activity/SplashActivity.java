@@ -1,9 +1,7 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
-import android.app.AlertDialog;
 import android.content.ComponentName;
-import android.content.DialogInterface;
 import android.content.Intent;
 import android.os.Build;
 import android.os.Bundle;
@@ -14,6 +12,7 @@ import android.provider.Settings;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.R;
 
 /**
@@ -39,7 +38,7 @@ public class SplashActivity extends Activity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+                Intent intent = new Intent(SplashActivity.this, SampleActivity.class);
                 intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
                 startActivity(intent);
                 SplashActivity.this.finish();
@@ -48,34 +47,36 @@ public class SplashActivity extends Activity {
     };
 
     private void SetNetwork() {
-        AlertDialog.Builder aletDialog = new AlertDialog.Builder(SplashActivity.this);
-        aletDialog.setTitle("提示");
-        aletDialog.setMessage("当前无法连接至Doufm服务器,请先检查网络设置!");
-        aletDialog.setPositiveButton(R.string.splash_activity_set_wifi, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                Intent intent = null;
-                if (Build.VERSION.SDK_INT > 11) {
-                    //Android 3.0以上版本跳转至Wifi设置界面
-                    intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                } else {
-                    //Android 3.0以下版本跳转至Wifi设置界面
-                    intent = new Intent();
-                    ComponentName componentName = new ComponentName("com.android.settings", "com.android.settings.WirelessSettings");
-                    intent.setComponent(componentName);
-                    intent.setAction("android.intent.action.VIEW");
-                }
-                startActivity(intent);
-            }
-        });
-        aletDialog.setNegativeButton(R.string.splash_activity_quit, new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface dialogInterface, int i) {
-                //无法使用网络退出
-                finish();
-            }
-        });
-        aletDialog.show();
+        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("网络连接出错啦...")
+                .setCancelText("设置网络")
+                .setConfirmText("试听一下!")
+                .showCancelButton(true)
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        Intent intent = null;
+                        if (Build.VERSION.SDK_INT > 11) {
+                            //Android 3.0以上版本跳转至Wifi设置界面
+                            intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                        } else {
+                            //Android 3.0以下版本跳转至Wifi设置界面
+                            intent = new Intent();
+                            ComponentName componentName = new ComponentName("com.android.settings", "com.android.settings.WirelessSettings");
+                            intent.setComponent(componentName);
+                            intent.setAction("android.intent.action.VIEW");
+                        }
+                        startActivity(intent);
+                    }
+                })
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        startActivity(new Intent(SplashActivity.this,TryListenActivity.class));
+                        finish();
+                    }
+                })
+                .show();
     }
 
     @Override

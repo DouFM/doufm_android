@@ -1,13 +1,13 @@
 package info.doufm.android.Activity;
 
-import android.support.v7.app.ActionBarActivity;
+import android.app.Activity;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuItem;
 
 import info.doufm.android.R;
 
-public class TryListenActivity extends ActionBarActivity {
+public class TryListenActivity extends Activity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

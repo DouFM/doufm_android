@@ -44,6 +44,13 @@
         <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\support-annotations-21.0.0-b73a123cddcbfbf62c3c673e667c8a67774564d1.jar" />
     </item>
     <item
+        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\cn.pedant.sweetalert\library\1.1\classes.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="4ebe2626650bb5d8e3d4546a5107a85e9df8775b">
+        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-07ab1b4f0e8dc17f32de5218917e98ce89c49115.jar" />
+    </item>
+    <item
         jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.0\libs\internal_impl-21.0.0.jar"
         jumboMode="false"
         revision="20.0.0"
