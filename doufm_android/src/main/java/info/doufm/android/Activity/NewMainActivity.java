@@ -4,7 +4,9 @@ import android.app.ActionBar;
 import android.app.Activity;
 import android.app.ProgressDialog;
 import android.content.Context;
+import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
+import android.graphics.Bitmap;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -13,20 +15,22 @@ import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
-import android.widget.FrameLayout.LayoutParams;
 import android.widget.ListView;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.Volley;
 import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
@@ -44,13 +48,14 @@ import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.Info.PlaylistInfo;
 import info.doufm.android.PlayView.MySeekBar;
 import info.doufm.android.PlayView.PlayView;
 import info.doufm.android.R;
 
 
-public class SampleActivity extends Activity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
+public class NewMainActivity extends Activity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -79,11 +84,13 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
     private int PLAYLIST_MENU_NUM = 0;
     private int mPlayListNum = 0;
+    private boolean isFirstLoad = true;
 
     private String mPreMusicURL;
     //音乐文件和封面路径
     private String MusicURL = "";
     private String CoverURL = "";
+    private TextView tvMusicTitle;
 
     private boolean isPlay = false;
     //播放器
@@ -130,6 +137,7 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
+                mPlayListNum = position;
                 PlayRandomMusic(mPlaylistInfoList.get(position).getKey());
             }
         }
@@ -139,16 +147,44 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
+        setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        ActionBar ab = getActionBar();
+        ab.setDisplayHomeAsUpEnabled(true);
+        ab.setHomeButtonEnabled(true);
+
+        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mDrawerList = (ListView) findViewById(R.id.navdrawer);
+        mDrawerList.setVerticalScrollBarEnabled(false);
+        tvMusicTitle = (TextView) findViewById(R.id.MusicTitle);
+
+        drawerArrow = new DrawerArrowDrawable(this) {
+            @Override
+            public boolean isLayoutRtl() {
+                return false;
+            }
+        };
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, drawerArrow, R.string.drawer_open, R.string.drawer_close) {
+
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                invalidateOptionsMenu();
+            }
+
+            public void onDrawerOpened(View drawerView) {
+                super.onDrawerOpened(drawerView);
+                invalidateOptionsMenu();
+            }
+        };
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        mDrawerToggle.syncState();
 
         mContainer = (FrameLayout) findViewById(R.id.media_container);
         btnPlay = (Button) findViewById(R.id.btn_start_play);
         btnNextSong = (Button) findViewById(R.id.btn_stop_play);
         seekBar = (MySeekBar) findViewById(R.id.seekbar);
-        mListLisener = new ListListener();
-        seekBar.setProgress(0);
 
         mPlayView = new PlayView(this);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         mContainer.addView(mPlayView, lp);
 
         btnPlay.setOnClickListener(new View.OnClickListener() {
@@ -174,47 +210,24 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
             }
         });
 
-        ActionBar ab = getActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setHomeButtonEnabled(true);
-
-        mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
-        mDrawerList = (ListView) findViewById(R.id.navdrawer);
-
-
-        drawerArrow = new DrawerArrowDrawable(this) {
-            @Override
-            public boolean isLayoutRtl() {
-                return false;
-            }
-        };
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, drawerArrow, R.string.drawer_open, R.string.drawer_close) {
-
-            public void onDrawerClosed(View view) {
-                super.onDrawerClosed(view);
-                invalidateOptionsMenu();
-            }
-
-            public void onDrawerOpened(View drawerView) {
-                super.onDrawerOpened(drawerView);
-                invalidateOptionsMenu();
-            }
-        };
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
+        mRequstQueue = Volley.newRequestQueue(this);
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         //PhoneIncomingListener();
-        mRequstQueue = Volley.newRequestQueue(this);
-        GetMusicList();
+
     }
 
     @Override
     protected void onResume() {
         super.onResume();
+        mListLisener = new ListListener();
+        if (isFirstLoad){
+            GetMusicList();
+            isFirstLoad = false;
+        }
         if (isPlay = false && mMainMediaPlayer != null) {
             mMainMediaPlayer.start();
         }
@@ -237,11 +250,11 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
                         mPlaylistInfoList.add(playlistInfo);
                     }
                     //生成播放列表菜单
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(SampleActivity.this,
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(NewMainActivity.this,
                             android.R.layout.simple_list_item_1, android.R.id.text1, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(adapter);
                     mDrawerList.setOnItemClickListener(mListLisener);
-                     isLoadingSuccess = true;
+                    isLoadingSuccess = true;
                     initPlayer();
                 } catch (JSONException e) {
                     e.printStackTrace();
@@ -275,7 +288,7 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
     }
 
     private void PlayRandomMusic(String playlist_key) {
-        progressDialog = ProgressDialog.show(SampleActivity.this, "提示", "加载中...", true, false);
+        progressDialog = ProgressDialog.show(NewMainActivity.this, "提示", "加载中...", true, false);
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -285,6 +298,10 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
                     JSONObject jo = new JSONObject();
                     jo = jsonArray.getJSONObject(0);
                     MusicURL = "http://doufm.info" + jo.getString("audio");
+                    CoverURL = "http://doufm.info" + jo.getString("cover");
+                    GetCoverImageRequest(CoverURL);
+                    mMusicTitle = jo.getString("title");
+                    tvMusicTitle.setText(mMusicTitle);
                     mPreMusicURL = MusicURL;
                     mMusicTitle = jo.getString("title");
                     mMainMediaPlayer.reset();
@@ -302,10 +319,20 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
         mRequstQueue.add(jaq);
     }
 
+    private void GetCoverImageRequest(String coverURL) {
+        ImageRequest imageRequest = new ImageRequest(coverURL, new Response.Listener<Bitmap>() {
+            @Override
+            public void onResponse(Bitmap bitmap) {
+                mPlayView.SetCDImage(bitmap);
+            }
+        }, 0, 0, null, errorListener);
+        mRequstQueue.add(imageRequest);
+    }
+
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            Toast.makeText(SampleActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(NewMainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
         }
     };
 
@@ -317,7 +344,13 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
             } else {
                 mDrawerLayout.openDrawer(mDrawerList);
             }
+        } else if(item.getItemId() == R.id.app_about_team){
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("DouFM - Android客户端")
+                    .setContentText(getResources().getString(R.string.title_activity_about))
+                    .show();
         }
+
         return super.onOptionsItemSelected(item);
     }
 
@@ -436,4 +469,13 @@ public class SampleActivity extends Activity implements MediaPlayer.OnCompletion
             }
         }
     };
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(R.menu.menu_sample, menu);
+        return true;
+    }
+
+
 }

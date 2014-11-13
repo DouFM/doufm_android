@@ -65,9 +65,9 @@ import info.doufm.android.ResideMenu.ResideMenuItem;
  * @author Qichao Chen
  * @version 1.0
  */
-public class MainActivity extends Activity implements View.OnClickListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
+public class OldMainActivity extends Activity implements View.OnClickListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnCompletionListener, MediaPlayer.OnPreparedListener, MediaPlayer.OnErrorListener {
 
-    private MainActivity mContext;
+    private OldMainActivity mContext;
     private ResideMenu mResideMenu;
     private ResideMenuListener mReisdeMenulistener;
 
@@ -237,13 +237,13 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
                     //添加左侧列表菜单项
                     for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
                         //图标需要改变
-                        mLeftResideMenuItemList.add(new ResideMenuItem(MainActivity.this, R.drawable.channel_logo, mLeftResideMenuItemTitleList.get(i)));
+                        mLeftResideMenuItemList.add(new ResideMenuItem(OldMainActivity.this, R.drawable.channel_logo, mLeftResideMenuItemTitleList.get(i)));
                     }
 
                     //添加监听事件
                     for (int i = 0; i < PLAYLIST_MENU_NUM; i++) {
                         //图标需要改变
-                        mLeftResideMenuItemList.get(i).setOnClickListener(MainActivity.this);
+                        mLeftResideMenuItemList.get(i).setOnClickListener(OldMainActivity.this);
                     }
                     mResideMenu.setMenuItems(mLeftResideMenuItemList, ResideMenu.DIRECTION_LEFT);
                     isLoadingSuccess = true;
@@ -281,7 +281,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
     }
 
     private void PlayRandomMusic(String playlist_key) {
-        progressDialog = ProgressDialog.show(MainActivity.this, "提示", "加载中...", true, false);
+        progressDialog = ProgressDialog.show(OldMainActivity.this, "提示", "加载中...", true, false);
         tvTimeLeft.setText("00:00");
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
@@ -442,7 +442,7 @@ public class MainActivity extends Activity implements View.OnClickListener, Medi
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(OldMainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
             Message msg = new Message();
             msg.what = DISSMISS;
             handler.sendMessage(msg);

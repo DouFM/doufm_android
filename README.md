@@ -22,15 +22,15 @@ Dou音乐, 爱生活
 
 ## 开发环境
 
-Mac OS X 10.9.2 + Android Studio(0.6.1) + Gradle(1.10)
+Mac OS X 10.9.2 + Android Studio(0.9.0) + Gradle(2.1)
 
 ## 工程项目导入
 
-项目工程采用的IDE是Android Studio 0.6.1，并且Android SDK已升级至最新版本(Kit Kat 4.4,Support Library 19.1，2014-06-18)，如果你是直接导入Android Studio，确保你的版本匹配，我们不能保证向上或在向下兼容（Google决定的！），需要检查你本地的gradle版本。如果你要导入到eclipse，有可能某些第三库无法试用，建议试用Android Studio！
+项目工程采用的IDE是Android Studio 0.9.0，并且Android SDK已升级至最新版本(Android SDK 5.0,Support Library 21.0.0，2014-11-12)，如果你是直接导入Android Studio，确保你的版本匹配，我们不能保证向上或在向下兼容（Google决定的！），需要检查你本地的gradle版本。如果你要导入到eclipse，有可能某些第三库无法试用，建议试用Android Studio！
 
 ## 预览效果
 
-暂无
+![App](http://tutorchen.qiniudn.com/android005.gif)
 
 
 ## 项目用到的开源库
@@ -41,6 +41,7 @@ Mac OS X 10.9.2 + Android Studio(0.6.1) + Gradle(1.10)
 
 * [Volley](https://android.googlesource.com/platform/frameworks/volley) Google I/O 2013推出的官方网络请求库，请求快速，使用方便，易于扩展，而且支持图片异步加载。
 
+* [LDrawer](https://github.com/ikimuhendis/LDrawer) Material Design 形式的展开折叠Icon
 
 License
 ============

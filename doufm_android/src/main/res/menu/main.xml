@@ -1,7 +1,7 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    tools:context="info.doufm.android.Activity.MainActivity" >
+    tools:context="info.doufm.android.Activity.OldMainActivity" >
     
     <item android:id="@+id/action_app_about"
         android:title="关于Doufm"

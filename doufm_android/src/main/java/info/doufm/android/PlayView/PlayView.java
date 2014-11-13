@@ -9,6 +9,8 @@ import android.graphics.Matrix;
 import android.graphics.Paint;
 import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
+import android.graphics.PorterDuffXfermode;
+import android.graphics.Rect;
 import android.media.ThumbnailUtils;
 import android.os.ConditionVariable;
 import android.view.SurfaceHolder;
@@ -27,13 +29,14 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
     private Bitmap discBgBmp;
     private Bitmap bgBmp;
     private Bitmap mLcBmp;
+    private Bitmap mCDBitmap;
 
     private int mWidth;
     private int mHeight;
 
     private int cycleTime = 8000;
     private Matrix mDiscMatrix;
-    private Matrix mLcMatrix;
+    private Matrix mCDCoverMatrix;
 
     private int interval = 10;
     private float everyRotate = (360) / ((float) cycleTime / interval);
@@ -44,6 +47,9 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
 
     private Thread mFrameThread;
     private ConditionVariable mVariable = new ConditionVariable();
+    private int mdiscBmpWidth;
+    private int mdiscBmpHeight;
+    private boolean flag = true;
 
     public PlayView(Context context) {
         super(context);
@@ -55,9 +61,12 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
 
     private void initBmp() {
         needleBmp = BitmapFactory.decodeResource(getResources(), R.drawable.icn_play_needle);
-        discBmp = BitmapFactory.decodeResource(getResources(),R.drawable.icn_play_disc);
-        discBgBmp = BitmapFactory.decodeResource(getResources(),R.drawable.play_disc_bg);
+        discBmp = BitmapFactory.decodeResource(getResources(), R.drawable.icn_play_disc);
+        discBgBmp = BitmapFactory.decodeResource(getResources(), R.drawable.play_disc_bg);
         bgBmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bg);
+        mdiscBmpWidth = discBmp.getWidth();
+        mdiscBmpHeight = discBmp.getHeight();
+        mCDBitmap = getCroppedBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.fm), Math.min((mdiscBmpWidth - 200) / 2, (mdiscBmpHeight - 200) / 2));
     }
 
     private void releaseBmp() {
@@ -70,7 +79,7 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
         if (discBgBmp != null) {
             discBgBmp.recycle();
         }
-        if(mLcBmp != null){
+        if (mLcBmp != null) {
             mLcBmp.recycle();
         }
     }
@@ -82,65 +91,40 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
     private void doDraw(Canvas c) {
 
         // 去锯齿
-        c.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG
-                | Paint.FILTER_BITMAP_FLAG));
+        c.setDrawFilter(new PaintFlagsDrawFilter(0, Paint.ANTI_ALIAS_FLAG | Paint.FILTER_BITMAP_FLAG));
 
         int cx = mWidth / 2;
         int cy = mHeight / 2;
         drawBmp(c, discBgBmp, cx, cy, null);
-
         if(mDiscMatrix == null){
             mDiscMatrix = new Matrix();
-            mDiscMatrix.setTranslate(mWidth / 2 - discBmp.getWidth() / 2f,
-                    mHeight / 2 - discBmp.getHeight() / 2f);
+            mDiscMatrix.setTranslate(cx - discBmp.getWidth() / 2,cy - discBmp.getHeight() / 2);
         }
 
-        if(mLcMatrix == null){
-            mLcMatrix = new Matrix();
-            mLcMatrix.setTranslate(mWidth / 2 - (discBmp.getWidth() - 60) / 2f,
-                    mHeight / 2 - (discBmp.getHeight() - 60) / 2f);
+        if(mCDCoverMatrix == null){
+            mCDCoverMatrix = new Matrix();
+            mCDCoverMatrix.setTranslate (cx - mCDBitmap.getWidth() / 2,cy - mCDBitmap.getHeight() / 2);
         }
 
         if (mIsPlay) {
             if (mRotates >= 360) {
                 mRotates = 0;
                 mDiscMatrix.reset();
-                mLcMatrix.reset();
-                mDiscMatrix.setTranslate(mWidth / 2 - discBmp.getWidth() / 2f,
-                        mHeight / 2 - discBmp.getHeight() / 2f);
-                mLcMatrix.setTranslate(mWidth / 2 - (discBmp.getWidth() - 60) / 2f,
-                        mHeight / 2 - (discBmp.getHeight() - 60) / 2f);
+                mCDCoverMatrix.reset();
+                mDiscMatrix.setTranslate(cx - discBmp.getWidth() / 2,cy - discBmp.getHeight() / 2);
+                mCDCoverMatrix.setTranslate (cx - mCDBitmap.getWidth() / 2,cy - mCDBitmap.getHeight() / 2);
             }
+
             mDiscMatrix.postRotate(everyRotate, cx, cy);
-            mLcMatrix.postRotate(everyRotate, cx, cy);
+            mCDCoverMatrix.postRotate(everyRotate, cx, cy);
             mRotates += everyRotate;
         }
 
-        if(mLcBmp == null){
-            int w = discBmp.getWidth() - 60;
-            int h = discBmp.getHeight() - 60;
-            mLcBmp = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_4444);
-            Canvas c2 = new Canvas(mLcBmp);
-            Paint p = new Paint();
-
-            c2.drawColor(Color.TRANSPARENT, PorterDuff.Mode.CLEAR);
-
-            p.setColor(Color.LTGRAY);
-            p.setStyle(Paint.Style.FILL);
-            c2.drawCircle(w / 2, h / 2, Math.min(w, h) / 2, p);
-
-            p.setColor(Color.DKGRAY);
-            p.setStrokeWidth(10f);
-            c2.drawLine(0, h / 2, w, h / 2, p);
-            c2.drawLine(w / 2, 0, w / 2, h, p);
-
-        }
-
-        c.drawBitmap(mLcBmp, mLcMatrix, null);
+        c.drawBitmap(mCDBitmap, mCDCoverMatrix, null);
         c.drawBitmap(discBmp, mDiscMatrix, null);
 
         int left = mWidth / 2 - needleBmp.getWidth();
-        int top = 30;
+        int top = 40;
         c.drawBitmap(needleBmp, left, top, null);
 
     }
@@ -158,6 +142,7 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
         if (mFrameThread != null) {
             mRun = false;
             mIsPlay = false;
+            flag = true;
             mFrameThread = null;
         }
     }
@@ -169,10 +154,13 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
 
     @Override
     public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
-        mWidth = width;
-        mHeight = height;
+        if (flag){
+            mWidth = width;
+            mHeight = height;
+            flag = false;
+        }
 
-        if(bgBmp.getWidth() != mWidth || bgBmp.getHeight() != mHeight){
+        if (bgBmp.getWidth() != mWidth || bgBmp.getHeight() != mHeight) {
             bgBmp = ThumbnailUtils.extractThumbnail(bgBmp, width, height);
         }
 
@@ -188,12 +176,16 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
         stop();
     }
 
+    public void SetCDImage(Bitmap bitmap) {
+        mCDBitmap = getCroppedBitmap(bitmap, Math.min((mdiscBmpWidth - 200) / 2, (mdiscBmpHeight - 200) / 2));
+    }
+
     @Override
     public void run() {
         mRun = true;
         Canvas c;
         while (mRun) {
-            if(!mIsPlay){
+            if (!mIsPlay) {
                 pause();
             }
             c = getHolder().lockCanvas();
@@ -211,4 +203,29 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
         }
     }
 
+    public static Bitmap getCroppedBitmap(Bitmap bmp, int radius) {
+        Bitmap scaledSrcBmp;
+        int diameter = radius * 2;
+        if (bmp.getWidth() != diameter || bmp.getHeight() != diameter)
+            scaledSrcBmp = Bitmap.createScaledBitmap(bmp, diameter, diameter, false);
+        else
+            scaledSrcBmp = bmp;
+        Bitmap output = Bitmap.createBitmap(scaledSrcBmp.getWidth(), scaledSrcBmp.getHeight(),
+                Bitmap.Config.ARGB_8888);
+        Canvas canvas = new Canvas(output);
+
+        final Paint paint = new Paint();
+        final Rect rect = new Rect(0, 0, scaledSrcBmp.getWidth(), scaledSrcBmp.getHeight());
+
+        paint.setAntiAlias(true);
+        paint.setFilterBitmap(true);
+        paint.setDither(true);
+        canvas.drawARGB(0, 0, 0, 0);
+        paint.setColor(Color.parseColor("#BAB399"));
+        canvas.drawCircle(scaledSrcBmp.getWidth() / 2,
+                scaledSrcBmp.getHeight() / 2, scaledSrcBmp.getWidth() / 2, paint);
+        paint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.SRC_IN));
+        canvas.drawBitmap(scaledSrcBmp, rect, rect, paint);
+        return output;
+    }
 }

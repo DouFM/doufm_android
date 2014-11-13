@@ -38,8 +38,7 @@ public class SplashActivity extends Activity {
                 } catch (InterruptedException e) {
                     e.printStackTrace();
                 }
-                Intent intent = new Intent(SplashActivity.this, SampleActivity.class);
-                intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+                Intent intent = new Intent(SplashActivity.this, NewMainActivity.class);
                 startActivity(intent);
                 SplashActivity.this.finish();
             }

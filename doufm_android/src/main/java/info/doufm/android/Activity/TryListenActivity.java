@@ -1,40 +1,51 @@
 package info.doufm.android.Activity;
 
 import android.app.Activity;
+import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.view.Menu;
-import android.view.MenuItem;
+import android.widget.FrameLayout;
+import android.widget.FrameLayout.LayoutParams;
 
+import info.doufm.android.PlayView.PlayView;
 import info.doufm.android.R;
 
-public class TryListenActivity extends Activity {
+/**
+ * 网易云音乐播放器播放界面UI及简单媒体播放
+ * @author Lqh
+ */
+public class TryListenActivity extends Activity implements MediaPlayer.OnCompletionListener{
+
+    private FrameLayout mContainer;
+    private PlayView mPlayView;
+    private MediaPlayer mediaPlayer;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_try_listen);
+
+        mContainer = (FrameLayout) findViewById(R.id.try_media_player);
+        mPlayView = new PlayView(this);
+        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
+        mContainer.addView(mPlayView, lp);
+        mediaPlayer = MediaPlayer.create(this,R.raw.home);
+        mediaPlayer.start();
+        mPlayView.play();
     }
 
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_try_listen, menu);
-        return true;
+    public void onCompletion(MediaPlayer mp) {
+        mediaPlayer.start();
     }
 
     @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+    protected void onDestroy() {
+        super.onDestroy();
+        mediaPlayer.stop();
+        if (mediaPlayer != null){
+            mediaPlayer.release();
+            mediaPlayer = null;
         }
-
-        return super.onOptionsItemSelected(item);
     }
 }
