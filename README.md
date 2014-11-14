@@ -30,7 +30,7 @@ Mac OS X 10.9.2 + Android Studio(0.9.0) + Gradle(2.1)
 
 ## 预览效果
 
-![App](http://tutorchen.qiniudn.com/android005.gif)
+![App](http://tutorchen.qiniudn.com/android006.gif
 
 
 ## 项目用到的开源库
@@ -42,6 +42,8 @@ Mac OS X 10.9.2 + Android Studio(0.9.0) + Gradle(2.1)
 * [Volley](https://android.googlesource.com/platform/frameworks/volley) Google I/O 2013推出的官方网络请求库，请求快速，使用方便，易于扩展，而且支持图片异步加载。
 
 * [LDrawer](https://github.com/ikimuhendis/LDrawer) Material Design 形式的展开折叠Icon
+
+* [Sweet Alert Dialog](https://github.com/pedant/sweet-alert-dialog) Android版的SweetAlert，清新文艺，快意灵动的甜心弹框
 
 License
 ============
