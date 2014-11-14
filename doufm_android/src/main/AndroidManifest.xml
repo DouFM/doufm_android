@@ -33,7 +33,7 @@
             android:theme="@android:style/Theme.Dialog" >
         </activity>
         <activity
-            android:name=".Activity.NewMainActivity"
+            android:name=".Activity.MainActivity"
             android:label="@string/title_activity_sample" >
         </activity>
         <activity

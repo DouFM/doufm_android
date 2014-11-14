@@ -58,7 +58,7 @@ import info.doufm.android.PlayView.PlayView;
 import info.doufm.android.R;
 
 
-public class NewMainActivity extends Activity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
+public class MainActivity extends Activity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
 
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
@@ -181,7 +181,7 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_sample);
+        setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         ab = getActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
@@ -286,7 +286,7 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
                         mPlaylistInfoList.add(playlistInfo);
                     }
                     //生成播放列表菜单
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(NewMainActivity.this,
+                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
                             android.R.layout.simple_list_item_1, android.R.id.text1, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(adapter);
                     mDrawerList.setOnItemClickListener(mListLisener);
@@ -324,7 +324,7 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     }
 
     private void PlayRandomMusic(String playlist_key) {
-        progressDialog = ProgressDialog.show(NewMainActivity.this, "提示", "加载中...", true, false);
+        progressDialog = ProgressDialog.show(MainActivity.this, "提示", "加载中...", true, false);
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -368,7 +368,7 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            Toast.makeText(NewMainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
+            Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
         }
     };
 
