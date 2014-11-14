@@ -30,6 +30,7 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
     private Bitmap bgBmp;
     private Bitmap mLcBmp;
     private Bitmap mCDBitmap;
+    private String mBgColor = "#ff6e40";
 
     private int mWidth;
     private int mHeight;
@@ -180,6 +181,10 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
         mCDBitmap = getCroppedBitmap(bitmap, Math.min((mdiscBmpWidth - 200) / 2, (mdiscBmpHeight - 200) / 2));
     }
 
+    public void SetBgColor(String color){
+        mBgColor = color;
+    }
+
     @Override
     public void run() {
         mRun = true;
@@ -192,7 +197,7 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
             if (c == null) {
                 continue;
             }
-            c.drawColor(Color.parseColor("#ff6e40"));
+            c.drawColor(Color.parseColor(mBgColor));
             doDraw(c);
             getHolder().unlockCanvasAndPost(c);
             try {

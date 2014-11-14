@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="info.doufm.android.Activity.NewMainActivity">
     <item
+        android:id="@+id/switch_theme"
+        android:title="切换主题"
+        android:orderInCategory="100"
+        app:showAsAction="never" />
+    <item
         android:id="@+id/app_about_team"
         android:title="@string/app_about"
         android:orderInCategory="100"

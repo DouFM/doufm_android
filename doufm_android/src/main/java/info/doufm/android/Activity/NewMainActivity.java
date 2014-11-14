@@ -7,6 +7,8 @@ import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
+import android.graphics.Color;
+import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
@@ -23,6 +25,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -63,6 +66,12 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     private DrawerArrowDrawable drawerArrow;
     private boolean drawerArrowColor;
 
+    private String[] mActionBarColors = {"#607d8b", "#ff5722", "#795548", "#9e9e9e", "#ffcc107", "#259b24", "#8bc34a", "#03a9f4", "#00bcd4", "#009688", "#673ab7", "#3f51b5", "#5677fc", "#e51c23", "#e91e63", "#9c27b0", "#607d8b"};
+    private String[] mBackgroundColors = {"#90a4ae", "#ff8a65", "#a1887f", "##e0e0e0", "#ffd54f", "#42bd41", "#aed581", "#4fc3f7", "#b2ebf2", "#4db6ac", "#9575cd", "#7986cb", "#91a7ff", "#f9bdbb", "#f06292", "#ba68c8", "#90a4ae"};
+    private String[] mCotrolBackgroundColors = {"#cfd8dc", "#ffccbc", "#d7ccc8", "#f5f5f5", "#ffecb3", "#a3e9a4", "#dcedc8", "#b3e5fc", "#b2ebf2", "#b2dfdb", "#d1c4e9", "#c5cae9", "#d0d9ff", "#f9bdbb", "#f8bbd0", "#e1bee7", "#cfd8dc"};
+    private int colorIndex = 0;
+    private int colorNum;
+
     private ListListener mListLisener;
     private FrameLayout mContainer;
     private Button btnPlay;
@@ -86,6 +95,8 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     private int mPlayListNum = 0;
     private boolean isFirstLoad = true;
 
+    private ActionBar ab;
+
     private String mPreMusicURL;
     //音乐文件和封面路径
     private String MusicURL = "";
@@ -99,6 +110,8 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
     //Volley请求
     private RequestQueue mRequstQueue;
+
+    private RelativeLayout rtBottom;
 
     private String mMusicTitle;
     //定义Handler对象
@@ -126,7 +139,7 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
         }
     };
 
-    private class ListListener implements AdapterView.OnItemClickListener{
+    private class ListListener implements AdapterView.OnItemClickListener {
 
         @Override
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
@@ -147,11 +160,12 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_sample);
-        setRequestedOrientation (ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        ActionBar ab = getActionBar();
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        ab = getActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
+        rtBottom = (RelativeLayout) findViewById(R.id.bottom);
         ab.setHomeButtonEnabled(true);
-
+        colorNum = mBackgroundColors.length;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.navdrawer);
         mDrawerList.setVerticalScrollBarEnabled(false);
@@ -224,7 +238,7 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     protected void onResume() {
         super.onResume();
         mListLisener = new ListListener();
-        if (isFirstLoad){
+        if (isFirstLoad) {
             GetMusicList();
             isFirstLoad = false;
         }
@@ -344,11 +358,22 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
             } else {
                 mDrawerLayout.openDrawer(mDrawerList);
             }
-        } else if(item.getItemId() == R.id.app_about_team){
+        } else if (item.getItemId() == R.id.app_about_team) {
             new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
                     .setTitleText("DouFM - Android客户端")
                     .setContentText(getResources().getString(R.string.title_activity_about))
                     .show();
+        } else if (item.getItemId() == R.id.switch_theme) {
+            colorIndex = (int) (Math.random() * colorNum);
+            if (colorIndex == colorNum) {
+                colorIndex--;
+            }
+            if (colorIndex < 0) {
+                colorIndex = 0;
+            }
+            ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(mActionBarColors[colorIndex])));
+            mPlayView.SetBgColor(mBackgroundColors[colorIndex]);
+            rtBottom.setBackgroundColor(Color.parseColor(mCotrolBackgroundColors[colorIndex]));
         }
 
         return super.onOptionsItemSelected(item);
