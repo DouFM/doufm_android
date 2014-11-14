@@ -30,7 +30,7 @@ Mac OS X 10.9.2 + Android Studio(0.9.0) + Gradle(2.1)
 
 ## 预览效果
 
-![App](http://tutorchen.qiniudn.com/android006.gif
+![App](http://tutorchen.qiniudn.com/android006.gif）
 
 
 ## 项目用到的开源库
