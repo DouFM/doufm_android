@@ -66,19 +66,41 @@ public class NewMainActivity extends Activity implements MediaPlayer.OnCompletio
     private DrawerArrowDrawable drawerArrow;
     private boolean drawerArrowColor;
 
-    private String[] mActionBarColors = {"#607d8b", "#ff5722", "#795548", "#9e9e9e", "#ffcc107", "#259b24", "#8bc34a", "#03a9f4", "#00bcd4", "#009688", "#673ab7", "#3f51b5", "#5677fc", "#e51c23", "#e91e63", "#9c27b0", "#607d8b"};
-    private String[] mBackgroundColors = {"#90a4ae", "#ff8a65", "#a1887f", "##e0e0e0", "#ffd54f", "#42bd41", "#aed581", "#4fc3f7", "#b2ebf2", "#4db6ac", "#9575cd", "#7986cb", "#91a7ff", "#f9bdbb", "#f06292", "#ba68c8", "#90a4ae"};
-    private String[] mCotrolBackgroundColors = {"#cfd8dc", "#ffccbc", "#d7ccc8", "#f5f5f5", "#ffecb3", "#a3e9a4", "#dcedc8", "#b3e5fc", "#b2ebf2", "#b2dfdb", "#d1c4e9", "#c5cae9", "#d0d9ff", "#f9bdbb", "#f8bbd0", "#e1bee7", "#cfd8dc"};
+    //Meterial Design主题(500 300 100)
+    private String[] mActionBarColors = {"#607d8b", "#ff5722", "#795548",
+            "#ffc107","#ff9800","#259b24",
+            "#8bc34a","#cddc39","#03a9f4",
+            "#00bcd4", "#009688", "#673ab7",
+            "#673ab7", "#3f51b5", "#5677fc",
+            "#e51c23", "#e91e63", "#9c27b0",
+            "#607d8b"};
+    private String[] mBackgroundColors = {"#90a4ae", "#ff8a65", "#a1887f",
+            "#ffd54f","#ffb74d","#42bd41",
+            "#aed581", "#dce775","#4fc3f7",
+            "#4dd0e1", "#4db6ac", "#9575cd",
+            "#9575cd", "#7986cb", "#91a7ff",
+            "#f36c60", "#f06292", "#ba68c8",
+            "#90a4ae"};
+    private String[] mCotrolBackgroundColors = {"#cfd8dc", "#ffccbc", "#d7ccc8",
+            "#ffecb3","#ffe0b2" ,"#a3e9a4",
+            "#dcedc8","#f0f4c3", "#b3e5fc",
+            "#b2ebf2", "#b2dfdb", "#d1c4e9",
+            "#dec4e9", "#c5cae9", "#d0d9ff",
+            "#f9bdbb", "#f8bbd0", "#e1bee7",
+            "#cfd8dc"};
     private int colorIndex = 0;
     private int colorNum;
 
+    //菜单列表监听器
     private ListListener mListLisener;
+
+    //播放界面相关
     private FrameLayout mContainer;
     private Button btnPlay;
     private Button btnNextSong;
     private MySeekBar seekBar;
-
     private PlayView mPlayView;
+
     //加载用户体验
     private ProgressDialog progressDialog;
 

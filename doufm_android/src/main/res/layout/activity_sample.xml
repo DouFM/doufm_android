@@ -20,11 +20,11 @@
             android:singleLine="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:textSize="25dp"
-            android:textColor="#FFFFFFFF"
+            android:textSize="20dp"
+            android:textColor="#eceff1"
             android:layout_above="@id/bottom"
             android:layout_centerHorizontal="true"
-            android:layout_margin="16dp"
+            android:layout_margin="12dp"
             />
 
 
