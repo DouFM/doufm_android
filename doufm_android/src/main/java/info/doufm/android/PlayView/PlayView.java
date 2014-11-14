@@ -11,7 +11,6 @@ import android.graphics.PaintFlagsDrawFilter;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
-import android.media.ThumbnailUtils;
 import android.os.ConditionVariable;
 import android.view.SurfaceHolder;
 import android.view.SurfaceHolder.Callback;
@@ -27,7 +26,6 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
     private Bitmap needleBmp;
     private Bitmap discBmp;
     private Bitmap discBgBmp;
-    private Bitmap bgBmp;
     private Bitmap mLcBmp;
     private Bitmap mCDBitmap;
     private String mBgColor = "#ff6e40";
@@ -64,7 +62,6 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
         needleBmp = BitmapFactory.decodeResource(getResources(), R.drawable.icn_play_needle);
         discBmp = BitmapFactory.decodeResource(getResources(), R.drawable.icn_play_disc);
         discBgBmp = BitmapFactory.decodeResource(getResources(), R.drawable.play_disc_bg);
-        bgBmp = BitmapFactory.decodeResource(getResources(), R.drawable.ic_bg);
         mdiscBmpWidth = discBmp.getWidth();
         mdiscBmpHeight = discBmp.getHeight();
         mCDBitmap = getCroppedBitmap(BitmapFactory.decodeResource(getResources(), R.drawable.fm), Math.min((mdiscBmpWidth - 200) / 2, (mdiscBmpHeight - 200) / 2));
@@ -159,10 +156,6 @@ public class PlayView extends SurfaceView implements Callback, Runnable {
             mWidth = width;
             mHeight = height;
             flag = false;
-        }
-
-        if (bgBmp.getWidth() != mWidth || bgBmp.getHeight() != mHeight) {
-            bgBmp = ThumbnailUtils.extractThumbnail(bgBmp, width, height);
         }
 
         if (mFrameThread == null) {
