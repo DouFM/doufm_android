@@ -29,6 +29,7 @@ public class TryListenActivity extends Activity implements MediaPlayer.OnComplet
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mContainer.addView(mPlayView, lp);
         mediaPlayer = MediaPlayer.create(this,R.raw.home);
+        mediaPlayer.setLooping(true);
         mediaPlayer.start();
         mPlayView.play();
     }

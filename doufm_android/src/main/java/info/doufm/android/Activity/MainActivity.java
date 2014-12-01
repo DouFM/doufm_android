@@ -2,7 +2,6 @@ package info.doufm.android.Activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
-import android.app.ProgressDialog;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
@@ -68,22 +67,22 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     //Meterial Design主题(500 300 100)
     private String[] mActionBarColors = {"#607d8b", "#ff5722", "#795548",
-            "#ffc107","#ff9800","#259b24",
-            "#8bc34a","#cddc39","#03a9f4",
+            "#ffc107", "#ff9800", "#259b24",
+            "#8bc34a", "#cddc39", "#03a9f4",
             "#00bcd4", "#009688", "#673ab7",
             "#673ab7", "#3f51b5", "#5677fc",
             "#e51c23", "#e91e63", "#9c27b0",
             "#607d8b"};
     private String[] mBackgroundColors = {"#90a4ae", "#ff8a65", "#a1887f",
-            "#ffd54f","#ffb74d","#42bd41",
-            "#aed581", "#dce775","#4fc3f7",
+            "#ffd54f", "#ffb74d", "#42bd41",
+            "#aed581", "#dce775", "#4fc3f7",
             "#4dd0e1", "#4db6ac", "#9575cd",
             "#9575cd", "#7986cb", "#91a7ff",
             "#f36c60", "#f06292", "#ba68c8",
             "#90a4ae"};
     private String[] mCotrolBackgroundColors = {"#cfd8dc", "#ffccbc", "#d7ccc8",
-            "#ffecb3","#ffe0b2" ,"#a3e9a4",
-            "#dcedc8","#f0f4c3", "#b3e5fc",
+            "#ffecb3", "#ffe0b2", "#a3e9a4",
+            "#dcedc8", "#f0f4c3", "#b3e5fc",
             "#b2ebf2", "#b2dfdb", "#d1c4e9",
             "#dec4e9", "#c5cae9", "#d0d9ff",
             "#f9bdbb", "#f8bbd0", "#e1bee7",
@@ -100,9 +99,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private Button btnNextSong;
     private MySeekBar seekBar;
     private PlayView mPlayView;
-
-    //加载用户体验
-    private ProgressDialog progressDialog;
 
     private boolean isLoadingSuccess = false;
     private int mMusicDuration;            //音乐总时间
@@ -142,7 +138,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         public void handleMessage(Message msg) {
             //处理消息
             if (msg.what == DISSMISS) {
-                progressDialog.dismiss();
+                btnNextSong.setEnabled(true);
+                btnPlay.setEnabled(true);
             }
             if (msg.what == UPDATE_TIME) {
                 //更新音乐播放状态
@@ -252,7 +249,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     @Override
     protected void onStart() {
         super.onStart();
-        //PhoneIncomingListener();
+        PhoneIncomingListener();
 
     }
 
@@ -313,6 +310,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     }
 
     private void initPlayer() {
+        btnNextSong.setEnabled(false);
+        btnPlay.setEnabled(false);
         mMainMediaPlayer = new MediaPlayer(); //创建媒体播放器
         mMainMediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC); //设置媒体流类型
         mMainMediaPlayer.setOnCompletionListener(this);
@@ -324,7 +323,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     }
 
     private void PlayRandomMusic(String playlist_key) {
-        progressDialog = ProgressDialog.show(MainActivity.this, "提示", "加载中...", true, false);
+        btnNextSong.setEnabled(false);
+        btnPlay.setEnabled(false);
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -365,10 +365,25 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         mRequstQueue.add(imageRequest);
     }
 
+    private boolean fisrtErrorFlag = true;
+
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            Toast.makeText(MainActivity.this, "网络异常,无法加载在线音乐,请检查网络配置!", Toast.LENGTH_SHORT).show();
+            timerTask.cancel();
+            if (fisrtErrorFlag) {
+                fisrtErrorFlag = false;
+                new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
+                        .setTitleText("网络连接出错啦...")
+                        .setConfirmText("退出")
+                        .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                finish();
+                            }
+                        })
+                        .show();
+            }
         }
     };
 
@@ -425,24 +440,38 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             mMainMediaPlayer.release();
             mMainMediaPlayer = null;
         }
-        Toast.makeText(this, "播放器异常!", Toast.LENGTH_SHORT).show();
+        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("网络连接出错啦...")
+                .setCancelText("等待")
+                .setConfirmText("退出")
+                .showCancelButton(true)
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        return;
+                    }
+                })
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        finish();
+                    }
+                })
+                .show();
         return true;
     }
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-        if (percent < 100) {
-            if (progressDialog.isShowing()) {
-                progressDialog.dismiss();
-            }
-        }
+
     }
 
     @Override
     public void onPrepared(MediaPlayer mp) {
         mMainMediaPlayer.start();
         mPlayView.play();
-        progressDialog.dismiss();
+        btnNextSong.setEnabled(true);
+        btnPlay.setEnabled(true);
     }
 
     @Override
@@ -485,21 +514,29 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     }
 
     private int mBackKeyPressedCount = 1;
+    private long exitTime = 0;
 
     @Override
     public void onBackPressed() {
-        if (mBackKeyPressedCount == 2) {
-            mRequstQueue.cancelAll(this);
-            if (mMainMediaPlayer != null) {
-                mMainMediaPlayer.stop();
-                mMainMediaPlayer.release();
-                mMainMediaPlayer = null;
-            }
-            finish();
+        if ((System.currentTimeMillis() - exitTime) > 2000) {
+            Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            exitTime = System.currentTimeMillis();
         } else {
-            mBackKeyPressedCount++;
-            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+            finish();
+            System.exit(0);
         }
+//        if (mBackKeyPressedCount == 2) {
+//            mRequstQueue.cancelAll(this);
+//            if (mMainMediaPlayer != null) {
+//                mMainMediaPlayer.stop();
+//                mMainMediaPlayer.release();
+//                mMainMediaPlayer = null;
+//            }
+//            finish();
+//        } else {
+//            mBackKeyPressedCount++;
+//            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
+//        }
     }
 
     private TimerTask timerTask = new TimerTask() {

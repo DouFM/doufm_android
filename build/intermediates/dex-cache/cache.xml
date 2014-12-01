@@ -57,5 +57,12 @@
         sha1="1609e6d42d0480b0f4188e2c29f75388fa12a8f0">
         <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\internal_impl-21.0.0-b2055d0c5a78843c09fa933976690e03bbd66659.jar" />
     </item>
+    <item
+        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.jpardogo.googleprogressbar\library\1.1.0\classes.jar"
+        jumboMode="false"
+        revision="20.0.0"
+        sha1="f44c62d1f53c6e217b565981f84deced5343504f">
+        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-a9e7b33878fe71adabe2d73b3fee746df21f1641.jar" />
+    </item>
 
 </items>

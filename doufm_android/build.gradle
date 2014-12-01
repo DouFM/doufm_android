@@ -2,7 +2,7 @@ apply plugin: 'android'
 
 android {
     compileSdkVersion 21
-    buildToolsVersion "20.0.0"
+    buildToolsVersion "21.0.0"
 
     defaultConfig {
         minSdkVersion 14
@@ -12,7 +12,6 @@ android {
     }
     buildTypes {
         release {
-            runProguard false
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.txt'
         }
     }
@@ -23,5 +22,4 @@ dependencies {
     compile 'com.android.support:appcompat-v7:21.+'
     compile 'com.ikimuhendis:ldrawer:0.1'
     compile 'cn.pedant.sweetalert:library:1.1'
-    compile 'com.jpardogo.googleprogressbar:library:1.1.0'
 }

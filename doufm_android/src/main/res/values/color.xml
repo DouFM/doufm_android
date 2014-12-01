@@ -4,7 +4,6 @@
     <color name="drawer_arrow_second_color">#303f9f</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#CCCCCC</color>
-    <color name="red">#FF0033</color>
     <color name="black">#000000</color>
     <color name="none">#00000000</color>
     <color name="light_gray">#8f8d8c</color>
@@ -12,8 +11,12 @@
     <color name="light_blue">#b3e1f1</color>
     <color name="dark_gray">#4a454a</color>
     <color name="light_gray2">#e1e4e7</color>
-    <color name="yellow">#ffd710</color>
 
     <color name="bg">#ff6e40</color>
     <color name="play_bg">#ffccbc</color>
+
+    <color name="red">#FFC93437</color>
+    <color name="blue">#FF375BF1</color>
+    <color name="yellow">#FFF7D23E</color>
+    <color name="green">#FF34A350</color>
 </resources>

@@ -14,18 +14,7 @@
         android:layout_height="wrap_content">
 
 
-        <TextView
-            android:id="@+id/MusicTitle"
-            android:ellipsize = "end"
-            android:singleLine="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:textColor="#eceff1"
-            android:layout_above="@id/bottom"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="12dp"
-            />
+
 
 
 
@@ -62,6 +51,18 @@
                 android:background="@drawable/bg_play_next"
                 android:layout_centerVertical="true" />
         </RelativeLayout>
+        <TextView
+            android:id="@+id/MusicTitle"
+            android:ellipsize = "end"
+            android:singleLine="true"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textSize="20dp"
+            android:textColor="#eceff1"
+            android:layout_above="@id/bottom"
+            android:layout_centerHorizontal="true"
+            android:layout_margin="12dp"
+            />
     </RelativeLayout>
 
     <!-- The navigation drawer -->
