@@ -16,6 +16,7 @@ import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -59,6 +60,7 @@ import info.doufm.android.R;
 
 public class MainActivity extends Activity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
 
+    private static final String TAG = "MainActivity";
     private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
@@ -122,6 +124,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private TextView tvMusicTitle;
 
     private boolean isPlay = false;
+    //来电标志:只当正在播放的情况下有来电时置为true
+    private boolean phoneCome = false;
     //播放器
     private MediaPlayer mMainMediaPlayer;
 
@@ -170,6 +174,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     e.printStackTrace();
                 }
                 mPlayListNum = position;
+                mPlayView.pause();
                 PlayRandomMusic(mPlaylistInfoList.get(position).getKey());
             }
         }
@@ -261,9 +266,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             GetMusicList();
             isFirstLoad = false;
         }
-        if (isPlay = false && mMainMediaPlayer != null) {
+/*        if (isPlay = false && mMainMediaPlayer != null) {
             mMainMediaPlayer.start();
-        }
+        }*/
+
     }
 
     private void GetMusicList() {
@@ -500,13 +506,19 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     if (isPlay) {
                         mMainMediaPlayer.pause();
                         isPlay = false;
+                        phoneCome = true;
                     }
                     break;
                 case TelephonyManager.CALL_STATE_IDLE:
                     //通话结束
-                    if (isPlay == false && mMainMediaPlayer != null) {
+                    if (phoneCome && mMainMediaPlayer != null) {
                         mMainMediaPlayer.start();
                         isPlay = true;
+                        phoneCome = false;
+                    }
+                    //每次切回MainActivity执行
+                    if(isPlay && mPlayView != null){
+                        mPlayView.play();
                     }
                     break;
             }
@@ -542,11 +554,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private TimerTask timerTask = new TimerTask() {
         @Override
         public void run() {
+
             if (mMainMediaPlayer == null) {
                 return;
             }
             if (mMainMediaPlayer.isPlaying()) {
                 //处理播放
+                //Log.d(TAG , "TimerTask run");
                 Message msg = new Message();
                 msg.what = UPDATE_TIME;
                 handler.sendMessage(msg);
