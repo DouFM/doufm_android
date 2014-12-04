@@ -168,14 +168,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (isLoadingSuccess) {
                 mDrawerLayout.closeDrawers();
-                try {
+/*                try {
                     Thread.sleep(500);
                 } catch (InterruptedException e) {
                     e.printStackTrace();
-                }
+                }*/
                 mPlayListNum = position;
-                mPlayView.pause();
-                PlayRandomMusic(mPlaylistInfoList.get(position).getKey());
+                //mPlayView.pause();
+                playRandomMusic(mPlaylistInfoList.get(position).getKey());
             }
         }
     }
@@ -194,7 +194,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         mDrawerList = (ListView) findViewById(R.id.navdrawer);
         mDrawerList.setVerticalScrollBarEnabled(false);
         tvMusicTitle = (TextView) findViewById(R.id.MusicTitle);
-
         drawerArrow = new DrawerArrowDrawable(this) {
             @Override
             public boolean isLayoutRtl() {
@@ -243,8 +242,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
         btnNextSong.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
-                mPlayView.pause();
-                PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+                //Log.i(TAG,"after click:"+System.currentTimeMillis());
+                playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
             }
         });
 
@@ -263,7 +262,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         super.onResume();
         mListLisener = new ListListener();
         if (isFirstLoad) {
-            GetMusicList();
+            getMusicList();
             isFirstLoad = false;
         }
 /*        if (isPlay = false && mMainMediaPlayer != null) {
@@ -272,7 +271,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     }
 
-    private void GetMusicList() {
+    private void getMusicList() {
         JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
@@ -325,12 +324,16 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         mMainMediaPlayer.setOnBufferingUpdateListener(this);
         mMainMediaPlayer.setOnPreparedListener(this);
         mTimer.schedule(timerTask, 0, 1000);
-        PlayRandomMusic(mPlaylistInfoList.get(0).getKey());
+        playRandomMusic(mPlaylistInfoList.get(0).getKey());
     }
 
-    private void PlayRandomMusic(String playlist_key) {
+    private void playRandomMusic(String playlist_key) {
         btnNextSong.setEnabled(false);
         btnPlay.setEnabled(false);
+        mPlayView.pause();
+        //切换歌曲时立即停止正在播放的歌曲
+        mMainMediaPlayer.reset();
+        isPlay = false;
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
@@ -341,14 +344,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     jo = jsonArray.getJSONObject(0);
                     MusicURL = "http://doufm.info" + jo.getString("audio");
                     CoverURL = "http://doufm.info" + jo.getString("cover");
-                    GetCoverImageRequest(CoverURL);
                     mMusicTitle = jo.getString("title");
-                    tvMusicTitle.setText(mMusicTitle);
+                    getCoverImageRequest(CoverURL);
                     mPreMusicURL = MusicURL;
-                    mMusicTitle = jo.getString("title");
-                    mMainMediaPlayer.reset();
+                    //Log.i(TAG,"before setSource:"+System.currentTimeMillis());
                     mMainMediaPlayer.setDataSource(MusicURL); //这种url路径
-                    mMainMediaPlayer.prepare(); //prepare自动播放
+                    mMainMediaPlayer.prepareAsync(); //prepare自动播放
                     isPlay = true;
                     btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
                 } catch (JSONException e) {
@@ -359,13 +360,17 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         }, errorListener);
         mRequstQueue.add(jaq);
+
     }
 
-    private void GetCoverImageRequest(String coverURL) {
+    private void getCoverImageRequest(String coverURL) {
         ImageRequest imageRequest = new ImageRequest(coverURL, new Response.Listener<Bitmap>() {
             @Override
             public void onResponse(Bitmap bitmap) {
+                //对齐新歌曲信息显示时间
                 mPlayView.SetCDImage(bitmap);
+                tvMusicTitle.setText(mMusicTitle);
+                seekBar.setProgress(0);
             }
         }, 0, 0, null, errorListener);
         mRequstQueue.add(imageRequest);
@@ -436,7 +441,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        PlayRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+        playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
     }
 
     @Override
@@ -474,6 +479,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        //Log.i(TAG,"before start:"+System.currentTimeMillis());
         mMainMediaPlayer.start();
         mPlayView.play();
         btnNextSong.setEnabled(true);
