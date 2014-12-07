@@ -1,4 +1,4 @@
-package info.doufm.android.PlayView;
+package info.doufm.android.playview;
 
 import android.content.Context;
 import android.graphics.Bitmap;

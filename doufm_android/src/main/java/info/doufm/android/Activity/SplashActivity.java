@@ -1,4 +1,4 @@
-package info.doufm.android.Activity;
+package info.doufm.android.activity;
 
 import android.app.Activity;
 import android.content.ComponentName;

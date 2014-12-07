@@ -1,4 +1,4 @@
-package info.doufm.android.Info;
+package info.doufm.android.info;
 
 /**
  * Created with Android Studio.

@@ -1,11 +1,9 @@
-package info.doufm.android.Activity;
+package info.doufm.android.activity;
 
 import android.app.ActionBar;
 import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
-import android.content.pm.PackageInfo;
-import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
@@ -13,13 +11,11 @@ import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
-import android.os.Environment;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -38,8 +34,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.JsonObjectRequest;
-import com.android.volley.toolbox.JsonRequest;
 import com.android.volley.toolbox.Volley;
 import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
 import com.ikimuhendis.ldrawer.DrawerArrowDrawable;
@@ -55,8 +49,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.security.MessageDigest;
-import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -65,11 +57,13 @@ import java.util.Timer;
 import java.util.TimerTask;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
-import info.doufm.android.Info.MusicInfo;
-import info.doufm.android.Info.PlaylistInfo;
-import info.doufm.android.PlayView.MySeekBar;
-import info.doufm.android.PlayView.PlayView;
 import info.doufm.android.R;
+import info.doufm.android.info.MusicInfo;
+import info.doufm.android.info.PlaylistInfo;
+import info.doufm.android.playview.MySeekBar;
+import info.doufm.android.playview.PlayView;
+import info.doufm.android.utils.CacheUtil;
+import info.doufm.android.utils.Constants;
 import libcore.io.DiskLruCache;
 
 
@@ -126,8 +120,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private boolean isLoadingSuccess = false;
     private int mMusicDuration;            //音乐总时间
     private int mMusicCurrDuration;        //当前播放时间
-    private static final int DISSMISS = 1000;
-    private static final int UPDATE_TIME = 2000;
+
 
     private Timer mTimer = new Timer();     //计时器
     private List<String> mLeftResideMenuItemTitleList = new ArrayList<String>();
@@ -162,11 +155,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         @Override
         public void handleMessage(Message msg) {
             //处理消息
-            if (msg.what == DISSMISS) {
+            if (msg.what == Constants.DISMISS) {
                 btnNextSong.setEnabled(true);
                 btnPlay.setEnabled(true);
             }
-            if (msg.what == UPDATE_TIME) {
+            if (msg.what == Constants.UPDATE_TIME) {
                 //更新音乐播放状态
                 if (isPlay) {
                     if (mMainMediaPlayer == null) {
@@ -196,7 +189,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                 }*/
                 mPlayListNum = position;
                 //mPlayView.pause();
-                if(mDownThread != null){
+                if (mDownThread != null) {
                     mDownThread.runFlag = false;
                     mDownThread = null;
                 }
@@ -270,13 +263,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         btnNextSong.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 //Log.i(TAG,"after click:"+System.currentTimeMillis());
-                if(hasNextCache){
+                if (hasNextCache) {
                     playMusicInfo = nextMusicInfo;
                     nextMusicInfo = new MusicInfo();
                     playCacheMusic();
                     hasNextCache = false;
-                } else{
-                    if(mDownThread != null){
+                } else {
+                    if (mDownThread != null) {
                         mDownThread.runFlag = false;
                         mDownThread = null;
                     }
@@ -288,11 +281,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         mRequstQueue = Volley.newRequestQueue(this);
 
         try {
-            cacheDir = getDiskCacheDir(this, "music");
+            cacheDir = CacheUtil.getDiskCacheDir(this, "music");
             if (!cacheDir.exists()) {
                 cacheDir.mkdirs();
             }
-            mDiskLruCache = DiskLruCache.open(cacheDir, getAppVersion(this), 1, 20 * 1024 * 1024);
+            mDiskLruCache = DiskLruCache.open(cacheDir, CacheUtil.getAppVersion(this), 1, CacheUtil.DISK_CACHE_SIZE);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -313,10 +306,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             getMusicList();
             isFirstLoad = false;
         }
-/*        if (isPlay = false && mMainMediaPlayer != null) {
-            mMainMediaPlayer.start();
-        }*/
-
     }
 
     private void getMusicList() {
@@ -388,10 +377,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             public void onResponse(JSONArray jsonArray) {
                 //请求随机播放音乐文件信息
                 try {
-/*                    MusicURL = "http://doufm.info" + jo[0].getString("audio");
-                    CoverURL = "http://doufm.info" + jo[0].getString("cover");
-                    mMusicTitle = jo[0].getString("title");
-                    mPreMusicURL = MusicURL;*/
                     //Log.i(TAG,"before setSource:"+System.currentTimeMillis());
                     JSONObject jo = jsonArray.getJSONObject(0);
                     playMusicInfo.setTitle(jo.getString("title"));
@@ -408,12 +393,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         }, errorListener);
         mRequstQueue.add(jaq);
-
     }
 
-    private void getNextMusicInfo(String playlist_key){
+    private void getNextMusicInfo(String playlist_key) {
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
-        JsonArrayRequest jar = new JsonArrayRequest(MUSIC_URL ,new Response.Listener<JSONArray>() {
+        JsonArrayRequest jar = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
                 try {
@@ -430,22 +414,22 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(MainActivity.this,"网络出错啦，请检查校园网设置",Toast.LENGTH_SHORT).show();
+                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置", Toast.LENGTH_SHORT).show();
             }
         });
         mRequstQueue.add(jar);
     }
 
-    private void playCacheMusic(){
+    private void playCacheMusic() {
         //切换歌曲时立即停止正在播放的歌曲
         mMainMediaPlayer.reset();
         isPlay = false;
         btnNextSong.setEnabled(false);
         btnPlay.setEnabled(false);
         mPlayView.pause();
-        String key = hashKeyForDisk(playMusicInfo.getAudio());
+        String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
         try {
-            mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key +".0");
+            mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
             mMainMediaPlayer.prepare();
         } catch (IOException e) {
             e.printStackTrace();
@@ -453,7 +437,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         getCoverImageRequest(playMusicInfo);
     }
 
-    private class DownloadMusicThread extends Thread{
+    private class DownloadMusicThread extends Thread {
 
         private String url;
         public boolean runFlag;
@@ -468,7 +452,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         public void run() {
             super.run();
             try {
-                String key = hashKeyForDisk(url);
+                String key = CacheUtil.hashKeyForDisk(url);
                 DiskLruCache.Editor editor = mDiskLruCache.edit(key);
                 if (editor != null) {
                     OutputStream outputStream = editor.newOutputStream(0);
@@ -485,7 +469,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         }
 
-        private boolean downloadUrlToStream(String urlString,OutputStream outputStream){
+        private boolean downloadUrlToStream(String urlString, OutputStream outputStream) {
             HttpURLConnection urlConnection = null;
             BufferedOutputStream out = null;
             BufferedInputStream in = null;
@@ -496,9 +480,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                 out = new BufferedOutputStream(outputStream, 8 * 1024);
                 int b;
                 while ((b = in.read()) != -1) {
-                    if(runFlag){
+                    if (runFlag) {
                         out.write(b);
-                    } else{
+                    } else {
                         return false;
                     }
                 }
@@ -522,56 +506,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
             return false;
         }
-    }
-
-
-
-    //for cache
-
-    public File getDiskCacheDir(Context context, String uniqueName) {
-        String cachePath;
-        if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
-                || !Environment.isExternalStorageRemovable()) {
-            cachePath = context.getExternalCacheDir().getPath();
-        } else {
-            cachePath = context.getCacheDir().getPath();
-        }
-        return new File(cachePath + File.separator + uniqueName);
-    }
-
-    public int getAppVersion(Context context) {
-        try {
-            PackageInfo info = context.getPackageManager().getPackageInfo(context.getPackageName(), 0);
-            return info.versionCode;
-        } catch (PackageManager.NameNotFoundException e) {
-            e.printStackTrace();
-        }
-        return 1;
-    }
-
-    //MD5编码
-    public String hashKeyForDisk(String key) {
-        String cacheKey;
-        try {
-            final MessageDigest mDigest = MessageDigest.getInstance("MD5");
-            mDigest.update(key.getBytes());
-            cacheKey = bytesToHexString(mDigest.digest());
-        } catch (NoSuchAlgorithmException e) {
-            cacheKey = String.valueOf(key.hashCode());
-        }
-        return cacheKey;
-    }
-
-    private String bytesToHexString(byte[] bytes) {
-        StringBuilder sb = new StringBuilder();
-        for (int i = 0; i < bytes.length; i++) {
-            String hex = Integer.toHexString(0xFF & bytes[i]);
-            if (hex.length() == 1) {
-                sb.append('0');
-            }
-            sb.append(hex);
-        }
-        return sb.toString();
     }
 
     private void getCoverImageRequest(final MusicInfo musicInfo) {
@@ -653,13 +587,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     @Override
     public void onCompletion(MediaPlayer mp) {
-        if(hasNextCache){
+        if (hasNextCache) {
             playMusicInfo = nextMusicInfo;
             nextMusicInfo = new MusicInfo();
             playCacheMusic();
             hasNextCache = false;
-        } else{
-            if(mDownThread != null){
+        } else {
+            if (mDownThread != null) {
                 mDownThread.runFlag = false;
                 mDownThread = null;
             }
@@ -697,9 +631,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     @Override
     public void onBufferingUpdate(MediaPlayer mp, int percent) {
-/*        if(percent == 100){
 
-        }*/
     }
 
     @Override
@@ -757,7 +689,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                         phoneCome = false;
                     }
                     //每次切回MainActivity执行
-                    if(isPlay && mPlayView != null){
+                    if (isPlay && mPlayView != null) {
                         mPlayView.play();
                     }
                     break;
@@ -777,18 +709,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             finish();
             System.exit(0);
         }
-//        if (mBackKeyPressedCount == 2) {
-//            mRequstQueue.cancelAll(this);
-//            if (mMainMediaPlayer != null) {
-//                mMainMediaPlayer.stop();
-//                mMainMediaPlayer.release();
-//                mMainMediaPlayer = null;
-//            }
-//            finish();
-//        } else {
-//            mBackKeyPressedCount++;
-//            Toast.makeText(this, "再按一次退出程序", Toast.LENGTH_SHORT).show();
-//        }
     }
 
     private TimerTask timerTask = new TimerTask() {
@@ -802,7 +722,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                 //处理播放
                 //Log.d(TAG , "TimerTask run");
                 Message msg = new Message();
-                msg.what = UPDATE_TIME;
+                msg.what = Constants.UPDATE_TIME;
                 handler.sendMessage(msg);
             }
         }
@@ -814,6 +734,4 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         getMenuInflater().inflate(R.menu.menu_sample, menu);
         return true;
     }
-
-
 }

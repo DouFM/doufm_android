@@ -1,4 +1,4 @@
-package info.doufm.android.Activity;
+package info.doufm.android.activity;
 
 import android.app.Activity;
 import android.media.MediaPlayer;
@@ -6,7 +6,7 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
-import info.doufm.android.PlayView.PlayView;
+import info.doufm.android.playview.PlayView;
 import info.doufm.android.R;
 
 /**
