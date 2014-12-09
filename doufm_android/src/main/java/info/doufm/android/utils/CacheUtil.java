@@ -74,6 +74,7 @@ public class CacheUtil {
      */
     public static File getDiskCacheDir(Context context, String uniqueName) {
         String cachePath;
+        //经测试,对于有两块SD卡的手机该处判断代码同样适用,但是默认使用的外部缓存目录是/storage/sdcard0/Android/data
         if (Environment.MEDIA_MOUNTED.equals(Environment.getExternalStorageState())
                 || !Environment.isExternalStorageRemovable()) {
             cachePath = context.getExternalCacheDir().getPath();
