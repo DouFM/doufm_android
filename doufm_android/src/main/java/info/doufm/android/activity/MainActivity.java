@@ -24,6 +24,7 @@ import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.FrameLayout;
 import android.widget.ListView;
+import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -84,6 +85,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private boolean hasNextCache = false;
     private DownloadMusicThread mDownThread;
     private int bufPercent = 0;
+    private boolean seekNow = false;
     private TextView tvTotalTime;
     private TextView tvCurTime;
     private boolean playLoopFlag = false;
@@ -177,7 +179,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             if (mMainMediaPlayer == null) {
                 return;
             }
-            if (mMainMediaPlayer.isPlaying()) {
+            if (mMainMediaPlayer.isPlaying() && !seekNow) {
                 //处理播放
                 Message msg = new Message();
                 msg.what = Constants.UPDATE_TIME;
@@ -262,6 +264,31 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         btnLove = (Button) findViewById(R.id.btn_love);
         seekBar = (MySeekBar) findViewById(R.id.seekbar);
 
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                seekBar.setProgress(progress);
+                mMusicCurrDuration = progress;
+                tvCurTime.setText(TimeFormat.msToMinAndS(progress));
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                seekNow = true;
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+                if (mMusicDuration != 0 && mMusicCurrDuration <= (mMusicDuration * bufPercent / 100)) {
+                    mMainMediaPlayer.seekTo(mMusicCurrDuration);
+                } else {
+                    mMusicCurrDuration = mMainMediaPlayer.getCurrentPosition();
+                    tvCurTime.setText(TimeFormat.msToMinAndS(mMusicCurrDuration));
+                    seekBar.setProgress(mMusicCurrDuration);
+                }
+                seekNow = false;
+            }
+        });
         mPlayView = new PlayView(this);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
         mContainer.addView(mPlayView, lp);

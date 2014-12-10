@@ -2,7 +2,6 @@ package info.doufm.android.playview;
 
 import android.content.Context;
 import android.util.AttributeSet;
-import android.view.MotionEvent;
 import android.widget.SeekBar;
 
 /**
@@ -21,7 +20,4 @@ public class MySeekBar extends SeekBar {
         super(context, attrs, defStyleAttr);
     }
 
-    public boolean onTouchEvent(MotionEvent event) {
-        return false ;
-    }
 }
