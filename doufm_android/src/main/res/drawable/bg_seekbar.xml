@@ -2,21 +2,41 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item android:id="@android:id/background">
-        <nine-patch android:src="@drawable/play_ctrl_barbg" />
+        <shape>
+            <corners android:radius="4.0dip" />
+            <gradient
+                android:angle="270.0"
+                android:centerColor="#FFFFFF"
+                android:centerY="0.75"
+                android:endColor="#FFFFFF"
+                android:startColor="#FFFFFF" />
+        </shape>
     </item>
 
     <item android:id="@android:id/secondaryProgress">
         <clip>
-            <scale
-                android:drawable="@drawable/play_ctrl_readybar"
-                android:scaleWidth="80%" />
+            <shape>
+                <corners android:radius="4.0dip" />
+                <gradient
+                    android:angle="270.0"
+                    android:centerColor="#31656565"
+                    android:centerY="0.75"
+                    android:endColor="#31000000"
+                    android:startColor="#31656565" />
+            </shape>
         </clip>
     </item>
     <item android:id="@android:id/progress">
         <clip>
-            <scale
-                android:drawable="@drawable/play_ctrl_currbar"
-                android:scaleWidth="80%" />
+            <shape>
+                <corners android:radius="4.0dip" />
+                <gradient
+                    android:angle="270.0"
+                    android:centerColor="#CD0000"
+                    android:centerY="0.75"
+                    android:endColor="#FFD10000"
+                    android:startColor="#FFD10000" />
+            </shape>
         </clip>
     </item>
 </layer-list>

@@ -1,6 +1,5 @@
-<android.support.v4.widget.DrawerLayout
+<android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
-    xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
@@ -10,59 +9,114 @@
         android:layout_height="match_parent"></FrameLayout>
 
     <RelativeLayout
-        android:layout_width="wrap_content"
+        android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-
-
-
-
-
         <RelativeLayout
-            android:id="@+id/bottom"
-            android:layout_width="wrap_content"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_alignParentBottom="true"
-            android:gravity="center_vertical"
-            android:background="@color/play_bg"
-            android:padding="5dp">
+            android:layout_above="@+id/progressLayout">
 
             <Button
-                android:id="@+id/btn_start_play"
-                android:layout_width="50dp"
-                android:layout_height="50dp"
-                android:background="@drawable/btn_start_play" />
+                android:id="@+id/btn_play_mode"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_marginLeft="20dp"
+                android:background="@drawable/bg_btn_shuffle" />
+
+            <Button
+                android:id="@+id/btn_love"
+                android:layout_width="30dp"
+                android:layout_height="30dp"
+                android:layout_alignParentEnd="true"
+                android:layout_alignParentRight="true"
+                android:layout_marginRight="20dp"
+                android:background="@drawable/bg_btn_love" />
+        </RelativeLayout>
+
+        <LinearLayout
+            android:id="@+id/progressLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_above="@+id/ctrlBtnLayout"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingEnd="5dp"
+            android:paddingStart="5dp"
+            android:paddingTop="5dp">
+
+            <TextView
+                android:id="@+id/curTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:text="00:00"
+                android:textColor="@color/gray"
+                android:textSize="12sp" />
 
             <info.doufm.android.playview.MySeekBar
                 android:id="@+id/seekbar"
                 style="@style/SeekBar"
-                android:layout_width="match_parent"
+                android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_toRightOf="@+id/btn_start_play"
-                android:layout_toLeftOf="@+id/btn_stop_play"
+                android:layout_weight="80"
                 android:paddingLeft="5dp"
                 android:paddingRight="5dp" />
 
+            <TextView
+                android:id="@+id/totalTimeText"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:gravity="end"
+                android:text="00:00"
+                android:textColor="@color/gray"
+                android:textSize="12sp" />
+        </LinearLayout>
+
+        <RelativeLayout
+            android:id="@+id/ctrlBtnLayout"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_alignParentBottom="true"
+            android:layout_marginBottom="10dp"
+            android:gravity="center_vertical"
+            android:padding="5dp">
+
             <Button
-                android:id="@+id/btn_stop_play"
+                android:id="@+id/btn_start_play"
+                android:layout_width="65dp"
+                android:layout_height="65dp"
+                android:layout_centerInParent="true"
+                android:background="@drawable/btn_start_play" />
+
+
+            <Button
+                android:id="@+id/btn_play_previous"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
+                android:layout_alignParentLeft="true"
+                android:layout_alignParentStart="true"
+                android:layout_centerVertical="true"
+                android:layout_marginLeft="55dp"
+                android:layout_marginStart="55dp"
+                android:background="@drawable/bg_play_previous" />
+
+            <Button
+                android:id="@+id/btn_play_next"
+                android:layout_width="50dp"
+                android:layout_height="50dp"
+                android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:background="@drawable/bg_play_next"
-                android:layout_centerVertical="true" />
+                android:layout_centerVertical="true"
+                android:layout_marginEnd="55dp"
+                android:layout_marginRight="55dp"
+                android:background="@drawable/bg_play_next" />
+
         </RelativeLayout>
-        <TextView
-            android:id="@+id/MusicTitle"
-            android:ellipsize = "end"
-            android:singleLine="true"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:textSize="20dp"
-            android:textColor="#eceff1"
-            android:layout_above="@id/bottom"
-            android:layout_centerHorizontal="true"
-            android:layout_margin="12dp"
-            />
+
     </RelativeLayout>
 
     <!-- The navigation drawer -->
@@ -75,7 +129,9 @@
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
-        android:drawSelectorOnTop="false"></ListView>
+        android:drawSelectorOnTop="false">
+
+    </ListView>
 
 </android.support.v4.widget.DrawerLayout>
 

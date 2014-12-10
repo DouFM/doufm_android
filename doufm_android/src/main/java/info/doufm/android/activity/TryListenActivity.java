@@ -6,14 +6,15 @@ import android.os.Bundle;
 import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
-import info.doufm.android.playview.PlayView;
 import info.doufm.android.R;
+import info.doufm.android.playview.PlayView;
 
 /**
  * 网易云音乐播放器播放界面UI及简单媒体播放
+ *
  * @author Lqh
  */
-public class TryListenActivity extends Activity implements MediaPlayer.OnCompletionListener{
+public class TryListenActivity extends Activity implements MediaPlayer.OnCompletionListener {
 
     private FrameLayout mContainer;
     private PlayView mPlayView;
@@ -28,7 +29,7 @@ public class TryListenActivity extends Activity implements MediaPlayer.OnComplet
         mPlayView = new PlayView(this);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);
         mContainer.addView(mPlayView, lp);
-        mediaPlayer = MediaPlayer.create(this,R.raw.home);
+        mediaPlayer = MediaPlayer.create(this, R.raw.home);
         mediaPlayer.setLooping(true);
         mediaPlayer.start();
         mPlayView.play();
@@ -44,7 +45,7 @@ public class TryListenActivity extends Activity implements MediaPlayer.OnComplet
     protected void onDestroy() {
         super.onDestroy();
         mediaPlayer.stop();
-        if (mediaPlayer != null){
+        if (mediaPlayer != null) {
             mediaPlayer.release();
             mediaPlayer = null;
         }

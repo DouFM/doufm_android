@@ -71,7 +71,7 @@ public class SplashActivity extends Activity {
                 .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
-                        startActivity(new Intent(SplashActivity.this,TryListenActivity.class));
+                        startActivity(new Intent(SplashActivity.this, TryListenActivity.class));
                         finish();
                     }
                 })
