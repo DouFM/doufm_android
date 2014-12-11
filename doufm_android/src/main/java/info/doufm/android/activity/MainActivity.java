@@ -357,13 +357,18 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         });
 
+        //单曲循环/随便播放按钮点击响应
         btnPlayMode.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 if (playLoopFlag) {
-                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_shuffle);
+                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_shuffle);//随机播放
+                    Toast.makeText(getApplicationContext(), "随机播放", Toast.LENGTH_SHORT).show();
+                    mMainMediaPlayer.setLooping(false);
                 } else {
-                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_one);
+                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_one);//单曲循环
+                    Toast.makeText(getApplicationContext(), "单曲循环", Toast.LENGTH_SHORT).show();
+                    mMainMediaPlayer.setLooping(true);
                 }
                 playLoopFlag = !playLoopFlag;
             }
