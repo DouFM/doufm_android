@@ -1,6 +1,7 @@
 package info.doufm.android.activity;
 
 import android.app.Activity;
+import android.content.pm.ActivityInfo;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.widget.FrameLayout;
@@ -24,7 +25,7 @@ public class TryListenActivity extends Activity implements MediaPlayer.OnComplet
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_try_listen);
-
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         mContainer = (FrameLayout) findViewById(R.id.try_media_player);
         mPlayView = new PlayView(this);
         FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(LayoutParams.MATCH_PARENT, LayoutParams.MATCH_PARENT);

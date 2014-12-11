@@ -60,6 +60,7 @@ import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.R;
 import info.doufm.android.info.MusicInfo;
 import info.doufm.android.info.PlaylistInfo;
+import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.PlayView;
 import info.doufm.android.utils.CacheUtil;
@@ -226,13 +227,11 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         tvTotalTime = (TextView) findViewById(R.id.totalTimeText);
         ab = getActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
-        //rtBottom = (RelativeLayout) findViewById(R.id.bottom);
         ab.setHomeButtonEnabled(true);
         colorNum = mBackgroundColors.length;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.navdrawer);
         mDrawerList.setVerticalScrollBarEnabled(false);
-        //tvMusicTitle = (TextView) findViewById(R.id.MusicTitle);
         playMusicInfo = new MusicInfo();
         nextMusicInfo = new MusicInfo();
         drawerArrow = new DrawerArrowDrawable(this) {
@@ -416,46 +415,47 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     }
 
     private void getMusicList() {
-        JsonArrayRequest jaq = new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray jsonArray) {
-                JSONObject jo = new JSONObject();
-                try {
-                    PLAYLIST_MENU_NUM = jsonArray.length();
-                    for (int i = 0; i < jsonArray.length(); i++) {
-                        jo = jsonArray.getJSONObject(i);
-                        PlaylistInfo playlistInfo = new PlaylistInfo();
-                        playlistInfo.setKey(jo.getString("key"));
-                        playlistInfo.setName(jo.getString("name"));
-                        mLeftResideMenuItemTitleList.add(jo.getString("name"));
-                        playlistInfo.setMusic_list(jo.getString("music_list"));
-                        mPlaylistInfoList.add(playlistInfo);
+        RequestManager.getRequestQueue().add(
+                new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray jsonArray) {
+                        JSONObject jo = new JSONObject();
+                        try {
+                            PLAYLIST_MENU_NUM = jsonArray.length();
+                            for (int i = 0; i < jsonArray.length(); i++) {
+                                jo = jsonArray.getJSONObject(i);
+                                PlaylistInfo playlistInfo = new PlaylistInfo();
+                                playlistInfo.setKey(jo.getString("key"));
+                                playlistInfo.setName(jo.getString("name"));
+                                mLeftResideMenuItemTitleList.add(jo.getString("name"));
+                                playlistInfo.setMusic_list(jo.getString("music_list"));
+                                mPlaylistInfoList.add(playlistInfo);
+                            }
+                            //生成播放列表菜单
+                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
+                                    android.R.layout.simple_list_item_1, android.R.id.text1, mLeftResideMenuItemTitleList);
+                            mDrawerList.setAdapter(adapter);
+                            mDrawerList.setOnItemClickListener(mListLisener);
+                            isLoadingSuccess = true;
+                            initPlayer();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
                     }
-                    //生成播放列表菜单
-                    ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
-                            android.R.layout.simple_list_item_1, android.R.id.text1, mLeftResideMenuItemTitleList);
-                    mDrawerList.setAdapter(adapter);
-                    mDrawerList.setOnItemClickListener(mListLisener);
-                    isLoadingSuccess = true;
-                    initPlayer();
-                } catch (JSONException e) {
-                    e.printStackTrace();
+                }, errorListener) {
+                    /**
+                     * 添加自定义HTTP Header
+                     * @return
+                     * @throws com.android.volley.AuthFailureError
+                     */
+                    @Override
+                    public Map<String, String> getHeaders() throws AuthFailureError {
+                        Map<String, String> params = new HashMap<String, String>();
+                        params.put("User-Agent", "Android:1.0:2009chenqc@163.com");
+                        return params;
+                    }
                 }
-            }
-        }, errorListener) {
-            /**
-             * 添加自定义HTTP Header
-             * @return
-             * @throws com.android.volley.AuthFailureError
-             */
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                Map<String, String> params = new HashMap<String, String>();
-                params.put("User-Agent", "Android:1.0:2009chenqc@163.com");
-                return params;
-            }
-        };
-        mRequstQueue.add(jaq);
+        );
     }
 
     private void initPlayer() {
@@ -500,28 +500,29 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     private void getNextMusicInfo(String playlist_key) {
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
-        JsonArrayRequest jar = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray jsonArray) {
-                try {
-                    JSONObject jo = jsonArray.getJSONObject(0);
-                    nextMusicInfo.setTitle(jo.getString("title"));
-                    nextMusicInfo.setArtist(jo.getString("artist"));
-                    nextMusicInfo.setAudio("http://doufm.info" + jo.getString("audio"));
-                    nextMusicInfo.setCover("http://doufm.info" + jo.getString("cover"));
-                    mDownThread = new DownloadMusicThread(nextMusicInfo.getAudio());
-                    mDownThread.start();
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置", Toast.LENGTH_SHORT).show();
-            }
-        });
-        mRequstQueue.add(jar);
+        RequestManager.getRequestQueue().add(
+                new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray jsonArray) {
+                        try {
+                            JSONObject jo = jsonArray.getJSONObject(0);
+                            nextMusicInfo.setTitle(jo.getString("title"));
+                            nextMusicInfo.setArtist(jo.getString("artist"));
+                            nextMusicInfo.setAudio("http://doufm.info" + jo.getString("audio"));
+                            nextMusicInfo.setCover("http://doufm.info" + jo.getString("cover"));
+                            mDownThread = new DownloadMusicThread(nextMusicInfo.getAudio());
+                            mDownThread.start();
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置", Toast.LENGTH_SHORT).show();
+                    }
+                })
+        );
     }
 
     private void changeMusic() {
@@ -552,17 +553,17 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     }
 
     private void getCoverImageRequest(final MusicInfo musicInfo) {
-        ImageRequest imageRequest = new ImageRequest(musicInfo.getCover(), new Response.Listener<Bitmap>() {
-            @Override
-            public void onResponse(Bitmap bitmap) {
-                //对齐新歌曲信息显示时间
-                mPlayView.SetCDImage(bitmap);
-                ab.setTitle(musicInfo.getTitle());
-                ab.setSubtitle(musicInfo.getArtist());
+        RequestManager.getRequestQueue().add(new ImageRequest(musicInfo.getCover(), new Response.Listener<Bitmap>() {
+                    @Override
+                    public void onResponse(Bitmap bitmap) {
+                        //对齐新歌曲信息显示时间
+                        mPlayView.SetCDImage(bitmap);
+                        ab.setTitle(musicInfo.getTitle());
+                        ab.setSubtitle(musicInfo.getArtist());
 
-            }
-        }, 0, 0, null, errorListener);
-        mRequstQueue.add(imageRequest);
+                    }
+                }, 0, 0, null, errorListener)
+        );
     }
 
     @Override
@@ -680,13 +681,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     @Override
     protected void onPause() {
         super.onPause();
-        mRequstQueue.cancelAll(this);
+        RequestManager.getRequestQueue().cancelAll(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mRequstQueue.cancelAll(this);
+        RequestManager.getRequestQueue().cancelAll(this);
     }
 
     @Override
