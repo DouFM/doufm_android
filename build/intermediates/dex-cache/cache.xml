@@ -2,60 +2,60 @@
 <items version="2" >
 
     <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.ikimuhendis\ldrawer\0.1\classes.jar"
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/libs/volley.jar"
         jumboMode="false"
-        revision="20.0.0"
-        sha1="d3bec8d72ee2aa86e69f66375c31f2161b7bb324">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-0082be1501567dad97310e22e447118b9a34ed46.jar" />
-    </item>
-    <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.android.support\appcompat-v7\21.0.2\classes.jar"
-        jumboMode="false"
-        revision="20.0.0"
-        sha1="7ae2d38807a43b2f2185ff4089a92c790b579e54">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-3b9ade56a965632270ec73f4e41c7abe5da01ecc.jar" />
-    </item>
-    <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\libs\volley.jar"
-        jumboMode="false"
-        revision="20.0.0"
+        revision="21.1.1"
         sha1="c3a7127079ec88fd22c96c4ccadfec2fd3d28998">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\volley-b5fa43789f4b064b2308bb597144fbef9f1773c7.jar" />
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/volley-636c89f7fa4a0f00546cc01b5a41d396de0109d4.jar" />
     </item>
     <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.2\classes.jar"
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/com.android.support/appcompat-v7/21.0.2/classes.jar"
         jumboMode="false"
-        revision="20.0.0"
-        sha1="d1bf02de1c56d942e7a9d093b8610ba1ef4128e3">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-c5d06c96c2f1b0506587c1beedb63bdd02f0f6d8.jar" />
+        revision="21.1.1"
+        sha1="7ae2d38807a43b2f2185ff4089a92c790b579e54">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/classes-08e9942995630b4a3fb55e267ae50d948af1174d.jar" />
     </item>
     <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\cn.pedant.sweetalert\library\1.1\classes.jar"
+        jar="/Users/tutorchen/AndroidSDK/sdk/extras/android/m2repository/com/android/support/support-annotations/21.0.2/support-annotations-21.0.2.jar"
         jumboMode="false"
-        revision="20.0.0"
-        sha1="4ebe2626650bb5d8e3d4546a5107a85e9df8775b">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\classes-07ab1b4f0e8dc17f32de5218917e98ce89c49115.jar" />
-    </item>
-    <item
-        jar="D:\Program Files (x86)\Android Studio\SDK\extras\android\m2repository\com\android\support\support-annotations\21.0.2\support-annotations-21.0.2.jar"
-        jumboMode="false"
-        revision="20.0.0"
+        revision="21.1.1"
         sha1="99373741f99a0556ee293c41e8faa1ca3ae8a4e6">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\support-annotations-21.0.2-d79671318ce8398a28fbb0fbcafb4088640e71e7.jar" />
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/support-annotations-21.0.2-f113ca17d41792264936791b95d7504df17d4fa5.jar" />
     </item>
     <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\libs\nineoldandroids-library-2.4.0.jar"
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/cn.pedant.sweetalert/library/1.1/classes.jar"
         jumboMode="false"
-        revision="20.0.0"
+        revision="21.1.1"
+        sha1="4ebe2626650bb5d8e3d4546a5107a85e9df8775b">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/classes-5ae0b5bf7ff3ea1c22a13155d27d29f1bc72964f.jar" />
+    </item>
+    <item
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.2/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="d1bf02de1c56d942e7a9d093b8610ba1ef4128e3">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/classes-043cfcfcec2e525e775763bfa31a972a75c134de.jar" />
+    </item>
+    <item
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/com.ikimuhendis/ldrawer/0.1/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="d3bec8d72ee2aa86e69f66375c31f2161b7bb324">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/classes-d7868587d67938b731d57dcd525ebbf63b77e5b4.jar" />
+    </item>
+    <item
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/libs/nineoldandroids-library-2.4.0.jar"
+        jumboMode="false"
+        revision="21.1.1"
         sha1="e9b63380f3a242dbdbf103a2355ad7e43bad17cb">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\nineoldandroids-library-2.4.0-8b17f46cd6f289997531e2559a085b1cc7454f7c.jar" />
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/nineoldandroids-library-2.4.0-a354ac9a4568f34020fb3b99ab8466ee758d470b.jar" />
     </item>
     <item
-        jar="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\exploded-aar\com.android.support\support-v4\21.0.2\libs\internal_impl-21.0.2.jar"
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.2/libs/internal_impl-21.0.2.jar"
         jumboMode="false"
-        revision="20.0.0"
+        revision="21.1.1"
         sha1="962e8b12569c56dbdcf8367eb4eac8bb129cd18f">
-        <dex dex="E:\MacShare\AndroidCode\doufm_android\doufm_android\build\intermediates\pre-dexed\debug\internal_impl-21.0.2-5f0009d86e9ece9b5681f2e75d811dbc9a2963c2.jar" />
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/internal_impl-21.0.2-5dcb8ff86a1ca6fd0a21865879c0a6de39f258df.jar" />
     </item>
 
 </items>
