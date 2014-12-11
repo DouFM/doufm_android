@@ -29,12 +29,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.android.volley.toolbox.Volley;
 import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
 import com.ikimuhendis.ldrawer.DrawerArrowDrawable;
 
@@ -76,7 +74,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private ListView mDrawerList;
     private ActionBarDrawerToggle mDrawerToggle;
     private DrawerArrowDrawable drawerArrow;
-    private boolean drawerArrowColor;
     private File cacheDir;
     private DiskLruCache mDiskLruCache = null;
     //添加了两个MusicInfo代替MusicURL、CoverURL等
@@ -91,28 +88,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private TextView tvCurTime;
     private boolean playLoopFlag = false;
     private boolean loveFlag = false;
-    //Meterial Design主题(500 300 100)
-    private String[] mActionBarColors = {"#607d8b", "#ff5722", "#795548",
-            "#ffc107", "#ff9800", "#259b24",
-            "#8bc34a", "#cddc39", "#03a9f4",
-            "#00bcd4", "#009688", "#673ab7",
-            "#673ab7", "#3f51b5", "#5677fc",
-            "#e51c23", "#e91e63", "#9c27b0",
-            "#607d8b"};
-    private String[] mBackgroundColors = {"#90a4ae", "#ff8a65", "#a1887f",
-            "#ffd54f", "#ffb74d", "#42bd41",
-            "#aed581", "#dce775", "#4fc3f7",
-            "#4dd0e1", "#4db6ac", "#9575cd",
-            "#9575cd", "#7986cb", "#91a7ff",
-            "#f36c60", "#f06292", "#ba68c8",
-            "#90a4ae"};
-    private String[] mCotrolBackgroundColors = {"#cfd8dc", "#ffccbc", "#d7ccc8",
-            "#ffecb3", "#ffe0b2", "#a3e9a4",
-            "#dcedc8", "#f0f4c3", "#b3e5fc",
-            "#b2ebf2", "#b2dfdb", "#d1c4e9",
-            "#dec4e9", "#c5cae9", "#d0d9ff",
-            "#f9bdbb", "#f8bbd0", "#e1bee7",
-            "#cfd8dc"};
+
     private int colorIndex = 0;
     private int colorNum;
 
@@ -137,17 +113,10 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private Timer mTimer = new Timer();     //计时器
     private List<String> mLeftResideMenuItemTitleList = new ArrayList<String>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
-    private int PLAYLIST_MENU_NUM = 0;
     private int mPlayListNum = 0;
     private boolean isFirstLoad = true;
 
     private ActionBar ab;
-
-    private String mPreMusicURL;
-    //音乐文件和封面路径
-    private String MusicURL = "";
-    private String CoverURL = "";
-    //private TextView tvMusicTitle;
 
     private boolean isPlay = false;
     //定义Handler对象
@@ -189,18 +158,14 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         }
     };
 
-    //private RelativeLayout rtBottom;
     private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
-    //Volley请求
-    private RequestQueue mRequstQueue;
-    private String mMusicTitle;
-    private boolean fisrtErrorFlag = true;
+    private boolean firstErrorFlag = true;
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
             timerTask.cancel();
-            if (fisrtErrorFlag) {
-                fisrtErrorFlag = false;
+            if (firstErrorFlag) {
+                firstErrorFlag = false;
                 new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("网络连接出错啦...")
                         .setConfirmText("退出")
@@ -215,7 +180,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         }
     };
-    private int mBackKeyPressedCount = 1;
+
     private long exitTime = 0;
 
     @Override
@@ -228,7 +193,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         ab = getActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setHomeButtonEnabled(true);
-        colorNum = mBackgroundColors.length;
+        colorNum = Constants.mBackgroundColors.length;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mDrawerList = (ListView) findViewById(R.id.navdrawer);
         mDrawerList.setVerticalScrollBarEnabled(false);
@@ -385,7 +350,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             }
         });
         btnPreSong.setClickable(false); //一定要在绑定监听器之后
-        mRequstQueue = Volley.newRequestQueue(this);
 
         try {
             cacheDir = CacheUtil.getDiskCacheDir(this, "music");
@@ -421,7 +385,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     public void onResponse(JSONArray jsonArray) {
                         JSONObject jo = new JSONObject();
                         try {
-                            PLAYLIST_MENU_NUM = jsonArray.length();
                             for (int i = 0; i < jsonArray.length(); i++) {
                                 jo = jsonArray.getJSONObject(i);
                                 PlaylistInfo playlistInfo = new PlaylistInfo();
@@ -474,28 +437,29 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private void playRandomMusic(String playlist_key) {
         changeMusic();
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
-        JsonArrayRequest jaq = new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray jsonArray) {
-                //请求随机播放音乐文件信息
-                try {
-                    //Log.i(TAG,"before setSource:"+System.currentTimeMillis());
-                    JSONObject jo = jsonArray.getJSONObject(0);
-                    playMusicInfo.setTitle(jo.getString("title"));
-                    playMusicInfo.setArtist(jo.getString("artist"));
-                    playMusicInfo.setAudio("http://doufm.info" + jo.getString("audio"));
-                    playMusicInfo.setCover("http://doufm.info" + jo.getString("cover"));
-                    mMainMediaPlayer.setDataSource(playMusicInfo.getAudio()); //这种url路径
-                    mMainMediaPlayer.prepareAsync(); //prepare自动播放
-                    getCoverImageRequest(playMusicInfo);
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }, errorListener);
-        mRequstQueue.add(jaq);
+        RequestManager.getRequestQueue().add(
+                new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
+                    @Override
+                    public void onResponse(JSONArray jsonArray) {
+                        //请求随机播放音乐文件信息
+                        try {
+                            //Log.i(TAG,"before setSource:"+System.currentTimeMillis());
+                            JSONObject jo = jsonArray.getJSONObject(0);
+                            playMusicInfo.setTitle(jo.getString("title"));
+                            playMusicInfo.setArtist(jo.getString("artist"));
+                            playMusicInfo.setAudio("http://doufm.info" + jo.getString("audio"));
+                            playMusicInfo.setCover("http://doufm.info" + jo.getString("cover"));
+                            mMainMediaPlayer.setDataSource(playMusicInfo.getAudio()); //这种url路径
+                            mMainMediaPlayer.prepareAsync(); //prepare自动播放
+                            getCoverImageRequest(playMusicInfo);
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        } catch (IOException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, errorListener)
+        );
     }
 
     private void getNextMusicInfo(String playlist_key) {
@@ -587,9 +551,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             if (colorIndex < 0) {
                 colorIndex = 0;
             }
-            ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(mActionBarColors[colorIndex])));
-            mPlayView.SetBgColor(mBackgroundColors[colorIndex]);
-            //rtBottom.setBackgroundColor(Color.parseColor(mCotrolBackgroundColors[colorIndex]));
+            ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(Constants.mActionBarColors[colorIndex])));
+            mPlayView.SetBgColor(Constants.mBackgroundColors[colorIndex]);
         }
         return super.onOptionsItemSelected(item);
     }
