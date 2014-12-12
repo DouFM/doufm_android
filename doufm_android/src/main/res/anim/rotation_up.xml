@@ -6,6 +6,6 @@
         android:fromDegrees="0"
         android:toDegrees="-30"
         android:duration="300"
-        android:pivotX="0%"
-        android:pivotY="0%" />
+        android:pivotX="30%"
+        android:pivotY="20%" />
 </set>

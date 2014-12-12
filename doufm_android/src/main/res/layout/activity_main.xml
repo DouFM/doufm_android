@@ -9,37 +9,54 @@
         android:layout_height="wrap_content">
 
         <RelativeLayout
+            android:id="@+id/rl_play_area"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_centerHorizontal="true">
 
-
             <RelativeLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:layout_marginTop="105dp">
-                <ImageView
-                    android:layout_centerInParent="true"
+                android:layout_marginTop="50dp">
+
+                <FrameLayout
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:background="@drawable/play_disc_bg"/>
-                <ImageView
-                    android:id="@+id/iv_disk"
-                    android:layout_centerInParent="true"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:scaleType="center"
-                    android:src="@drawable/fm"
-                    android:background="@drawable/icn_play_disc"/>
+                    android:layout_centerInParent="true">
+
+                    <ImageView
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:background="@drawable/play_disc_bg" />
+
+                    <ImageView
+                        android:id="@+id/iv_disk"
+                        android:layout_gravity="center"
+                        android:layout_width="250dp"
+                        android:layout_height="250dp"
+                        android:background="@drawable/fm"
+                        android:scaleType="centerCrop"/>
+
+                    <ImageView
+                        android:layout_gravity="center"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:scaleType="center"
+                        android:background="@drawable/icn_play_disc" />
+
+                </FrameLayout>
+
+
             </RelativeLayout>
 
             <ImageView
+                android:layout_centerHorizontal="true"
+                android:layout_marginTop="-25dp"
                 android:id="@+id/iv_needle"
-                android:layout_marginTop="20dp"
-
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:src="@drawable/icn_play_needle"/>
+                android:src="@drawable/play_needle" />
 
         </RelativeLayout>
 
@@ -98,7 +115,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="80"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp"/>
+                android:paddingRight="5dp" />
 
             <TextView
                 android:id="@+id/totalTimeText"
