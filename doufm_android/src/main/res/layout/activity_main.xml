@@ -1,16 +1,47 @@
 <android.support.v4.widget.DrawerLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/drawer_layout"
+    android:background="@color/bg"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
-
-    <FrameLayout
-        android:id="@+id/media_container"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"></FrameLayout>
 
     <RelativeLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_centerHorizontal="true">
+
+
+            <RelativeLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="105dp">
+                <ImageView
+                    android:layout_centerInParent="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:background="@drawable/play_disc_bg"/>
+                <ImageView
+                    android:id="@+id/iv_disk"
+                    android:layout_centerInParent="true"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:scaleType="center"
+                    android:src="@drawable/fm"
+                    android:background="@drawable/icn_play_disc"/>
+            </RelativeLayout>
+
+            <ImageView
+                android:id="@+id/iv_needle"
+                android:layout_marginTop="20dp"
+
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:src="@drawable/icn_play_needle"/>
+
+        </RelativeLayout>
 
         <RelativeLayout
             android:layout_width="match_parent"
@@ -19,11 +50,12 @@
 
             <Button
                 android:id="@+id/btn_play_mode"
-                android:layout_width="30dp"
-                android:layout_height="30dp"
+                android:layout_width="35dp"
+                android:layout_height="35dp"
                 android:layout_alignParentLeft="true"
                 android:layout_alignParentStart="true"
-                android:layout_marginLeft="20dp"
+                android:layout_marginLeft="25dp"
+                android:layout_marginStart="25dp"
                 android:background="@drawable/bg_btn_shuffle" />
 
             <Button
@@ -32,7 +64,8 @@
                 android:layout_height="30dp"
                 android:layout_alignParentEnd="true"
                 android:layout_alignParentRight="true"
-                android:layout_marginRight="20dp"
+                android:layout_marginRight="25dp"
+                android:layout_marginEnd="25dp"
                 android:background="@drawable/bg_btn_love" />
         </RelativeLayout>
 
@@ -44,7 +77,9 @@
             android:gravity="center_vertical"
             android:orientation="horizontal"
             android:paddingEnd="5dp"
+            android:paddingRight="5dp"
             android:paddingStart="5dp"
+            android:paddingLeft="5dp"
             android:paddingTop="5dp">
 
             <TextView
@@ -63,7 +98,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="80"
                 android:paddingLeft="5dp"
-                android:paddingRight="5dp" />
+                android:paddingRight="5dp"/>
 
             <TextView
                 android:id="@+id/totalTimeText"
@@ -97,22 +132,22 @@
                 android:id="@+id/btn_play_previous"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_alignParentLeft="true"
-                android:layout_alignParentStart="true"
                 android:layout_centerVertical="true"
-                android:layout_marginLeft="55dp"
-                android:layout_marginStart="55dp"
+                android:layout_toLeftOf="@+id/btn_start_play"
+                android:layout_toStartOf="@+id/btn_start_play"
+                android:layout_marginRight="40dp"
+                android:layout_marginEnd="40dp"
                 android:background="@drawable/bg_play_previous" />
 
             <Button
                 android:id="@+id/btn_play_next"
                 android:layout_width="50dp"
                 android:layout_height="50dp"
-                android:layout_alignParentEnd="true"
-                android:layout_alignParentRight="true"
                 android:layout_centerVertical="true"
-                android:layout_marginEnd="55dp"
-                android:layout_marginRight="55dp"
+                android:layout_toRightOf="@+id/btn_start_play"
+                android:layout_toEndOf="@+id/btn_start_play"
+                android:layout_marginLeft="40dp"
+                android:layout_marginStart="40dp"
                 android:background="@drawable/bg_play_next" />
 
         </RelativeLayout>

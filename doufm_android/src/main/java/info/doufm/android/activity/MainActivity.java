@@ -19,10 +19,12 @@ import android.telephony.TelephonyManager;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.view.animation.Animation;
+import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.FrameLayout;
+import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
 import android.widget.TextView;
@@ -60,7 +62,7 @@ import info.doufm.android.info.MusicInfo;
 import info.doufm.android.info.PlaylistInfo;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
-import info.doufm.android.playview.PlayView;
+import info.doufm.android.playview.RotateAnimator;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.TimeFormat;
@@ -76,7 +78,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private DrawerArrowDrawable drawerArrow;
     private File cacheDir;
     private DiskLruCache mDiskLruCache = null;
-    //添加了两个MusicInfo代替MusicURL、CoverURL等
     private MusicInfo playMusicInfo;
     private MusicInfo nextMusicInfo;
     private MusicInfo preMusicInfo;
@@ -96,26 +97,27 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private ListListener mListLisener;
 
     //播放界面相关
-    private FrameLayout mContainer;
     private Button btnPlay;
     private Button btnNextSong;
     private Button btnPreSong;
     private Button btnPlayMode;
     private Button btnLove;
     private MySeekBar seekBar;
-    private PlayView mPlayView;
-
+    private ImageView ivNeedle;
+    private ImageView ivDisk;
+    private RotateAnimator mDiskAnimator;
     private boolean isLoadingSuccess = false;
     private int mMusicDuration;            //音乐总时间
     private int mMusicCurrDuration;        //当前播放时间
-
-
+    private Animation needleUpAnim;
+    private Animation needleDownAnim;
+    private Animation needleAnim;
     private Timer mTimer = new Timer();     //计时器
     private List<String> mLeftResideMenuItemTitleList = new ArrayList<String>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
     private int mPlayListNum = 0;
     private boolean isFirstLoad = true;
-
+    private boolean needleDownFlag = false;
     private ActionBar ab;
 
     private boolean isPlay = false;
@@ -190,6 +192,12 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         tvCurTime = (TextView) findViewById(R.id.curTimeText);
         tvTotalTime = (TextView) findViewById(R.id.totalTimeText);
+        ivNeedle = (ImageView) findViewById(R.id.iv_needle);
+        ivDisk = (ImageView) findViewById(R.id.iv_disk);
+        needleUpAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_up);
+        needleDownAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_down);
+        needleAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_up_down);
+        mDiskAnimator = new RotateAnimator(this, ivDisk);
         ab = getActionBar();
         ab.setDisplayHomeAsUpEnabled(true);
         ab.setHomeButtonEnabled(true);
@@ -220,7 +228,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         mDrawerLayout.setDrawerListener(mDrawerToggle);
         mDrawerToggle.syncState();
 
-        mContainer = (FrameLayout) findViewById(R.id.media_container);
+        //mContainer = (FrameLayout) findViewById(R.id.media_container);
         btnPlay = (Button) findViewById(R.id.btn_start_play);
         btnNextSong = (Button) findViewById(R.id.btn_play_next);
         btnPreSong = (Button) findViewById(R.id.btn_play_previous);
@@ -253,22 +261,21 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                 seekNow = false;
             }
         });
-        mPlayView = new PlayView(this);
-        FrameLayout.LayoutParams lp = new FrameLayout.LayoutParams(FrameLayout.LayoutParams.MATCH_PARENT, FrameLayout.LayoutParams.MATCH_PARENT);
-        mContainer.addView(mPlayView, lp);
 
         btnPlay.setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 if (isPlay) {
                     isPlay = false;
+                    ivNeedle.startAnimation(needleUpAnim);
                     btnPlay.setBackgroundResource(R.drawable.btn_start_play);
                     mMainMediaPlayer.pause();
-                    mPlayView.pause();
+                    mDiskAnimator.pause();
                 } else {
                     isPlay = true;
+                    ivNeedle.startAnimation(needleDownAnim);
                     btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
                     mMainMediaPlayer.start();
-                    mPlayView.play();
+                    mDiskAnimator.play();
                 }
             }
         });
@@ -301,16 +308,17 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     mDownThread.runFlag = false;
                     mDownThread = null;
                 }
-                changeMusic();
                 playMusicInfo = preMusicInfo;
                 btnPreSong.setClickable(false);
                 String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
                 try {
                     if (mDiskLruCache.get(key) != null) {
+                        changeMusic(true);
                         mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
                         mMainMediaPlayer.prepare();
                         seekBar.setSecondaryProgress(seekBar.getMax());
                     } else {
+                        changeMusic(false);
                         mMainMediaPlayer.setDataSource(playMusicInfo.getAudio());
                         mMainMediaPlayer.prepareAsync();
                     }
@@ -378,6 +386,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         }
     }
 
+
     private void getMusicList() {
         RequestManager.getRequestQueue().add(
                 new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
@@ -435,7 +444,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     }
 
     private void playRandomMusic(String playlist_key) {
-        changeMusic();
+        changeMusic(false);
         final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
         RequestManager.getRequestQueue().add(
                 new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
@@ -489,12 +498,30 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         );
     }
 
-    private void changeMusic() {
+    private void changeMusic(boolean type) {
+        //true for cache,false for random
+        if (type) {
+            if (isPlay) {
+                //正在播放状态下切歌，播放needleAnim动画
+                needleDownFlag = false;
+                ivNeedle.startAnimation(needleAnim);
+            } else {
+                needleDownFlag = true;
+            }
+        } else {
+            //如果不是首次播放
+            if (mDiskAnimator.notFirstFlag) {
+                needleDownFlag = true;
+            }
+            if (isPlay) {
+                ivNeedle.startAnimation(needleUpAnim);
+            }
+        }
         isPlay = false;
         mMusicDuration = 0;
         btnNextSong.setEnabled(false);
         btnPlay.setEnabled(false);
-        mPlayView.pause();
+        mDiskAnimator.pause();
         seekBar.setProgress(0);
         seekBar.setSecondaryProgress(0);
         tvCurTime.setText("00:00");
@@ -504,7 +531,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     }
 
     private void playCacheMusic() {
-        changeMusic();
+        changeMusic(true);
         String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
         try {
             mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
@@ -521,7 +548,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                     @Override
                     public void onResponse(Bitmap bitmap) {
                         //对齐新歌曲信息显示时间
-                        mPlayView.SetCDImage(bitmap);
+                        //mPlayView.SetCDImage(bitmap);
+                        ivDisk.setImageBitmap(mDiskAnimator.getCroppedBitmap(bitmap));
                         ab.setTitle(musicInfo.getTitle());
                         ab.setSubtitle(musicInfo.getArtist());
 
@@ -552,7 +580,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                 colorIndex = 0;
             }
             ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(Constants.mActionBarColors[colorIndex])));
-            mPlayView.SetBgColor(Constants.mBackgroundColors[colorIndex]);
+            mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[colorIndex]));
         }
         return super.onOptionsItemSelected(item);
     }
@@ -629,12 +657,15 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
 
     @Override
     public void onPrepared(MediaPlayer mp) {
+        if (needleDownFlag) {
+            ivNeedle.startAnimation(needleDownAnim);
+        }
+        mDiskAnimator.play();
         mMusicDuration = mMainMediaPlayer.getDuration();
         tvTotalTime.setText(TimeFormat.msToMinAndS(mMusicDuration));
         seekBar.setMax(mMusicDuration);
         isPlay = true;
         mMainMediaPlayer.start();
-        mPlayView.play();
         btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
         btnNextSong.setEnabled(true);
         btnPlay.setEnabled(true);
@@ -687,13 +718,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
             if (isLoadingSuccess) {
                 mDrawerLayout.closeDrawers();
-/*                try {
-                    Thread.sleep(500);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
-                }*/
                 mPlayListNum = position;
-                //mPlayView.pause();
+                mDiskAnimator.pause();
                 preMusicInfo = playMusicInfo;
                 btnPreSong.setClickable(true);
                 if (mDownThread != null) {
@@ -796,12 +822,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                         isPlay = true;
                         phoneCome = false;
                     }
-                    //每次切回MainActivity执行
-                    if (isPlay && mPlayView != null) {
-                        mPlayView.play();
-                    }
                     break;
             }
         }
     }
+
 }

@@ -9,7 +9,7 @@ import info.doufm.android.network.RequestManager;
  * Time: 2014-12-12 03:28
  * Info:
  */
-public class MainApplication extends Application{
+public class MainApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
