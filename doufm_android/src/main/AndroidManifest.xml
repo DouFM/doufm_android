@@ -26,15 +26,6 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-<!--        <activity
-            android:name=".Activity.OldMainActivity"
-            android:launchMode="singleTop"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" />
-        <activity
-            android:name="info.doufm.android.Activity.About"
-            android:label="关于"
-            android:theme="@android:style/Theme.Dialog" >
-        </activity>-->
         <activity
             android:name=".activity.MainActivity"
             android:label="@string/title_activity_sample" >
@@ -43,6 +34,10 @@
             android:name="info.doufm.android.activity.TryListenActivity"
             android:label="@string/title_activity_try_listen" >
         </activity>
+
+        <meta-data android:value="548b043dfd98c5bf12000fa0" android:name="UMENG_APPKEY"></meta-data>
+        <meta-data android:value="DouFM" android:name="UMENG_CHANNEL"/>
+
     </application>
 
 </manifest>
