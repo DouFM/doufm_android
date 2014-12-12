@@ -1,19 +1,19 @@
 package info.doufm.android.activity;
 
-import android.app.ActionBar;
-import android.app.Activity;
 import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
 import android.graphics.Color;
-import android.graphics.drawable.ColorDrawable;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
 import android.view.Menu;
@@ -35,8 +35,6 @@ import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
-import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
-import com.ikimuhendis.ldrawer.DrawerArrowDrawable;
 import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
@@ -70,13 +68,15 @@ import info.doufm.android.utils.TimeFormat;
 import libcore.io.DiskLruCache;
 
 
-public class MainActivity extends Activity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
+public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
 
     private static final String TAG = "MainActivity";
-    private DrawerLayout mDrawerLayout;
     private ListView mDrawerList;
-    private ActionBarDrawerToggle mDrawerToggle;
-    private DrawerArrowDrawable drawerArrow;
+
+    private Toolbar mToolbar;
+    private DrawerLayout mDrawerLayout;
+    private ActionBarDrawerToggle mActionBarDrawerToggle;
+
     private File cacheDir;
     private DiskLruCache mDiskLruCache = null;
     private MusicInfo playMusicInfo;
@@ -119,7 +119,6 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private int mPlayListNum = 0;
     private boolean isFirstLoad = true;
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
-    private ActionBar ab;
 
     private boolean isPlay = false;
     //定义Handler对象
@@ -199,22 +198,21 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
         needleDownAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_down);
         needleAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_up_down);
         mDiskAnimator = new RotateAnimator(this, ivDisk);
-        ab = getActionBar();
-        ab.setDisplayHomeAsUpEnabled(true);
-        ab.setHomeButtonEnabled(true);
         colorNum = Constants.mBackgroundColors.length;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
+        mToolbar.setTitle("DouFM");
+        mToolbar.setTitleTextColor(Color.WHITE);
+        mToolbar.setSubtitleTextColor(Color.WHITE);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setHomeButtonEnabled(true);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         mDrawerList = (ListView) findViewById(R.id.navdrawer);
         mDrawerList.setVerticalScrollBarEnabled(false);
         playMusicInfo = new MusicInfo();
         nextMusicInfo = new MusicInfo();
-        drawerArrow = new DrawerArrowDrawable(this) {
-            @Override
-            public boolean isLayoutRtl() {
-                return false;
-            }
-        };
-        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, drawerArrow, R.string.drawer_open, R.string.drawer_close) {
+
+        mActionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.drawer_open, R.string.drawer_close) {
 
             public void onDrawerClosed(View view) {
                 super.onDrawerClosed(view);
@@ -226,10 +224,9 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                 invalidateOptionsMenu();
             }
         };
-        mDrawerLayout.setDrawerListener(mDrawerToggle);
-        mDrawerToggle.syncState();
+        mDrawerLayout.setDrawerListener(mActionBarDrawerToggle);
+        mActionBarDrawerToggle.syncState();
 
-        //mContainer = (FrameLayout) findViewById(R.id.media_container);
         btnPlay = (Button) findViewById(R.id.btn_start_play);
         btnNextSong = (Button) findViewById(R.id.btn_play_next);
         btnPreSong = (Button) findViewById(R.id.btn_play_previous);
@@ -552,8 +549,8 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
                         //对齐新歌曲信息显示时间
                         //mPlayView.SetCDImage(bitmap);
                         ivDisk.setImageBitmap(mDiskAnimator.getCroppedBitmap(bitmap));
-                        ab.setTitle(musicInfo.getTitle());
-                        ab.setSubtitle(musicInfo.getArtist());
+                        mToolbar.setTitle(musicInfo.getTitle());
+                        mToolbar.setSubtitle(musicInfo.getArtist());
 
                     }
                 }, 0, 0, null, errorListener)
@@ -581,7 +578,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
             if (colorIndex < 0) {
                 colorIndex = 0;
             }
-            ab.setBackgroundDrawable(new ColorDrawable(Color.parseColor(Constants.mActionBarColors[colorIndex])));
+            mToolbar.setBackgroundColor(Color.parseColor(Constants.mActionBarColors[colorIndex]));
             mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[colorIndex]));
         }
         return super.onOptionsItemSelected(item);
@@ -590,13 +587,13 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
         super.onPostCreate(savedInstanceState);
-        mDrawerToggle.syncState();
+        mActionBarDrawerToggle.syncState();
     }
 
     @Override
     public void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        mDrawerToggle.onConfigurationChanged(newConfig);
+        mActionBarDrawerToggle.onConfigurationChanged(newConfig);
     }
 
     @Override

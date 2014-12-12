@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="actionbar_color">#bf360c</color>
+    <color name="status_bar_color">#303f9f</color>
+    <color name="actionbar_color">#3f51b5</color>
     <color name="drawer_arrow_second_color">#303f9f</color>
     <color name="white">#FFFFFF</color>
     <color name="gray">#CCCCCC</color>
@@ -12,11 +13,16 @@
     <color name="dark_gray">#4a454a</color>
     <color name="light_gray2">#e1e4e7</color>
 
-    <color name="bg">#ff6e40</color>
+    <color name="bg">#7986cb</color>
     <color name="play_bg">#ffccbc</color>
 
     <color name="red">#FFC93437</color>
     <color name="blue">#FF375BF1</color>
     <color name="yellow">#FFF7D23E</color>
     <color name="green">#FF34A350</color>
+
+    <color name="Indigo_colorPrimaryDark">#303f9f</color>
+    <color name="Indigo_colorPrimary">#3f51b5</color>
+    <color name="Indigo_accentColor">#4675FF</color>
+    <color name="Indigo_nav_color">#4675FF</color>
 </resources>
