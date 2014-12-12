@@ -37,6 +37,7 @@ import com.android.volley.toolbox.ImageRequest;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.ikimuhendis.ldrawer.ActionBarDrawerToggle;
 import com.ikimuhendis.ldrawer.DrawerArrowDrawable;
+import com.umeng.analytics.MobclickAgent;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -379,6 +380,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     @Override
     protected void onResume() {
         super.onResume();
+        MobclickAgent.onResume(this);
         mListLisener = new ListListener();
         if (isFirstLoad) {
             getMusicList();
@@ -676,6 +678,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     protected void onPause() {
         super.onPause();
         RequestManager.getRequestQueue().cancelAll(this);
+        MobclickAgent.onPause(this);
     }
 
     @Override

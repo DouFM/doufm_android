@@ -9,6 +9,8 @@ import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
 
+import com.umeng.analytics.MobclickAgent;
+
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.DefaultHttpClient;
 
@@ -94,6 +96,15 @@ public class SplashActivity extends Activity {
     protected void onResume() {
         super.onResume();
         isNetworkAvailable(h, 2000);
+        MobclickAgent.onPageStart("Welcome");
+        MobclickAgent.onResume(this);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        MobclickAgent.onPageEnd("Welcome");
+        MobclickAgent.onPause(this);
     }
 
     public void isNetworkAvailable(final Handler handler, final int timeout) {
