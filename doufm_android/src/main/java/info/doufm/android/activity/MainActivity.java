@@ -118,7 +118,7 @@ public class MainActivity extends Activity implements MediaPlayer.OnCompletionLi
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
     private int mPlayListNum = 0;
     private boolean isFirstLoad = true;
-    private boolean needleDownFlag = false;
+    private boolean needleDownFlag = false;  //是否需要play needledown的动画
     private ActionBar ab;
 
     private boolean isPlay = false;
