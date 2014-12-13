@@ -25,6 +25,8 @@
     <string name="user_psw_confirm">确认密码</string>
     <string name="confirm">确认</string>
     <string name="cancel">取消</string>
-
+    <string name="init_user_name">请输入用户名，长度小于20</string>
+    <string name="init_user_psw">请输入密码，长度小于16</string>
+    <string name="init_user_psw_confirm">请再次输入密码</string>
 
 </resources>

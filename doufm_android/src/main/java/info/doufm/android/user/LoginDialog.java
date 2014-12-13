@@ -4,6 +4,8 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -14,9 +16,8 @@ import android.widget.TextView;
 import info.doufm.android.R;
 
 /**
- * 用于自定义loginUI
- * Date:2014-12 -13
- * Time:09:52
+ * 自定义loginDialog 仿SweetAlertDialog
+ * Create on 2014-12-13
  */
 
 public class LoginDialog extends Dialog implements View.OnClickListener{
@@ -26,13 +27,13 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
     private TextView mContentTextView;
     //登录界面组件
     private LinearLayout mLoginLayout;
-    private EditText mLoginNameEdit;
-    private EditText mLoginPswEdit;
+    private EditText mLoginNameView;
+    private EditText mLoginPswView;
     //注册界面组件
     private LinearLayout mRegistLayout;
-    private EditText mRegistNameEdit;
-    private EditText mRegistPswEdit;
-    private EditText mRegistPswConfirmEdit;
+    private EditText mRegistNameView;
+    private EditText mRegistPswView;
+    private EditText mRegistPswConfirmView;
 
     private Drawable mCustomImgDrawable;
     private ImageView mCustomImage;
@@ -70,13 +71,13 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
         mContentTextView = (TextView)findViewById(R.id.login_content_text);
         //获取登录界面组件
         mLoginLayout = (LinearLayout) findViewById(R.id.login_layout);
-        mLoginNameEdit = (EditText) mLoginLayout.findViewById(R.id.login_name);
-        mLoginPswEdit = (EditText) mLoginLayout.findViewById(R.id.login_psw);
+        mLoginNameView = (EditText) mLoginLayout.findViewById(R.id.login_name);
+        mLoginPswView = (EditText) mLoginLayout.findViewById(R.id.login_psw);
         //获取注册界面组件
         mRegistLayout = (LinearLayout) findViewById(R.id.regist_layout);
-        mRegistNameEdit = (EditText) mRegistLayout.findViewById(R.id.regist_name);
-        mRegistPswEdit = (EditText) mRegistLayout.findViewById(R.id.regist_psw);
-        mRegistPswConfirmEdit = (EditText) mRegistLayout.findViewById(R.id.regist_psw_confirm);
+        mRegistNameView = (EditText) mRegistLayout.findViewById(R.id.regist_name);
+        mRegistPswView = (EditText) mRegistLayout.findViewById(R.id.regist_psw);
+        mRegistPswConfirmView = (EditText) mRegistLayout.findViewById(R.id.regist_psw_confirm);
         mCustomImage = (ImageView) findViewById(R.id.custom_image);
         setTitleText(mTitleText);
         setContentText(mContentText);
@@ -213,26 +214,43 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
         return mConfirmText;
     }
 
-    public EditText getLoginNameEdit() {
-        return mLoginNameEdit;
+    public EditText getLoginNameView() {
+        return mLoginNameView;
     }
 
-    public EditText getLoginPswEdit() {
-        return mLoginPswEdit;
+    public EditText getLoginPswView() {
+        return mLoginPswView;
     }
 
     //获得注册相关的editText组件
-    public EditText getRegistNameEdit(){
-        return mRegistNameEdit;
+    public EditText getRegistNameView(){
+        return mRegistNameView;
     }
 
-    public EditText getRegistPswEdit(){
-        return mRegistPswEdit;
+    public EditText getRegistPswView(){
+        return mRegistPswView;
     }
 
-    public EditText getRegistPswConfirmEdit(){
-        return mRegistPswConfirmEdit;
+    public EditText getRegistPswConfirmView(){
+        return mRegistPswConfirmView;
     }
+
+    private TextWatcher mTextWatcher = new TextWatcher() {
+        @Override
+        public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+        }
+
+        @Override
+        public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
+
+        }
+
+        @Override
+        public void afterTextChanged(Editable editable) {
+
+        }
+    };
 
     public LoginDialog setCancelClickListener(OnLoginDialogClickListener listener) {
         mCancelClickListener = listener;
