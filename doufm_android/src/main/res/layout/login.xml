@@ -1,0 +1,190 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+
+              android:id="@+id/dialog_layout"
+              android:layout_width="290dp"
+              android:layout_height="wrap_content"
+              android:gravity="center"
+              android:layout_gravity="center"
+              android:orientation="vertical"
+              android:background="@drawable/dialog_background"
+              android:padding="10dp">
+
+    <ImageView
+        android:id="@+id/custom_image"
+        android:layout_width="53dp"
+        android:layout_height="53dp"
+        android:layout_marginTop="5dp"
+        android:contentDescription="@string/app_name"
+        android:visibility="gone"
+        android:scaleType="fitCenter"/>
+
+    <TextView
+        android:id="@+id/login_title_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="19sp"
+        android:textColor="#575757"
+        android:layout_marginTop="10dp"
+        android:singleLine="true"
+        android:text="@string/app_name"/>
+
+    <TextView
+        android:id="@+id/login_content_text"
+        android:layout_marginTop="10dp"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textSize="14sp"
+        android:textAlignment="center"
+        android:gravity="center"
+        android:textColor="#797979"
+        android:visibility="gone"/>
+
+    <!--登录界面-->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="80dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/login_layout"
+        android:visibility="gone">
+        <!--用户名-->
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:layout_margin="6dp"
+                android:text="@string/user_name"
+                android:textSize="16sp"/>
+
+            <EditText
+                android:id="@+id/login_name"
+                android:layout_width="160dp"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+        <!--密码-->
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:layout_margin="6dp"
+                android:text="@string/user_psw"
+                android:textSize="16sp"/>
+
+            <EditText
+                android:id="@+id/login_psw"
+                android:layout_width="160dp"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"
+                android:password="true"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+    <!--注册界面-->
+    <LinearLayout
+        android:orientation="vertical"
+        android:layout_width="match_parent"
+        android:layout_height="120dp"
+        android:layout_marginTop="15dp"
+        android:layout_marginBottom="10dp"
+        android:id="@+id/regist_layout"
+        android:visibility="gone">
+
+        <!--用户名-->
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:orientation="horizontal">
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:layout_margin="6dp"
+                android:text="@string/user_name"
+                android:textSize="16sp"/>
+
+            <EditText
+                android:id="@+id/regist_name"
+                android:layout_width="160dp"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"/>
+        </LinearLayout>
+
+        <!--密码-->
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:layout_margin="6dp"
+                android:text="@string/user_psw"
+                android:textSize="16sp"/>
+
+            <EditText
+                android:id="@+id/regist_psw"
+                android:layout_width="160dp"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"
+                android:password="true"/>
+
+        </LinearLayout>
+        <!--确认密码-->
+        <LinearLayout
+            android:layout_weight="1"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <TextView
+                android:layout_width="70dp"
+                android:layout_height="match_parent"
+                android:layout_margin="6dp"
+                android:text="@string/user_psw_confirm"
+                android:textSize="16sp"/>
+
+            <EditText
+                android:id="@+id/regist_psw_confirm"
+                android:layout_width="160dp"
+                android:layout_marginLeft="10dp"
+                android:layout_height="match_parent"
+                android:password="true"/>
+
+        </LinearLayout>
+    </LinearLayout>
+
+
+    <LinearLayout
+        android:layout_marginTop="10dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center">
+
+        <Button
+            android:id="@+id/cancel_button"
+            style="@style/dialog_blue_button"
+            android:background="@drawable/gray_button_background"
+            android:layout_marginRight="10dp"
+            android:visibility="gone"
+            android:text="@string/cancel"/>
+
+        <Button
+            android:id="@+id/confirm_button"
+            style="@style/dialog_blue_button"
+            android:text="@string/confirm"/>
+    </LinearLayout>
+</LinearLayout>

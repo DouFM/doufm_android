@@ -25,4 +25,9 @@
     <color name="Indigo_colorPrimary">#3f51b5</color>
     <color name="Indigo_accentColor">#4675FF</color>
     <color name="Indigo_nav_color">#4675FF</color>
+
+    <color name="blue_btn_bg_color">#AEDEF4</color>
+    <color name="blue_btn_bg_pressed_color">#96BFD2</color>
+    <color name="gray_btn_bg_color">#D0D0D0</color>
+    <color name="gray_btn_bg_pressed_color">#B6B6B6</color>
 </resources>

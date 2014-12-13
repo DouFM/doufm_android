@@ -62,6 +62,7 @@ import info.doufm.android.info.PlaylistInfo;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
+import info.doufm.android.user.LoginDialog;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.TimeFormat;
@@ -570,6 +571,43 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     .setTitleText("DouFM - Android客户端")
                     .setContentText(getResources().getString(R.string.title_activity_about))
                     .show();
+        } else if (item.getItemId() == R.id.user) {
+            new LoginDialog(this, LoginDialog.LOGIN_TYPE)
+                    .setCustomImage(R.drawable.user)
+                    .setConfirmClickListener(new LoginDialog.OnLoginDialogClickListener() {
+                        @Override
+                        public void onClick(LoginDialog loginDialog) {
+                            //点击登录按钮时，调用doufm user的API
+                            if ("登录".equals(loginDialog.getConfirmText())){
+                                String userName = loginDialog.getLoginNameEdit().getText().toString();
+                                if (!userName.equals("")) {
+                                    Toast.makeText(getApplicationContext(), userName
+                                            , Toast.LENGTH_SHORT).show();
+                                }
+                            } else if("注册".equals(loginDialog.getConfirmText())){
+                                //注册用户
+                                String userName = loginDialog.getRegistNameEdit().getText().toString();
+                                if (!userName.equals("")) {
+                                    Toast.makeText(getApplicationContext(), userName
+                                            , Toast.LENGTH_SHORT).show();
+                                }
+                            }
+                        }
+                    }).setCancelClickListener(new LoginDialog.OnLoginDialogClickListener() {
+                //由源码可知，registDialog对象=loginDialog对象
+                //通过API changeDialogType(int dialogtype)实现对话框款式的转换
+                @Override
+                public void onClick(LoginDialog loginDialog) {
+                    if ("取消".equals(loginDialog.getCancelText())) {
+                        loginDialog.dismiss();
+                    } else if ("注册".equals(loginDialog.getCancelText())) {
+                        //点击注册按钮时,跳入注册页面
+                        loginDialog.changeDialogType(loginDialog.REGIST_TYPE);
+                        loginDialog.setCustomImage(R.drawable.ic_launcher);
+                    }
+                }
+            }).show();
+
         } else if (item.getItemId() == R.id.switch_theme) {
             colorIndex = (int) (Math.random() * colorNum);
             if (colorIndex == colorNum) {
