@@ -12,4 +12,9 @@
         android:title="@string/app_about"
         android:orderInCategory="100"
         app:showAsAction="never" />
+    <item
+        android:id="@+id/user"
+        android:title="用户登录"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
 </menu>
