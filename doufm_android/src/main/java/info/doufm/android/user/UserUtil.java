@@ -1,6 +1,6 @@
 package info.doufm.android.user;
 
-import android.widget.Toast;
+import android.util.Log;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
@@ -26,29 +26,42 @@ import info.doufm.android.network.RequestManager;
  */
 
 /*
-     获取当前用户：
-     UserUtil userUtil = new UserUtil();
-     userUtil.getIsLogin();//获取登录状态
-     int result = userUtil.login();//若未登录需先登录
-     int result = userUtil.getCurrent();//若已登录可直接获取 //result用于检测是否操作成功
-     User currentUser = userUtil.getCurrentUser();
+     类用法说明：
+         要获取用户信息,需先创建一个UserUtil对象，由UserUtil对象获取User对象
+         int state;        //用于标识操作返回状态
+         User mCurrentUser;//用于保存当前登录用户信息，若未登录则user.key = null;
+         boolean isLogin;  //判断是否已登录
+     对外提供API：
+         boolean getIsLogin() 获取登录状态
+         User getCurrentUser() 获取当前用户对象，若当前无登录用户则返回空
+         以下是需要与服务端对接的方法：通过返回值(int)判断操作完成状态
+         int regist(String name,String password) 注册用户
+         int login(String name, String password) 登录用户 将登录状态置为已登录
+         int current() 从服务端获取当前用户信息，并保存在mCurrentUser中
+         int logout() 登出用户 并将mCurrentUser信息置空 将登录状态置为未登录
+         int updateUserInfo(String password) 修改用户信息 通过给HTTP头部传入"x-http-method-override"参数，达成对HTTP请求方法的重写
+         int insertHistory(String op,String music_key) 添加用户操作日志
+         int getFavorList() 获取喜欢歌曲列表 并将列表信息存储在mCurrentUser中的favorList中
+
 */
 
 public class UserUtil {
+    private static final String TAG = "UserUtil";
 
     private static final String USER_URL = "http://doufm.info/api/user/";
     private static final String CURRENT_USER_URL = "http://doufm.info/api/user/current/";
     private static final String USER_HISTORY_URL = "http://doufm.info/api/user/current/history/";
     private static final String USER_FAVOR_URL = "http://doufm.info/api/user/current/favor";
 
-    public static final int STATE_INIT = 0;
-    public static final int STATE_SUCCESS = 1;
-    public static final int STATE_WRONG = 2;
-    public static final int STATE_ERROR = -1;
-    public static final int STATE_OTHER = -2;
-    private int state;
-    private User mCurrentUser;
-    private boolean isLogin;
+    //操作状态常数
+    public static final int STATE_INIT = 0;  //初始状态
+    public static final int STATE_SUCCESS = 1; //操作成功
+    public static final int STATE_WRONG = 2;   //操作失败
+    public static final int STATE_ERROR = -1;  //网络出错
+    public static final int STATE_OTHER = -2;  //系统出现异常
+    private int state;        //标识操作返回状态
+    private User mCurrentUser;//用于保存当前登录用户信息，若未登录则user.key = null;
+    private boolean isLogin;  //判断是否已登录
 
     public UserUtil() {
         mCurrentUser = new User();
@@ -56,10 +69,12 @@ public class UserUtil {
         isLogin = false;
     }
 
-    public boolean getIsLogin(){
+    public boolean getIsLogin() {
         return isLogin;
     }
+
     public User getCurrentUser() {
+        if (!isLogin) return null;
         return mCurrentUser;
     }
 
@@ -98,8 +113,9 @@ public class UserUtil {
                         try {
                             if (jsonObject != null) {
                                 //注册成功  返回用户信息
-                                getUserInfo(mCurrentUser, jsonObject);
+                                getUserInfoByJO(mCurrentUser, jsonObject);
                                 state = STATE_SUCCESS;
+                                Log.d(TAG, jsonObject.toString());
                             } else state = STATE_WRONG;
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -132,7 +148,7 @@ public class UserUtil {
             skipped: 跳过歌曲数
             dislike: 不喜欢歌曲数
      */
-    public int getCurrent() {
+    public int current() {
         state = STATE_INIT;
         RequestManager.getRequestQueue().add(
                 new JsonObjectRequest(Request.Method.GET, CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
@@ -141,7 +157,7 @@ public class UserUtil {
                         try {
                             if (jsonObject != null) {
                                 //已登录
-                                getUserInfo(mCurrentUser, jsonObject);
+                                getUserInfoByJO(mCurrentUser, jsonObject);
                                 state = STATE_SUCCESS;
                             } else state = STATE_WRONG;
                         } catch (JSONException e) {
@@ -181,14 +197,15 @@ public class UserUtil {
         final String LOGIN_URL = CURRENT_USER_URL + "?name=" + name + "&password=" + password;
         state = STATE_INIT;
         RequestManager.getRequestQueue().add(
-                new JsonObjectRequest(Request.Method.POST, CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
+                new JsonObjectRequest(Request.Method.POST, LOGIN_URL, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
                             if (jsonObject != null) {
-                                getUserInfo(mCurrentUser, jsonObject);
+                                getUserInfoByJO(mCurrentUser, jsonObject);
                                 state = STATE_SUCCESS;
                                 isLogin = true;
+                                Log.d(TAG, jsonObject.toString());
                             } else state = STATE_WRONG;
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -218,8 +235,11 @@ public class UserUtil {
                 new JsonObjectRequest(Request.Method.DELETE, CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
+
+                        resetUser(mCurrentUser);
                         state = STATE_SUCCESS;
                         isLogin = false;
+
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -256,7 +276,7 @@ public class UserUtil {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
-                            getUserInfo(mCurrentUser, jsonObject);
+                            getUserInfoByJO(mCurrentUser, jsonObject);
                             state = STATE_SUCCESS;
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -281,8 +301,8 @@ public class UserUtil {
         return state;
     }
 
-    private void getUserInfo(User user, JSONObject jsonObject) throws JSONException {
-
+    //通过JSONObject获取用户信息
+    private void getUserInfoByJO(User user, JSONObject jsonObject) throws JSONException {
         user.setKey(jsonObject.getString("key"));
         user.setName(jsonObject.getString("name"));
         user.setLevel(jsonObject.getString("level"));
@@ -290,6 +310,17 @@ public class UserUtil {
         user.setListened(jsonObject.getInt("listened"));
         user.setFavor(jsonObject.getInt("favor"));
         user.setDislike(jsonObject.getInt("dislike"));
+    }
+
+    //情况用户信息
+    private void resetUser(User user) {
+        user.setKey(null);
+        user.setName(null);
+        user.setLevel(null);
+        user.setRegist_date(null);
+        user.setListened(0);
+        user.setFavor(0);
+        user.setDislike(0);
     }
 
 
@@ -318,7 +349,7 @@ public class UserUtil {
         key: 音乐key
     Response: None
      */
-    public int updateOperation(String op, String music_key) {
+    public int insertHistory(String op, String music_key) {
         final String UPDATE_OP_URL = USER_HISTORY_URL + "?op=" + op + "&key=" + music_key;
         state = STATE_INIT;
         RequestManager.getRequestQueue().add(
@@ -357,10 +388,6 @@ public class UserUtil {
      */
     //获取整个喜欢列表
     public void getFavorList() {
-        //判断是否已登录
-        if (!isLogin) {
-
-        }
         state = STATE_INIT;
         final List<MusicInfo> favorList = mCurrentUser.getFavorList();
         RequestManager.getRequestQueue().add(

@@ -1,8 +1,6 @@
 package info.doufm.android.user;
 
 
-import java.util.Date;
-
 /**
  * 历史操作信息类
  * Create on 2014-12-13
