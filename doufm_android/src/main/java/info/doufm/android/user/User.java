@@ -1,6 +1,5 @@
 package info.doufm.android.user;
 
-import java.util.Date;
 import java.util.List;
 
 import info.doufm.android.info.MusicInfo;

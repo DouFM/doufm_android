@@ -4,8 +4,6 @@ import android.app.Dialog;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
@@ -16,11 +14,11 @@ import android.widget.TextView;
 import info.doufm.android.R;
 
 /**
- * 自定义loginDialog 仿SweetAlertDialog
+ * 自定义登录界面类 以Dialog实现 仿SweetAlertDialog
  * Create on 2014-12-13
  */
 
-public class LoginDialog extends Dialog implements View.OnClickListener{
+public class LoginDialog extends Dialog implements View.OnClickListener {
 
     private View mDialogView;
     private TextView mTitleTextView;
@@ -34,21 +32,21 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
     private EditText mRegistNameView;
     private EditText mRegistPswView;
     private EditText mRegistPswConfirmView;
-
-    private Drawable mCustomImgDrawable;
+    //图标
     private ImageView mCustomImage;
+    //确认和取消按钮
     private Button mConfirmButton;
     private Button mCancelButton;
-
+    //用于保存各组件的内容
     private String mTitleText;
     private String mContentText;
     private String mCancelText;
     private String mConfirmText;
-    private int mDialogType;
-
+    private Drawable mCustomImgDrawable;
+    private int mDialogType;//表示对话框的款式
     private OnLoginDialogClickListener mConfirmClickListener;
     private OnLoginDialogClickListener mCancelClickListener;
-
+    //款式常量
     public final static int LOGIN_TYPE = 1;
     public final static int REGIST_TYPE = 2;
 
@@ -67,49 +65,45 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
-        mTitleTextView = (TextView)findViewById(R.id.login_title_text);
-        mContentTextView = (TextView)findViewById(R.id.login_content_text);
-        //获取登录界面组件
+        //获取各组件
+        mTitleTextView = (TextView) findViewById(R.id.login_title_text);
+        mContentTextView = (TextView) findViewById(R.id.login_content_text);
         mLoginLayout = (LinearLayout) findViewById(R.id.login_layout);
         mLoginNameView = (EditText) mLoginLayout.findViewById(R.id.login_name);
         mLoginPswView = (EditText) mLoginLayout.findViewById(R.id.login_psw);
-        //获取注册界面组件
         mRegistLayout = (LinearLayout) findViewById(R.id.regist_layout);
         mRegistNameView = (EditText) mRegistLayout.findViewById(R.id.regist_name);
         mRegistPswView = (EditText) mRegistLayout.findViewById(R.id.regist_psw);
         mRegistPswConfirmView = (EditText) mRegistLayout.findViewById(R.id.regist_psw_confirm);
         mCustomImage = (ImageView) findViewById(R.id.custom_image);
-        setTitleText(mTitleText);
-        setContentText(mContentText);
-        setCancelText(mCancelText);
-        setConfirmText(mConfirmText);
-
         mConfirmButton = (Button) findViewById(R.id.confirm_button);
         mCancelButton = (Button) findViewById(R.id.cancel_button);
         mConfirmButton.setOnClickListener(this);
         mCancelButton.setOnClickListener(this);
         mDialogView = getWindow().getDecorView().findViewById(android.R.id.content);
+
+        setTitleText(mTitleText);
+        setContentText(mContentText);
+        setCancelText(mCancelText);
+        setConfirmText(mConfirmText);
         changeDialogType(mDialogType, true);
     }
 
-    public void changeDialogType(int dialogType){
-        changeDialogType(dialogType,false);
+    public void changeDialogType(int dialogType) {
+        changeDialogType(dialogType, false);
     }
+
     private void changeDialogType(int dialogType, boolean fromCreate) {
         mDialogType = dialogType;
-        // call after created views
         if (mDialogView != null) {
-            if (!fromCreate) {
-                // restore all of views state before switching alert type
+            if (!fromCreate) { //判断是否是初始创建，若不是将所有组件初始化
                 restore();
             }
             switch (mDialogType) {
-                //加入登录框类型
                 case LOGIN_TYPE:
                     mLoginLayout.setVisibility(View.VISIBLE);
                     mConfirmButton.setVisibility(View.VISIBLE);
                     mCancelButton.setVisibility(View.VISIBLE);
-                    //有一个图标
                     setCustomImage(mCustomImgDrawable);
                     mCustomImage.setVisibility(View.VISIBLE);
                     mTitleTextView.setTextSize(14);
@@ -122,7 +116,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
                     mTitleTextView.setText(mTitleText);
                     mConfirmButton.setText(mConfirmText);
                     mCancelButton.setText(mCancelText);
-                    setCanceledOnTouchOutside(true);
+                    setCanceledOnTouchOutside(true);//设置点击对话框外的区域触发关闭对话框
                     break;
                 case REGIST_TYPE:
                     mRegistLayout.setVisibility(View.VISIBLE);
@@ -206,7 +200,8 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
         return this;
     }
 
-    public String getCancelText(){
+    //获取按钮文本信息
+    public String getCancelText() {
         return mCancelText;
     }
 
@@ -214,6 +209,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
         return mConfirmText;
     }
 
+    //获得登录相关的editText组件
     public EditText getLoginNameView() {
         return mLoginNameView;
     }
@@ -223,34 +219,17 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
     }
 
     //获得注册相关的editText组件
-    public EditText getRegistNameView(){
+    public EditText getRegistNameView() {
         return mRegistNameView;
     }
 
-    public EditText getRegistPswView(){
+    public EditText getRegistPswView() {
         return mRegistPswView;
     }
 
-    public EditText getRegistPswConfirmView(){
+    public EditText getRegistPswConfirmView() {
         return mRegistPswConfirmView;
     }
-
-    private TextWatcher mTextWatcher = new TextWatcher() {
-        @Override
-        public void beforeTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-
-        }
-
-        @Override
-        public void onTextChanged(CharSequence charSequence, int i, int i2, int i3) {
-
-        }
-
-        @Override
-        public void afterTextChanged(Editable editable) {
-
-        }
-    };
 
     public LoginDialog setCancelClickListener(OnLoginDialogClickListener listener) {
         mCancelClickListener = listener;
@@ -263,7 +242,7 @@ public class LoginDialog extends Dialog implements View.OnClickListener{
     }
 
     @Override
-    public void onClick(View v) {
+    public void onClick(View v) { //当确认按钮和取消按钮不设置监听器时 默认触发关闭对话框
         if (v.getId() == R.id.cancel_button) {
             if (mCancelClickListener != null) {
                 mCancelClickListener.onClick(LoginDialog.this);

@@ -64,7 +64,6 @@ import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
 import info.doufm.android.user.LoginDialog;
-import info.doufm.android.user.User;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
@@ -581,16 +580,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         } else if (item.getItemId() == R.id.user) {    //应将弹出登录界面的控件改为自定义控件而非menu
             if (mUserUtil.getIsLogin()) {
                 //已登录 应有另一套UI用于显示用户信息
-                /*
-                    获取当前用户：UserUtil userUtil = new UserUtil();
-                                  int result = userUtil.getCurrent();//result用于检测是否操作成功
-                                  User currentUser = userUtil.getCurrentUser();
-                 */
 
             } else
                 new LoginDialog(this, LoginDialog.LOGIN_TYPE)
-                        .setCustomImage(R.drawable.user)
-                        .setConfirmClickListener(new LoginDialog.OnLoginDialogClickListener() {
+                        .setCustomImage(R.drawable.user)   //登录图片
+                        .setConfirmClickListener(new LoginDialog.OnLoginDialogClickListener() {   //设置确认按钮的onClick方法
                             @Override
                             public void onClick(LoginDialog loginDialog) {
                                 if ("登录".equals(loginDialog.getConfirmText())) {
@@ -618,6 +612,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                                                 loginNameView.setText("");
                                                 break;
                                             case UserUtil.STATE_OTHER:
+                                            case UserUtil.STATE_INIT:
                                                 Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
                                                 break;
                                         }
@@ -625,9 +620,9 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                                     }
 
                                 } else if ("注册".equals(loginDialog.getConfirmText())) {
-                                    EditText registNameView = loginDialog.getRegistNameView();
-                                    EditText registPswView = loginDialog.getRegistPswView();
-                                    EditText registPswConfirmView = loginDialog.getRegistPswConfirmView();
+                                    EditText registNameView = loginDialog.getRegistNameView();//用户名EditView
+                                    EditText registPswView = loginDialog.getRegistPswView();  //密码EditView
+                                    EditText registPswConfirmView = loginDialog.getRegistPswConfirmView();  //确认密码EditView
                                     //注册用户
                                     String registName = loginDialog.getRegistNameView().getText().toString();
                                     String registPsw = loginDialog.getRegistPswView().getText().toString().trim();
@@ -653,7 +648,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                                             case UserUtil.STATE_SUCCESS:
                                                 //注册成功
                                                 Toast.makeText(MainActivity.this, "注册成功！" + registName + "O(∩_∩)O", Toast.LENGTH_SHORT);
-                                                mUserUtil.login(registName, registPsw);  //登录
+                                                mUserUtil.login(registName, registPsw);  //自动登录
                                                 loginDialog.dismiss();
                                                 break;
                                             case UserUtil.STATE_ERROR:
@@ -665,6 +660,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                                                 registPswConfirmView.setText("");
                                                 break;
                                             case UserUtil.STATE_OTHER:
+                                            case UserUtil.STATE_INIT:
                                                 Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
                                                 break;
                                         }
@@ -672,7 +668,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
                                 }
                             }
-                        }).setCancelClickListener(new LoginDialog.OnLoginDialogClickListener() {
+                        }).setCancelClickListener(new LoginDialog.OnLoginDialogClickListener() {  //设置取消按钮的onClick方法
                     //由源码可知，registDialog对象=loginDialog对象
                     //通过API changeDialogType(int dialogtype)实现对话框款式的转换
                     @Override
