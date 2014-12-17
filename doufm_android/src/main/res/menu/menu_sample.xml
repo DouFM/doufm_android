@@ -3,6 +3,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context="info.doufm.android.activity.MainActivity">
     <item
+        android:id="@+id/user"
+        android:title="用户登录"
+        android:orderInCategory="100"
+        app:showAsAction="never"/>
+    <item
         android:id="@+id/switch_theme"
         android:title="切换主题"
         android:orderInCategory="100"
@@ -12,9 +17,4 @@
         android:title="@string/app_about"
         android:orderInCategory="100"
         app:showAsAction="never" />
-    <item
-        android:id="@+id/user"
-        android:title="用户登录"
-        android:orderInCategory="100"
-        app:showAsAction="never"/>
 </menu>
