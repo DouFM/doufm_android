@@ -16,9 +16,9 @@
         android:label="@string/app_name"
         android:theme="@style/AppTheme" >
         <activity
-            android:name="info.doufm.android.activity.SplashActivity"
-            android:screenOrientation="portrait"
+            android:name=".activity.SplashActivity"
             android:configChanges="orientation|screenSize"
+            android:screenOrientation="portrait"
             android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -31,13 +31,25 @@
             android:label="@string/title_activity_sample" >
         </activity>
         <activity
-            android:name="info.doufm.android.activity.TryListenActivity"
+            android:name=".activity.TryListenActivity"
             android:label="@string/title_activity_try_listen" >
         </activity>
 
-        <meta-data android:value="548b043dfd98c5bf12000fa0" android:name="UMENG_APPKEY"></meta-data>
-        <meta-data android:value="DouFM" android:name="UMENG_CHANNEL"/>
+        <meta-data
+            android:name="UMENG_APPKEY"
+            android:value="548b043dfd98c5bf12000fa0" />
+        <meta-data
+            android:name="UMENG_CHANNEL"
+            android:value="DouFM" />
 
+        <activity
+            android:name=".activity.LoginActivity"
+            android:label="@string/title_activity_login" >
+        </activity>
+        <activity
+            android:name=".activity.UserActivity"
+            android:label="@string/title_activity_user" >
+        </activity>
     </application>
 
 </manifest>
