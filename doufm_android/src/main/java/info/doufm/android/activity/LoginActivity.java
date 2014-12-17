@@ -6,12 +6,26 @@ import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.Toast;
+
+import com.android.volley.Request;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+import com.android.volley.toolbox.JsonObjectRequest;
+
+import org.json.JSONObject;
+
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 
 import info.doufm.android.R;
+import info.doufm.android.network.RequestManager;
+import info.doufm.android.user.UserUtil;
 
 public class LoginActivity extends ActionBarActivity implements View.OnClickListener {
 
@@ -87,7 +101,54 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.btn_activity_login:
                 //执行Login操作
+                Login();
                 break;
         }
+    }
+
+    private void Login() {
+        if (checkUserInputInfo()) {
+            String userName = etUserName.getText().toString().trim();
+            String userPassword = etUserPassword.getText().toString().trim();
+            //生成MD5
+            userPassword = UserUtil.ToLowerCaseMD5(userPassword);
+            //转成成UTF-8
+            try {
+                userName = URLEncoder.encode(userName, "UTF-8");
+                userPassword = URLEncoder.encode(userPassword, "UTF-8");
+            } catch (UnsupportedEncodingException e) {
+                e.printStackTrace();
+            }
+            //发起POST请求
+            RequestManager.getRequestQueue().add(
+                    new JsonObjectRequest(Request.Method.POST, "http://http:115.29.140.122:5001/api/app_auth?name=" + userName + "&password=" + userPassword, null,
+                            new Response.Listener<JSONObject>() {
+                                @Override
+                                public void onResponse(JSONObject jsonObject) {
+                                    Log.i("Volley", jsonObject.toString());
+
+                                }
+                            },
+                            new Response.ErrorListener() {
+                                @Override
+                                public void onErrorResponse(VolleyError volleyError) {
+                                    Log.i("Volley", volleyError.toString());
+                                    Toast.makeText(LoginActivity.this,"账号或者密码错误！",Toast.LENGTH_LONG).show();
+                                }
+                            }));
+
+        }
+    }
+
+    private boolean checkUserInputInfo() {
+        if (etUserName.getText().toString().equals("")) {
+            Toast.makeText(LoginActivity.this, "用户名不能为空!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        if (etUserPassword.getText().toString().equals("")) {
+            Toast.makeText(LoginActivity.this, "密码不能为空!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 }
