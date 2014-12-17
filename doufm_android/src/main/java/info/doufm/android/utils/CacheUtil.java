@@ -19,6 +19,7 @@ public class CacheUtil {
 
     /**
      * 二进制转成十六进制字符串
+     *
      * @param bytes
      * @return
      */
@@ -35,7 +36,6 @@ public class CacheUtil {
     }
 
     /**
-     *
      * @param key
      * @return
      */
@@ -53,6 +53,7 @@ public class CacheUtil {
 
     /**
      * 获取软件版本
+     *
      * @param context
      * @return
      */
@@ -68,6 +69,7 @@ public class CacheUtil {
 
     /**
      * 获取缓存目录
+     *
      * @param context
      * @param uniqueName
      * @return

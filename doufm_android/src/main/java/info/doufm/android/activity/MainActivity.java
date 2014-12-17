@@ -67,6 +67,7 @@ import info.doufm.android.user.LoginDialog;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
+import info.doufm.android.utils.ShareUtil;
 import info.doufm.android.utils.TimeFormat;
 import libcore.io.DiskLruCache;
 
@@ -94,7 +95,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean playLoopFlag = false;
     private boolean loveFlag = false;
 
-    private int colorIndex = 0;
     private int colorNum;
 
     //菜单列表监听器
@@ -120,11 +120,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private List<String> mLeftResideMenuItemTitleList = new ArrayList<String>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
     private int mPlayListNum = 0;
+    private int mThemeNum = 0;
     private boolean isFirstLoad = true;
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
 
     //用户操作类对象
     private UserUtil mUserUtil;
+
+    private ShareUtil mShareUtil;
 
     private boolean isPlay = false;
     //定义Handler对象
@@ -373,6 +376,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        mShareUtil = new ShareUtil(this);
+        mThemeNum = mShareUtil.getTheme();
+        mToolbar.setBackgroundColor(Color.parseColor(Constants.mActionBarColors[mThemeNum]));
+        mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[mThemeNum]));
+        mPlayListNum = mShareUtil.getPlayList();
     }
 
     @Override
@@ -446,7 +455,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mMainMediaPlayer.setOnBufferingUpdateListener(this);
         mMainMediaPlayer.setOnPreparedListener(this);
         mTimer.schedule(timerTask, 0, 1000);
-        playRandomMusic(mPlaylistInfoList.get(0).getKey());
+        playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+        Toast.makeText(this, "已加载频道" + "『" + mPlaylistInfoList.get(mPlayListNum).getName() + "』", Toast.LENGTH_SHORT).show();
     }
 
     private void playRandomMusic(String playlist_key) {
@@ -684,7 +694,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 }).show();
 
         } else if (item.getItemId() == R.id.switch_theme) {
-            colorIndex = (int) (Math.random() * colorNum);
+            int colorIndex = (int) (Math.random() * colorNum);
             if (colorIndex == colorNum) {
                 colorIndex--;
             }
@@ -693,6 +703,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
             mToolbar.setBackgroundColor(Color.parseColor(Constants.mActionBarColors[colorIndex]));
             mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[colorIndex]));
+            mThemeNum = colorIndex;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -750,6 +761,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         finish();
+                        System.exit(0);
                     }
                 })
                 .show();
@@ -805,6 +817,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private void PhoneIncomingListener() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(new MyPhoneListener(), PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        mShareUtil.setTheme(mThemeNum);
+        mShareUtil.setPlayList(mPlayListNum);
+        mShareUtil.commit();
     }
 
     @Override
