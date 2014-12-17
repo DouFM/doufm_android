@@ -1,5 +1,6 @@
 package info.doufm.android.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
@@ -126,14 +127,17 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                                 @Override
                                 public void onResponse(JSONObject jsonObject) {
                                     Log.i("Volley", jsonObject.toString());
-
+                                    //登录成功
+                                    startActivity(new Intent(LoginActivity.this, MainActivity.class));
+                                    finish();
                                 }
                             },
                             new Response.ErrorListener() {
                                 @Override
                                 public void onErrorResponse(VolleyError volleyError) {
                                     Log.i("Volley", volleyError.toString());
-                                    Toast.makeText(LoginActivity.this,"账号或者密码错误！",Toast.LENGTH_LONG).show();
+                                    //登录失败
+                                    Toast.makeText(LoginActivity.this, "账号或者密码错误！", Toast.LENGTH_LONG).show();
                                 }
                             }));
 

@@ -123,6 +123,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean isFirstLoad = true;
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
 
+    private Menu menu;
+
     //用户操作类对象
     private UserUtil mUserUtil;
 
@@ -398,6 +400,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             getMusicList();
             isFirstLoad = false;
         }
+        UpdateMenu();
     }
 
 
@@ -587,7 +590,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     .setContentText(getResources().getString(R.string.title_activity_about))
                     .show();
         } else if (item.getItemId() == R.id.user) {    //应将弹出登录界面的控件改为自定义控件而非menu
-            startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            if (item.getTitle().equals("用户登录")) {
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            } else if (item.getTitle().equals("个人中心")) {
+                startActivity(new Intent(MainActivity.this, UserActivity.class));
+            }
 //            if (mUserUtil.getIsLogin()) {
 //                //已登录 应有另一套UI用于显示用户信息
 //
@@ -841,6 +848,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_sample, menu);
         return true;
     }
@@ -958,6 +966,24 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     break;
             }
         }
+    }
+
+    private void UpdateMenu() {
+        MenuItem menuItem = menu.findItem(R.id.user);
+        if (isLogin()) {
+            if (menuItem.getTitle().equals("用户登录")) {
+                menuItem.setTitle("个人中心");
+            }
+        } else {
+            if (menuItem.getTitle().equals("个人中心")) {
+                menuItem.setTitle("用户登录");
+            }
+        }
+    }
+
+    private boolean isLogin() {
+        //判断用户是否登录
+        return false;
     }
 
 }
