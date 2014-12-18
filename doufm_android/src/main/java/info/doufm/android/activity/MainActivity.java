@@ -769,7 +769,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     }
                     loveFlag = !loveFlag;
                 } else {
-
+                    showTips();
                 }
 
                 break;
@@ -788,6 +788,27 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 }
                 break;
         }
+    }
+
+    private void showTips() {
+        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                .setTitleText("尚未登录，是否马上登录?")
+                .setCancelText("不了，下次")
+                .setConfirmText("马上登录")
+                .showCancelButton(true)
+                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        sDialog.cancel();
+                    }
+                })
+                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                    @Override
+                    public void onClick(SweetAlertDialog sDialog) {
+                        startActivityForResult(new Intent(MainActivity.this, LoginActivity.class), Constants.REQUEST_LOGIN_CODE);
+                        sDialog.dismiss();
+                    }
+                }).show();
     }
 
     private class ListListener implements AdapterView.OnItemClickListener {
