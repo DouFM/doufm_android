@@ -177,7 +177,8 @@
 
     </RelativeLayout>
 
-    <ListView
+    <!-- 试听不需要左边栏 -->
+    <!--ListView
         android:id="@+id/navdrawer"
         android:layout_width="@dimen/navdrawer_width"
         android:layout_height="match_parent"
@@ -186,7 +187,7 @@
         android:choiceMode="singleChoice"
         android:divider="@android:color/transparent"
         android:dividerHeight="0dp"
-        android:drawSelectorOnTop="false" />
+        android:drawSelectorOnTop="false" /-->
 
 
 </android.support.v4.widget.DrawerLayout>

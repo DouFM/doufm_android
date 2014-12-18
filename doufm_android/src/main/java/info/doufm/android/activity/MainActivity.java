@@ -17,6 +17,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -73,7 +74,7 @@ import libcore.io.DiskLruCache;
 
 public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
 
-    private static final String TAG = "MainActivity";
+    private static final String TAG = "seekBar";
     private ListView mDrawerList;
 
     private Toolbar mToolbar;
@@ -91,8 +92,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean seekNow = false;
     private TextView tvTotalTime;
     private TextView tvCurTime;
-    private boolean playLoopFlag = false;
-    private boolean loveFlag = false;
+    private boolean playLoopFlag = false;    
 
     private int colorNum;
 
@@ -122,7 +122,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private int mThemeNum = 0;
     private boolean isFirstLoad = true;
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
-
+    private boolean loveFlag = false;
     private Menu menu;
 
     //用户操作类对象
@@ -360,8 +360,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             public void onClick(View v) {
                 if (loveFlag) {
                     btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+                    Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
                 } else {
                     btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
+                    Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
                 }
                 loveFlag = !loveFlag;
             }
@@ -579,8 +581,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         if (item.getItemId() == android.R.id.home) {
             if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
                 mDrawerLayout.closeDrawer(mDrawerList);
+                mDrawerLayout.setFocusableInTouchMode(true);
             } else {
                 mDrawerLayout.openDrawer(mDrawerList);
+                mDrawerLayout.setFocusableInTouchMode(false);
             }
         } else if (item.getItemId() == R.id.app_about_team) {
             new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
@@ -733,15 +737,19 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     @Override
     public void onBackPressed() {
-        if ((System.currentTimeMillis() - exitTime) > 2000) {
-            Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
-            exitTime = System.currentTimeMillis();
-        } else {
-            finish();
-            System.exit(0);
+        //如果左边栏打开时，返回键关闭左边栏
+        if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
+            mDrawerLayout.closeDrawer(mDrawerList);
+        }else{
+            if ((System.currentTimeMillis() - exitTime) > 2000) {
+                Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
+                exitTime = System.currentTimeMillis();
+            } else {
+                finish();
+                System.exit(0);
+            }
         }
     }
-
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
