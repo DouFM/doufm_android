@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="horizontal"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:gravity="center_vertical"
+    android:weightSum="1">
+
+    <ImageView
+        android:id="@+id/ivChannelIcon"
+        android:layout_width="24dp"
+        android:layout_height="24dp"
+        android:layout_marginLeft="16dp"
+        android:src="@drawable/ic_audiotrack_grey600_48dp" />
+
+    <TextView
+        android:id="@+id/tvChannelName"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginLeft="16dp"
+        android:text="abc"
+        android:textSize="16sp" />
+</LinearLayout>

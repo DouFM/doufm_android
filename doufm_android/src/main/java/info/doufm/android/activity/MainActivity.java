@@ -17,14 +17,12 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.animation.Animation;
 import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ListView;
@@ -59,6 +57,7 @@ import java.util.TimerTask;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.R;
+import info.doufm.android.adapter.ChannelListAdapter;
 import info.doufm.android.info.MusicInfo;
 import info.doufm.android.info.PlaylistInfo;
 import info.doufm.android.network.RequestManager;
@@ -92,7 +91,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean seekNow = false;
     private TextView tvTotalTime;
     private TextView tvCurTime;
-    private boolean playLoopFlag = false;    
+    private boolean playLoopFlag = false;
 
     private int colorNum;
 
@@ -124,6 +123,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
     private boolean loveFlag = false;
     private Menu menu;
+    private ChannelListAdapter channelListAdapter;
 
     //用户操作类对象
     private UserUtil mUserUtil;
@@ -422,10 +422,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                                 playlistInfo.setMusic_list(jo.getString("music_list"));
                                 mPlaylistInfoList.add(playlistInfo);
                             }
-                            //生成播放列表菜单
-                            ArrayAdapter<String> adapter = new ArrayAdapter<String>(MainActivity.this,
-                                    android.R.layout.simple_list_item_1, android.R.id.text1, mLeftResideMenuItemTitleList);
-                            mDrawerList.setAdapter(adapter);
+                            channelListAdapter = new ChannelListAdapter(MainActivity.this, mLeftResideMenuItemTitleList);
+                            mDrawerList.setAdapter(channelListAdapter);
                             mDrawerList.setOnItemClickListener(mListLisener);
                             isLoadingSuccess = true;
                             initPlayer();
@@ -740,7 +738,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         //如果左边栏打开时，返回键关闭左边栏
         if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
             mDrawerLayout.closeDrawer(mDrawerList);
-        }else{
+        } else {
             if ((System.currentTimeMillis() - exitTime) > 2000) {
                 Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
                 exitTime = System.currentTimeMillis();
