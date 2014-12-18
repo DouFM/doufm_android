@@ -4,7 +4,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
-import android.media.AudioManager;
 import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
@@ -101,6 +100,7 @@ public class TryListenActivity extends ActionBarActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_try_listen);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+        tvCurTime = (TextView) findViewById(R.id.curTimeText);
         ivDisk = (ImageView) findViewById(R.id.iv_disk);
         ivNeedle = (ImageView) findViewById(R.id.iv_needle);
         needleUpAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_up);
@@ -201,7 +201,7 @@ public class TryListenActivity extends ActionBarActivity{
             isFirstLoad = false;
         }
         //when to invoke the mTimer.schedule(timerTask,0,1000);
-        //mTimer.schedule(timerTask,0,1000);
+        mTimer.schedule(timerTask,0,1000);
         Log.i(TAG, "onResume");
     }
 
