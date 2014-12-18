@@ -320,6 +320,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             isFirstLoad = false;
         }
         updateLoginTitle();
+        //列表始终滚动到顶部
+        mDrawerList.setSelection(0);
     }
 
     private void getMusicList() {
