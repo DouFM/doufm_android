@@ -642,9 +642,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        if (mDrawerLayout.isDrawerOpen(llLeftSlideMenu)) {
-            mDrawerLayout.closeDrawer(llLeftSlideMenu);
-        }
         if (item.getItemId() == android.R.id.home) {
             if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
                 mDrawerLayout.closeDrawer(mDrawerList);
