@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="info.doufm.android" >
+    package="info.doufm.android">
 
     <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
@@ -14,12 +14,12 @@
         android:allowBackup="true"
         android:icon="@drawable/ic_launcher"
         android:label="@string/app_name"
-        android:theme="@style/AppTheme" >
+        android:theme="@style/AppTheme">
         <activity
             android:name=".activity.SplashActivity"
             android:configChanges="orientation|screenSize"
             android:screenOrientation="portrait"
-            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen" >
+            android:theme="@android:style/Theme.Black.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
@@ -28,12 +28,10 @@
         </activity>
         <activity
             android:name=".activity.MainActivity"
-            android:label="@string/title_activity_sample" >
-        </activity>
+            android:label="@string/title_activity_sample"></activity>
         <activity
             android:name=".activity.TryListenActivity"
-            android:label="@string/title_activity_try_listen" >
-        </activity>
+            android:label="@string/title_activity_try_listen"></activity>
 
         <meta-data
             android:name="UMENG_APPKEY"
@@ -44,14 +42,12 @@
 
         <activity
             android:name=".activity.LoginActivity"
+            android:label="@string/title_activity_login"
             android:theme="@style/AppTheme"
-            android:windowSoftInputMode="adjustUnspecified|stateHidden"
-            android:label="@string/title_activity_login" >
-        </activity>
+            android:windowSoftInputMode="adjustUnspecified|stateHidden"></activity>
         <activity
             android:name=".activity.UserActivity"
-            android:label="@string/title_activity_user" >
-        </activity>
+            android:label="@string/title_activity_user"></activity>
     </application>
 
 </manifest>

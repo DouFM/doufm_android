@@ -12,24 +12,24 @@ public class ShareUtil {
     private SharedPreferences.Editor mEditor;
 
     public ShareUtil(Context context) {
-        mPreferences = context.getSharedPreferences(Constants.userInfo, Context.MODE_PRIVATE);
+        mPreferences = context.getSharedPreferences(Constants.USER_INFO, Context.MODE_PRIVATE);
         mEditor = mPreferences.edit();
     }
 
-    public void setTheme(int theme) {
-        mEditor.putInt(Constants.theme, theme);
-    }
-
     public int getTheme() {
-        return mPreferences.getInt(Constants.theme, 13);
+        return mPreferences.getInt(Constants.THEME, 13);
     }
 
-    public void setPlayList(int listNo) {
-        mEditor.putInt(Constants.playList, listNo);
+    public void setTheme(int theme) {
+        mEditor.putInt(Constants.THEME, theme);
     }
 
     public int getPlayList() {
-        return mPreferences.getInt(Constants.playList, 0);
+        return mPreferences.getInt(Constants.PLAYLIST, 0);
+    }
+
+    public void setPlayList(int listNo) {
+        mEditor.putInt(Constants.PLAYLIST, listNo);
     }
 
     public void commit() {

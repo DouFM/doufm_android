@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 
@@ -29,7 +30,6 @@ import info.doufm.android.R;
 public class SplashActivity extends Activity {
 
     private SweetAlertDialog mDialog;
-
     private Handler h = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -114,7 +114,6 @@ public class SplashActivity extends Activity {
     }
 
     public void isNetworkAvailable(final Handler handler, final int timeout) {
-
         new Thread() {
             private boolean responded = false;
 
