@@ -22,4 +22,7 @@ public class Constants {
             "#9575cd", "#7986cb", "#91a7ff",
             "#f36c60", "#f06292", "#ba68c8",
             "#90a4ae"};
+    public static final String userInfo = "userinfo";
+    public static final String theme = "theme";
+    public static final String playList = "playlist";
 }

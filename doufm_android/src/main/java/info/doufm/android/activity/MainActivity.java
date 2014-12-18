@@ -1,6 +1,7 @@
 package info.doufm.android.activity;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -25,7 +26,6 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
 import android.widget.Button;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SeekBar;
@@ -64,10 +64,10 @@ import info.doufm.android.info.PlaylistInfo;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
-import info.doufm.android.user.LoginDialog;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
+import info.doufm.android.utils.ShareUtil;
 import info.doufm.android.utils.TimeFormat;
 import libcore.io.DiskLruCache;
 
@@ -92,10 +92,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean seekNow = false;
     private TextView tvTotalTime;
     private TextView tvCurTime;
-    private boolean playLoopFlag = false;
-    private boolean loveFlag = false;
+    private boolean playLoopFlag = false;    
 
-    private int colorIndex = 0;
     private int colorNum;
 
     //菜单列表监听器
@@ -121,11 +119,16 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private List<String> mLeftResideMenuItemTitleList = new ArrayList<String>();
     private List<PlaylistInfo> mPlaylistInfoList = new ArrayList<PlaylistInfo>();
     private int mPlayListNum = 0;
+    private int mThemeNum = 0;
     private boolean isFirstLoad = true;
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
 
+    private Menu menu;
+
     //用户操作类对象
     private UserUtil mUserUtil;
+
+    private ShareUtil mShareUtil;
 
     private boolean isPlay = false;
     //定义Handler对象
@@ -194,7 +197,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
-        Log.i(TAG, "AonCreate");
+        
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
@@ -378,13 +381,19 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         } catch (IOException e) {
             e.printStackTrace();
         }
+
+        mShareUtil = new ShareUtil(this);
+        mThemeNum = mShareUtil.getTheme();
+        mToolbar.setBackgroundColor(Color.parseColor(Constants.mActionBarColors[mThemeNum]));
+        mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[mThemeNum]));
+        mPlayListNum = mShareUtil.getPlayList();
     }
 
     @Override
     protected void onStart() {
         super.onStart();
         PhoneIncomingListener();
-        Log.i(TAG, "AonStart");
+
     }
 
     @Override
@@ -396,7 +405,9 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             getMusicList();
             isFirstLoad = false;
         }
-        Log.i(TAG, "AonResume");
+
+        UpdateMenu();
+
     }
 
 
@@ -453,7 +464,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mMainMediaPlayer.setOnBufferingUpdateListener(this);
         mMainMediaPlayer.setOnPreparedListener(this);
         mTimer.schedule(timerTask, 0, 1000);
-        playRandomMusic(mPlaylistInfoList.get(0).getKey());
+        playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+        Toast.makeText(this, "已加载频道" + "『" + mPlaylistInfoList.get(mPlayListNum).getName() + "』", Toast.LENGTH_SHORT).show();
     }
 
     private void playRandomMusic(String playlist_key) {
@@ -587,113 +599,118 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     .setContentText(getResources().getString(R.string.title_activity_about))
                     .show();
         } else if (item.getItemId() == R.id.user) {    //应将弹出登录界面的控件改为自定义控件而非menu
-            if (mUserUtil.getIsLogin()) {
-                //已登录 应有另一套UI用于显示用户信息
-
-            } else
-                new LoginDialog(this, LoginDialog.LOGIN_TYPE)
-                        .setCustomImage(R.drawable.user)   //登录图片
-                        .setConfirmClickListener(new LoginDialog.OnLoginDialogClickListener() {   //设置确认按钮的onClick方法
-                            @Override
-                            public void onClick(LoginDialog loginDialog) {
-                                if ("登录".equals(loginDialog.getConfirmText())) {
-                                    EditText loginNameView = loginDialog.getLoginNameView();
-                                    EditText loginPswView = loginDialog.getLoginPswView();
-                                    String loginName = loginNameView.getText().toString().trim();
-                                    String loginPsw = loginPswView.getText().toString().trim();
-                                    if ("".equals(loginName) || "".equals(loginPsw)) {
-                                        Toast.makeText(MainActivity.this, "登录失败，用户名或密码不能为空"
-                                                , Toast.LENGTH_SHORT).show();
-                                        loginPswView.setText("");
-                                    } else {
-                                        int result = mUserUtil.login(loginName, loginPsw);
-                                        switch (result) {
-                                            case UserUtil.STATE_SUCCESS:
-                                                //登录成功
-                                                Toast.makeText(MainActivity.this, "欢迎回来！" + loginName + "O(∩_∩)O", Toast.LENGTH_SHORT);
-                                                loginDialog.dismiss();
-                                                break;
-                                            case UserUtil.STATE_ERROR:
-                                                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置@.@", Toast.LENGTH_SHORT).show();
-                                                break;
-                                            case UserUtil.STATE_WRONG:
-                                                Toast.makeText(MainActivity.this, "登录失败，查无此人0.0", Toast.LENGTH_SHORT).show();
-                                                loginNameView.setText("");
-                                                break;
-                                            case UserUtil.STATE_OTHER:
-                                            case UserUtil.STATE_INIT:
-                                                Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
-                                                break;
-                                        }
-
-                                    }
-
-                                } else if ("注册".equals(loginDialog.getConfirmText())) {
-                                    EditText registNameView = loginDialog.getRegistNameView();//用户名EditView
-                                    EditText registPswView = loginDialog.getRegistPswView();  //密码EditView
-                                    EditText registPswConfirmView = loginDialog.getRegistPswConfirmView();  //确认密码EditView
-                                    //注册用户
-                                    String registName = loginDialog.getRegistNameView().getText().toString();
-                                    String registPsw = loginDialog.getRegistPswView().getText().toString().trim();
-                                    String registPswConfirm = loginDialog.getRegistPswConfirmView().getText().toString().trim();
-                                    if ("".equals(registName) || "".equals(registPsw) || "".equals(registPswConfirm)) {
-                                        Toast.makeText(MainActivity.this, "注册失败，用户名或密码不能为空"
-                                                , Toast.LENGTH_SHORT).show();
-                                        registPswView.setText("");
-                                        registPswConfirmView.setText("");
-                                    } else if (registName.contains(" ") || registPsw.contains(" ")) {
-                                        Toast.makeText(MainActivity.this, "注册失败，用户名或密码中不能有空格"
-                                                , Toast.LENGTH_SHORT).show();
-                                        registPswView.setText("");
-                                        registPswConfirmView.setText("");
-                                    } else if (!registPsw.equals(registPswConfirm)) {
-                                        Toast.makeText(MainActivity.this, "注册失败，两次输入的密码不一致"
-                                                , Toast.LENGTH_SHORT).show();
-                                        registPswView.setText("");
-                                        registPswConfirmView.setText("");
-                                    } else {
-                                        int result = mUserUtil.regist(registName, registPsw);
-                                        switch (result) {
-                                            case UserUtil.STATE_SUCCESS:
-                                                //注册成功
-                                                Toast.makeText(MainActivity.this, "注册成功！" + registName + "O(∩_∩)O", Toast.LENGTH_SHORT);
-                                                mUserUtil.login(registName, registPsw);  //自动登录
-                                                loginDialog.dismiss();
-                                                break;
-                                            case UserUtil.STATE_ERROR:
-                                                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置@.@", Toast.LENGTH_SHORT).show();
-                                                break;
-                                            case UserUtil.STATE_WRONG:
-                                                Toast.makeText(MainActivity.this, "注册失败，用户已存在0.0", Toast.LENGTH_SHORT).show();
-                                                registPswView.setText("");
-                                                registPswConfirmView.setText("");
-                                                break;
-                                            case UserUtil.STATE_OTHER:
-                                            case UserUtil.STATE_INIT:
-                                                Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
-                                                break;
-                                        }
-                                    }
-
-                                }
-                            }
-                        }).setCancelClickListener(new LoginDialog.OnLoginDialogClickListener() {  //设置取消按钮的onClick方法
-                    //由源码可知，registDialog对象=loginDialog对象
-                    //通过API changeDialogType(int dialogtype)实现对话框款式的转换
-                    @Override
-                    public void onClick(LoginDialog loginDialog) {
-                        if ("取消".equals(loginDialog.getCancelText())) {
-                            loginDialog.dismiss();
-                        } else if ("注册".equals(loginDialog.getCancelText())) {
-                            //点击注册按钮时,跳入注册页面
-                            loginDialog.changeDialogType(loginDialog.REGIST_TYPE);
-                            loginDialog.setCustomImage(R.drawable.ic_launcher);
-                        }
-                    }
-                }).show();
+            if (item.getTitle().equals("用户登录")) {
+                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+            } else if (item.getTitle().equals("个人中心")) {
+                startActivity(new Intent(MainActivity.this, UserActivity.class));
+            }
+//            if (mUserUtil.getIsLogin()) {
+//                //已登录 应有另一套UI用于显示用户信息
+//
+//            } else
+//                new LoginDialog(this, LoginDialog.LOGIN_TYPE)
+//                        .setCustomImage(R.drawable.user)   //登录图片
+//                        .setConfirmClickListener(new LoginDialog.OnLoginDialogClickListener() {   //设置确认按钮的onClick方法
+//                            @Override
+//                            public void onClick(LoginDialog loginDialog) {
+//                                if ("登录".equals(loginDialog.getConfirmText())) {
+//                                    EditText loginNameView = loginDialog.getLoginNameView();
+//                                    EditText loginPswView = loginDialog.getLoginPswView();
+//                                    String loginName = loginNameView.getText().toString().trim();
+//                                    String loginPsw = loginPswView.getText().toString().trim();
+//                                    if ("".equals(loginName) || "".equals(loginPsw)) {
+//                                        Toast.makeText(MainActivity.this, "登录失败，用户名或密码不能为空"
+//                                                , Toast.LENGTH_SHORT).show();
+//                                        loginPswView.setText("");
+//                                    } else {
+//                                        int result = mUserUtil.login(loginName, loginPsw);
+//                                        switch (result) {
+//                                            case UserUtil.STATE_SUCCESS:
+//                                                //登录成功
+//                                                Toast.makeText(MainActivity.this, "欢迎回来！" + loginName + "O(∩_∩)O", Toast.LENGTH_SHORT);
+//                                                loginDialog.dismiss();
+//                                                break;
+//                                            case UserUtil.STATE_ERROR:
+//                                                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置@.@", Toast.LENGTH_SHORT).show();
+//                                                break;
+//                                            case UserUtil.STATE_WRONG:
+//                                                Toast.makeText(MainActivity.this, "登录失败，查无此人0.0", Toast.LENGTH_SHORT).show();
+//                                                loginNameView.setText("");
+//                                                break;
+//                                            case UserUtil.STATE_OTHER:
+//                                            case UserUtil.STATE_INIT:
+//                                                Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
+//                                                break;
+//                                        }
+//
+//                                    }
+//
+//                                } else if ("注册".equals(loginDialog.getConfirmText())) {
+//                                    EditText registNameView = loginDialog.getRegistNameView();//用户名EditView
+//                                    EditText registPswView = loginDialog.getRegistPswView();  //密码EditView
+//                                    EditText registPswConfirmView = loginDialog.getRegistPswConfirmView();  //确认密码EditView
+//                                    //注册用户
+//                                    String registName = loginDialog.getRegistNameView().getText().toString();
+//                                    String registPsw = loginDialog.getRegistPswView().getText().toString().trim();
+//                                    String registPswConfirm = loginDialog.getRegistPswConfirmView().getText().toString().trim();
+//                                    if ("".equals(registName) || "".equals(registPsw) || "".equals(registPswConfirm)) {
+//                                        Toast.makeText(MainActivity.this, "注册失败，用户名或密码不能为空"
+//                                                , Toast.LENGTH_SHORT).show();
+//                                        registPswView.setText("");
+//                                        registPswConfirmView.setText("");
+//                                    } else if (registName.contains(" ") || registPsw.contains(" ")) {
+//                                        Toast.makeText(MainActivity.this, "注册失败，用户名或密码中不能有空格"
+//                                                , Toast.LENGTH_SHORT).show();
+//                                        registPswView.setText("");
+//                                        registPswConfirmView.setText("");
+//                                    } else if (!registPsw.equals(registPswConfirm)) {
+//                                        Toast.makeText(MainActivity.this, "注册失败，两次输入的密码不一致"
+//                                                , Toast.LENGTH_SHORT).show();
+//                                        registPswView.setText("");
+//                                        registPswConfirmView.setText("");
+//                                    } else {
+//                                        int result = mUserUtil.regist(registName, registPsw);
+//                                        switch (result) {
+//                                            case UserUtil.STATE_SUCCESS:
+//                                                //注册成功
+//                                                Toast.makeText(MainActivity.this, "注册成功！" + registName + "O(∩_∩)O", Toast.LENGTH_SHORT);
+//                                                mUserUtil.login(registName, registPsw);  //自动登录
+//                                                loginDialog.dismiss();
+//                                                break;
+//                                            case UserUtil.STATE_ERROR:
+//                                                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置@.@", Toast.LENGTH_SHORT).show();
+//                                                break;
+//                                            case UserUtil.STATE_WRONG:
+//                                                Toast.makeText(MainActivity.this, "注册失败，用户已存在0.0", Toast.LENGTH_SHORT).show();
+//                                                registPswView.setText("");
+//                                                registPswConfirmView.setText("");
+//                                                break;
+//                                            case UserUtil.STATE_OTHER:
+//                                            case UserUtil.STATE_INIT:
+//                                                Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
+//                                                break;
+//                                        }
+//                                    }
+//
+//                                }
+//                            }
+//                        }).setCancelClickListener(new LoginDialog.OnLoginDialogClickListener() {  //设置取消按钮的onClick方法
+//                    //由源码可知，registDialog对象=loginDialog对象
+//                    //通过API changeDialogType(int dialogtype)实现对话框款式的转换
+//                    @Override
+//                    public void onClick(LoginDialog loginDialog) {
+//                        if ("取消".equals(loginDialog.getCancelText())) {
+//                            loginDialog.dismiss();
+//                        } else if ("注册".equals(loginDialog.getCancelText())) {
+//                            //点击注册按钮时,跳入注册页面
+//                            loginDialog.changeDialogType(loginDialog.REGIST_TYPE);
+//                            loginDialog.setCustomImage(R.drawable.ic_launcher);
+//                        }
+//                    }
+//                }).show();
 
         } else if (item.getItemId() == R.id.switch_theme) {
-            colorIndex = (int) (Math.random() * colorNum);
+            int colorIndex = (int) (Math.random() * colorNum);
             if (colorIndex == colorNum) {
                 colorIndex--;
             }
@@ -702,6 +719,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
             mToolbar.setBackgroundColor(Color.parseColor(Constants.mActionBarColors[colorIndex]));
             mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[colorIndex]));
+            mThemeNum = colorIndex;
         }
         return super.onOptionsItemSelected(item);
     }
@@ -759,6 +777,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         finish();
+                        System.exit(0);
                     }
                 })
                 .show();
@@ -798,25 +817,33 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         super.onPause();
         RequestManager.getRequestQueue().cancelAll(this);
         MobclickAgent.onPause(this);
-        Log.i(TAG, "AonPause");
+        
     }
 
     @Override
     protected void onStop() {
         super.onStop();
         RequestManager.getRequestQueue().cancelAll(this);
-        Log.i(TAG, "AonStop");
+        
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-        Log.i(TAG, "AonDestory");
+        
     }
 
     private void PhoneIncomingListener() {
         TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
         telephonyManager.listen(new MyPhoneListener(), PhoneStateListener.LISTEN_CALL_STATE);
+    }
+
+    @Override
+    public void finish() {
+        super.finish();
+        mShareUtil.setTheme(mThemeNum);
+        mShareUtil.setPlayList(mPlayListNum);
+        mShareUtil.commit();
     }
 
     @Override
@@ -839,6 +866,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
+        this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_sample, menu);
         return true;
     }
@@ -957,4 +985,23 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
         }
     }
+
+    private void UpdateMenu() {
+        MenuItem menuItem = menu.findItem(R.id.user);
+        if (isLogin()) {
+            if (menuItem.getTitle().equals("用户登录")) {
+                menuItem.setTitle("个人中心");
+            }
+        } else {
+            if (menuItem.getTitle().equals("个人中心")) {
+                menuItem.setTitle("用户登录");
+            }
+        }
+    }
+
+    private boolean isLogin() {
+        //判断用户是否登录
+        return false;
+    }
+
 }

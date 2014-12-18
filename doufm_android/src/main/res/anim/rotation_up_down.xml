@@ -5,13 +5,13 @@
         android:fromDegrees="30"
         android:toDegrees="0"
         android:duration="300"
-        android:pivotX="0%"
-        android:pivotY="0%" />
+        android:pivotX="30%"
+        android:pivotY="20%" />
     <rotate
         android:fromDegrees="-30"
         android:toDegrees="0"
         android:duration="300"
         android:startOffset="300"
-        android:pivotX="0%"
-        android:pivotY="0%" />
+        android:pivotX="30%"
+        android:pivotY="20%" />
 </set>

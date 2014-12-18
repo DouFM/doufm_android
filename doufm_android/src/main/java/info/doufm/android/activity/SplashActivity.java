@@ -1,4 +1,4 @@
-package info.doufm.android.activity;
+﻿package info.doufm.android.activity;
 
 import android.app.Activity;
 import android.content.ComponentName;
@@ -28,6 +28,8 @@ import info.doufm.android.R;
  * @version 1.0
  */
 public class SplashActivity extends Activity {
+
+    private SweetAlertDialog mDialog;
     private Handler h = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -35,10 +37,12 @@ public class SplashActivity extends Activity {
             if (msg.what != 1) { // 无法连接服务器
                 SetNetwork();
             } else { // 正确连接服务器
-                try {
-                    Thread.sleep(1000);
-                } catch (InterruptedException e) {
-                    e.printStackTrace();
+                if (mDialog == null) {
+                    try {
+                        Thread.sleep(1000);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
                 }
                 Intent intent = new Intent(SplashActivity.this, MainActivity.class);
                 startActivity(intent);
@@ -48,36 +52,38 @@ public class SplashActivity extends Activity {
     };
 
     private void SetNetwork() {
-        new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
-                .setTitleText("网络连接出错啦...")
-                .setCancelText("设置网络")
-                .setConfirmText("试听一下!")
-                .showCancelButton(true)
-                .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sDialog) {
-                        Intent intent = null;
-                        if (Build.VERSION.SDK_INT > 11) {
-                            //Android 3.0以上版本跳转至Wifi设置界面
-                            intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
-                        } else {
-                            //Android 3.0以下版本跳转至Wifi设置界面
-                            intent = new Intent();
-                            ComponentName componentName = new ComponentName("com.android.settings", "com.android.settings.WirelessSettings");
-                            intent.setComponent(componentName);
-                            intent.setAction("android.intent.action.VIEW");
+        if (mDialog == null) {
+            mDialog = new SweetAlertDialog(this, SweetAlertDialog.WARNING_TYPE)
+                    .setTitleText("网络连接出错啦...")
+                    .setCancelText("设置网络")
+                    .setConfirmText("试听一下!")
+                    .showCancelButton(true)
+                    .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            Intent intent = null;
+                            if (Build.VERSION.SDK_INT > 11) {
+                                //Android 3.0以上版本跳转至Wifi设置界面
+                                intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                            } else {
+                                //Android 3.0以下版本跳转至Wifi设置界面
+                                intent = new Intent();
+                                ComponentName componentName = new ComponentName("com.android.settings", "com.android.settings.WirelessSettings");
+                                intent.setComponent(componentName);
+                                intent.setAction("android.intent.action.VIEW");
+                            }
+                            startActivity(intent);
                         }
-                        startActivity(intent);
-                    }
-                })
-                .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
-                    @Override
-                    public void onClick(SweetAlertDialog sDialog) {
-                        startActivity(new Intent(SplashActivity.this, TryListenActivity.class));
-                        finish();
-                    }
-                })
-                .show();
+                    })
+                    .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                        @Override
+                        public void onClick(SweetAlertDialog sDialog) {
+                            startActivity(new Intent(SplashActivity.this, TryListenActivity.class));
+                            finish();
+                        }
+                    });
+            mDialog.show();
+        }
     }
 
     @Override
@@ -108,7 +114,6 @@ public class SplashActivity extends Activity {
     }
 
     public void isNetworkAvailable(final Handler handler, final int timeout) {
-
         new Thread() {
             private boolean responded = false;
 
@@ -147,5 +152,4 @@ public class SplashActivity extends Activity {
             }
         }.start();
     }
-
 }
