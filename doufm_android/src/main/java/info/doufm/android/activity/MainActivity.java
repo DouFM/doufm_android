@@ -122,7 +122,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private int mThemeNum = 0;
     private boolean isFirstLoad = true;
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
-
+    private boolean loveFlag = false;
     private Menu menu;
 
     //用户操作类对象
