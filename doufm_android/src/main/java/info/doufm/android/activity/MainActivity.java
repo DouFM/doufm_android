@@ -25,7 +25,9 @@ import android.view.animation.AnimationUtils;
 import android.widget.AdapterView;
 import android.widget.Button;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.RelativeLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -71,7 +73,7 @@ import info.doufm.android.utils.TimeFormat;
 import libcore.io.DiskLruCache;
 
 
-public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener {
+public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCompletionListener, MediaPlayer.OnErrorListener, MediaPlayer.OnBufferingUpdateListener, MediaPlayer.OnPreparedListener, View.OnClickListener {
 
     private static final String TAG = "seekBar";
     private ListView mDrawerList;
@@ -124,6 +126,9 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean loveFlag = false;
     private Menu menu;
     private ChannelListAdapter channelListAdapter;
+    private LinearLayout llLeftSlideMenu;
+    private RelativeLayout rlUserLogin;
+    private TextView tvUserLoginTitle;
 
     //用户操作类对象
     private UserUtil mUserUtil;
@@ -210,6 +215,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mDiskAnimator = new RotateAnimator(this, ivDisk);
         colorNum = Constants.BACKGROUND_COLORS.length;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
+        llLeftSlideMenu = (LinearLayout) findViewById(R.id.ll_left_slide_menu);
+        rlUserLogin = (RelativeLayout) findViewById(R.id.rl_slide_menu_header);
+        rlUserLogin.setOnClickListener(this);
+        tvUserLoginTitle = (TextView) findViewById(R.id.tv_user_name);
         mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
         mToolbar.setTitle("DouFM");
         mToolbar.setTitleTextColor(Color.WHITE);
@@ -237,14 +246,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         };
         mDrawerLayout.setDrawerListener(mActionBarDrawerToggle);
         mActionBarDrawerToggle.syncState();
-
         btnPlay = (Button) findViewById(R.id.btn_start_play);
         btnNextSong = (Button) findViewById(R.id.btn_play_next);
         btnPreSong = (Button) findViewById(R.id.btn_play_previous);
         btnPlayMode = (Button) findViewById(R.id.btn_play_mode);
         btnLove = (Button) findViewById(R.id.btn_love);
         seekBar = (MySeekBar) findViewById(R.id.seekbar);
-
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -271,103 +278,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
         });
 
-        btnPlay.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (isPlay) {
-                    isPlay = false;
-                    ivNeedle.startAnimation(needleUpAnim);
-                    btnPlay.setBackgroundResource(R.drawable.btn_start_play);
-                    mMainMediaPlayer.pause();
-                    mDiskAnimator.pause();
-                } else {
-                    isPlay = true;
-                    ivNeedle.startAnimation(needleDownAnim);
-                    btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
-                    mMainMediaPlayer.start();
-                    mDiskAnimator.play();
-                }
-            }
-        });
-
-        btnNextSong.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                preMusicInfo = playMusicInfo;
-                btnPreSong.setClickable(true);
-                if (hasNextCache) {
-                    playMusicInfo = nextMusicInfo;
-                    nextMusicInfo = new MusicInfo();
-                    playCacheMusic();
-                    hasNextCache = false;
-                } else {
-                    if (mDownThread != null) {
-                        mDownThread.runFlag = false;
-                        mDownThread = null;
-                    }
-                    playMusicInfo = new MusicInfo();
-                    playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
-                }
-            }
-        });
-
-        btnPreSong.setOnClickListener(new View.OnClickListener() {
-
-            @Override
-            public void onClick(View v) {
-                if (mDownThread != null) {
-                    mDownThread.runFlag = false;
-                    mDownThread = null;
-                }
-                playMusicInfo = preMusicInfo;
-                btnPreSong.setClickable(false);
-                String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
-                try {
-                    if (mDiskLruCache.get(key) != null) {
-                        changeMusic(true);
-                        mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
-                        mMainMediaPlayer.prepare();
-                        seekBar.setSecondaryProgress(seekBar.getMax());
-                    } else {
-                        changeMusic(false);
-                        mMainMediaPlayer.setDataSource(playMusicInfo.getAudio());
-                        mMainMediaPlayer.prepareAsync();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-                getCoverImageRequest(playMusicInfo);
-            }
-        });
-
+        btnPlay.setOnClickListener(this);
+        btnNextSong.setOnClickListener(this);
+        btnPreSong.setOnClickListener(this);
         //单曲循环/随便播放按钮点击响应
-        btnPlayMode.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (playLoopFlag) {
-                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_shuffle);//随机播放
-                    Toast.makeText(getApplicationContext(), "随机播放", Toast.LENGTH_SHORT).show();
-                    mMainMediaPlayer.setLooping(false);
-                } else {
-                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_one);//单曲循环
-                    Toast.makeText(getApplicationContext(), "单曲循环", Toast.LENGTH_SHORT).show();
-                    mMainMediaPlayer.setLooping(true);
-                }
-                playLoopFlag = !playLoopFlag;
-            }
-        });
-
-        btnLove.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (loveFlag) {
-                    btnLove.setBackgroundResource(R.drawable.bg_btn_love);
-                    Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
-                } else {
-                    btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
-                    Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
-                }
-                loveFlag = !loveFlag;
-            }
-        });
+        btnPlayMode.setOnClickListener(this);
+        btnLove.setOnClickListener(this);
         btnPreSong.setClickable(false); //一定要在绑定监听器之后
 
         try {
@@ -574,45 +490,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         );
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        if (item.getItemId() == android.R.id.home) {
-            if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
-                mDrawerLayout.closeDrawer(mDrawerList);
-                mDrawerLayout.setFocusableInTouchMode(true);
-            } else {
-                mDrawerLayout.openDrawer(mDrawerList);
-                mDrawerLayout.setFocusableInTouchMode(false);
-            }
-        } else if (item.getItemId() == R.id.app_about_team) {
-            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
-                    .setTitleText("DouFM - Android客户端")
-                    .setContentText(getResources().getString(R.string.title_activity_about))
-                    .show();
-        } else if (item.getItemId() == R.id.user) {    //应将弹出登录界面的控件改为自定义控件而非menu
-            Intent intent = new Intent();
-            intent.putExtra(Constants.EXTRA_THEME, mThemeNum);
-            if (item.getTitle().equals("用户登录")) {
-                intent.setClass(MainActivity.this, LoginActivity.class);
-            } else if (item.getTitle().equals("个人中心")) {
-                intent.setClass(MainActivity.this, UserActivity.class);
-            }
-            startActivity(intent);
-
-        } else if (item.getItemId() == R.id.switch_theme) {
-            int colorIndex = (int) (Math.random() * colorNum);
-            if (colorIndex == colorNum) {
-                colorIndex--;
-            }
-            if (colorIndex < 0) {
-                colorIndex = 0;
-            }
-            mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[colorIndex]));
-            mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[colorIndex]));
-            mThemeNum = colorIndex;
-        }
-        return super.onOptionsItemSelected(item);
-    }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -736,8 +613,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     @Override
     public void onBackPressed() {
         //如果左边栏打开时，返回键关闭左边栏
-        if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
-            mDrawerLayout.closeDrawer(mDrawerList);
+        if (mDrawerLayout.isDrawerOpen(llLeftSlideMenu)) {
+            mDrawerLayout.closeDrawer(llLeftSlideMenu);
         } else {
             if ((System.currentTimeMillis() - exitTime) > 2000) {
                 Toast.makeText(getApplicationContext(), "再按一次退出程序", Toast.LENGTH_SHORT).show();
@@ -751,7 +628,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        updateMenu();
+        updateLoginTitle();
         return true;
     }
 
@@ -763,15 +640,47 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         return true;
     }
 
-    private void updateMenu() {
-        MenuItem menuItem = menu.findItem(R.id.user);
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        if (mDrawerLayout.isDrawerOpen(llLeftSlideMenu)) {
+            mDrawerLayout.closeDrawer(llLeftSlideMenu);
+        }
+        if (item.getItemId() == android.R.id.home) {
+            if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
+                mDrawerLayout.closeDrawer(mDrawerList);
+                mDrawerLayout.setFocusableInTouchMode(true);
+            } else {
+                mDrawerLayout.openDrawer(mDrawerList);
+                mDrawerLayout.setFocusableInTouchMode(false);
+            }
+        } else if (item.getItemId() == R.id.app_about_team) {
+            new SweetAlertDialog(this, SweetAlertDialog.SUCCESS_TYPE)
+                    .setTitleText("DouFM - Android客户端")
+                    .setContentText(getResources().getString(R.string.title_activity_about))
+                    .show();
+        } else if (item.getItemId() == R.id.switch_theme) {
+            int colorIndex = (int) (Math.random() * colorNum);
+            if (colorIndex == colorNum) {
+                colorIndex--;
+            }
+            if (colorIndex < 0) {
+                colorIndex = 0;
+            }
+            mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[colorIndex]));
+            mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[colorIndex]));
+            mThemeNum = colorIndex;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
+    private void updateLoginTitle() {
         if (isLogin()) {
-            if (menuItem.getTitle().equals("用户登录")) {
-                menuItem.setTitle("个人中心");
+            if (tvUserLoginTitle.getText().toString().equals("用户登录")) {
+                tvUserLoginTitle.setText("个人中心");
             }
         } else {
-            if (menuItem.getTitle().equals("个人中心")) {
-                menuItem.setTitle("用户登录");
+            if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
+                tvUserLoginTitle.setText("用户登录");
             }
         }
     }
@@ -779,6 +688,100 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean isLogin() {
         //判断用户是否登录
         return false;
+    }
+
+    @Override
+    public void onClick(View v) {
+        switch (v.getId()) {
+            case R.id.btn_start_play:
+                if (isPlay) {
+                    isPlay = false;
+                    ivNeedle.startAnimation(needleUpAnim);
+                    btnPlay.setBackgroundResource(R.drawable.btn_start_play);
+                    mMainMediaPlayer.pause();
+                    mDiskAnimator.pause();
+                } else {
+                    isPlay = true;
+                    ivNeedle.startAnimation(needleDownAnim);
+                    btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
+                    mMainMediaPlayer.start();
+                    mDiskAnimator.play();
+                }
+                break;
+            case R.id.btn_play_next:
+                preMusicInfo = playMusicInfo;
+                btnPreSong.setClickable(true);
+                if (hasNextCache) {
+                    playMusicInfo = nextMusicInfo;
+                    nextMusicInfo = new MusicInfo();
+                    playCacheMusic();
+                    hasNextCache = false;
+                } else {
+                    if (mDownThread != null) {
+                        mDownThread.runFlag = false;
+                        mDownThread = null;
+                    }
+                    playMusicInfo = new MusicInfo();
+                    playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+                }
+                break;
+            case R.id.btn_play_previous:
+                if (mDownThread != null) {
+                    mDownThread.runFlag = false;
+                    mDownThread = null;
+                }
+                playMusicInfo = preMusicInfo;
+                btnPreSong.setClickable(false);
+                String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
+                try {
+                    if (mDiskLruCache.get(key) != null) {
+                        changeMusic(true);
+                        mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
+                        mMainMediaPlayer.prepare();
+                        seekBar.setSecondaryProgress(seekBar.getMax());
+                    } else {
+                        changeMusic(false);
+                        mMainMediaPlayer.setDataSource(playMusicInfo.getAudio());
+                        mMainMediaPlayer.prepareAsync();
+                    }
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+                getCoverImageRequest(playMusicInfo);
+                break;
+            case R.id.btn_play_mode:
+                if (playLoopFlag) {
+                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_shuffle);//随机播放
+                    Toast.makeText(getApplicationContext(), "随机播放", Toast.LENGTH_SHORT).show();
+                    mMainMediaPlayer.setLooping(false);
+                } else {
+                    btnPlayMode.setBackgroundResource(R.drawable.bg_btn_one);//单曲循环
+                    Toast.makeText(getApplicationContext(), "单曲循环", Toast.LENGTH_SHORT).show();
+                    mMainMediaPlayer.setLooping(true);
+                }
+                playLoopFlag = !playLoopFlag;
+                break;
+            case R.id.btn_love:
+                if (loveFlag) {
+                    btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+                    Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
+                } else {
+                    btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
+                    Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
+                }
+                loveFlag = !loveFlag;
+                break;
+            case R.id.rl_slide_menu_header:
+                Intent intent = new Intent();
+                intent.putExtra(Constants.EXTRA_THEME, mThemeNum);
+                if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
+                    intent.setClass(MainActivity.this, LoginActivity.class);
+                } else if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
+                    intent.setClass(MainActivity.this, UserActivity.class);
+                }
+                startActivity(intent);
+                break;
+        }
     }
 
     private class ListListener implements AdapterView.OnItemClickListener {

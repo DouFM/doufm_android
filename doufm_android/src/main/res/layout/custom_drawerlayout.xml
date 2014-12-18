@@ -172,16 +172,57 @@
 
     </RelativeLayout>
 
-    <ListView
-        android:id="@+id/navdrawer"
-        android:layout_width="@dimen/navdrawer_width"
-        android:layout_height="match_parent"
+    <LinearLayout
+        android:id="@+id/ll_left_slide_menu"
+        android:orientation="vertical"
+        android:layout_width="200dp"
         android:layout_gravity="start"
-        android:background="@android:color/white"
-        android:choiceMode="singleChoice"
-        android:divider="@android:color/transparent"
-        android:dividerHeight="0dp"
-        android:drawSelectorOnTop="false" />
+        android:layout_height="match_parent">
+
+        <RelativeLayout
+            android:id="@+id/rl_slide_menu_header"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp"
+            android:paddingLeft="16dp"
+            android:paddingRight="16dp"
+            android:paddingTop="16dp"
+            android:clickable="true"
+            android:background="@drawable/selector_slide_menu_item">
+
+            <ImageView
+                android:id="@+id/iv_user_avatar"
+                android:layout_width="64dp"
+                android:layout_height="64dp"
+                android:src="@drawable/default_head_320" />
+
+            <TextView
+                android:id="@+id/tv_user_name"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="16dp"
+                android:text="点击登录"
+                android:layout_toRightOf="@id/iv_user_avatar"
+                android:layout_centerVertical="true"
+                android:textSize="16sp" />
+
+        </RelativeLayout>
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#c2c2c2" />
+
+        <ListView
+            android:id="@+id/navdrawer"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:background="@android:color/white"
+            android:choiceMode="singleChoice"
+            android:divider="@android:color/transparent"
+            android:dividerHeight="0dp"
+            android:drawSelectorOnTop="false" />
+    </LinearLayout>
 
 
 </android.support.v4.widget.DrawerLayout>
