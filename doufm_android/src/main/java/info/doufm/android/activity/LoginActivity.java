@@ -7,6 +7,8 @@ import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
+import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.text.Editable;
@@ -31,6 +33,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 
+import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.R;
 import info.doufm.android.network.JsonObjectPostRequest;
 import info.doufm.android.network.RequestManager;
@@ -42,6 +45,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
 
     private static final int LOGIN_SUCCESS = 100;
     private static final int LOGIN_ERROR = 200;
+    private static final int DISSMIS_LOADING_DLG = 1000;
     private Toolbar mToolbar;
     private EditText etUserName, etUserPassword;
     private Button btnLogin;
@@ -53,6 +57,20 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private CheckBox cbSavePassword;
     private String originPassword;
     private ImageView ivLoginLogo;
+
+    private SweetAlertDialog loadingDialog;
+
+    private Handler handler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            super.handleMessage(msg);
+            switch (msg.what) {
+                case DISSMIS_LOADING_DLG:
+                    loadingDialog.dismissWithAnimation();
+                    break;
+            }
+        }
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -153,6 +171,10 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
 
     private void Login() {
         if (checkUserInputInfo()) {
+            loadingDialog = new SweetAlertDialog(this, SweetAlertDialog.PROGRESS_TYPE);
+            loadingDialog.setCancelable(false);
+            loadingDialog.setTitleText("努力登录中...");
+            loadingDialog.show();
             String userName = etUserName.getText().toString().trim();
             String userPassword = etUserPassword.getText().toString().trim();
             originPassword = userPassword;
@@ -190,6 +212,9 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                                 editor.commit();
                             }
                             if (!isLogin) {
+                                Message msg = new Message();
+                                msg.what = DISSMIS_LOADING_DLG;
+                                handler.sendMessage(msg);
                                 Toast.makeText(LoginActivity.this, "登录成功！", Toast.LENGTH_SHORT).show();
                                 LoginActivity.this.setResult(LOGIN_SUCCESS);
                                 LoginActivity.this.finish();

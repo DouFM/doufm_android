@@ -646,11 +646,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         if (item.getItemId() == android.R.id.home) {
-            if (mDrawerLayout.isDrawerOpen(mDrawerList)) {
-                mDrawerLayout.closeDrawer(mDrawerList);
+            if (mDrawerLayout.isDrawerOpen(llLeftSlideMenu)) {
+                mDrawerLayout.closeDrawer(llLeftSlideMenu);
                 mDrawerLayout.setFocusableInTouchMode(true);
             } else {
-                mDrawerLayout.openDrawer(mDrawerList);
+                mDrawerLayout.openDrawer(llLeftSlideMenu);
                 mDrawerLayout.setFocusableInTouchMode(false);
             }
         } else if (item.getItemId() == R.id.app_about_team) {
@@ -759,16 +759,24 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 playLoopFlag = !playLoopFlag;
                 break;
             case R.id.btn_love:
-                if (loveFlag) {
-                    btnLove.setBackgroundResource(R.drawable.bg_btn_love);
-                    Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
+                if (User.getInstance().getLogin()) {
+                    if (loveFlag) {
+                        btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+                        Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
+                    } else {
+                        btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
+                        Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
+                    }
+                    loveFlag = !loveFlag;
                 } else {
-                    btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
-                    Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
+
                 }
-                loveFlag = !loveFlag;
+
                 break;
             case R.id.rl_slide_menu_header:
+                if (mDrawerLayout.isDrawerOpen(llLeftSlideMenu)) {
+                    mDrawerLayout.closeDrawer(llLeftSlideMenu);
+                }
                 Intent intent = new Intent();
                 intent.putExtra(Constants.EXTRA_THEME, mThemeNum);
                 if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
