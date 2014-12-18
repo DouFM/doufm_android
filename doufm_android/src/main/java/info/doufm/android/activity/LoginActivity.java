@@ -66,7 +66,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     }
 
     private void initViews() {
-        ivLoginLogo.setImageDrawable(UserUtil.getCircleImage(this,R.drawable.default_artist_300));
+        ivLoginLogo.setImageDrawable(UserUtil.getCircleImage(this, R.drawable.default_artist_300));
         sp = getSharedPreferences("user", MODE_PRIVATE);
         sp.edit().putBoolean("save_login_info", true).commit();
         //etUserName.set
@@ -206,6 +206,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
+
                 }
             }, mMap));
         }

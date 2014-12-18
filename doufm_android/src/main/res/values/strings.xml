@@ -30,5 +30,7 @@
     <string name="init_user_psw_confirm">请再次输入密码</string>
     <string name="title_activity_login">LoginActivity</string>
     <string name="title_activity_user">UserActivity</string>
+    <string name="title_activity_user_history">UserHistoryActivity</string>
+    <string name="title_activity_user_like">UserLikeActivity</string>
 
 </resources>

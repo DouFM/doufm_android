@@ -2,6 +2,154 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="info.doufm.android.activity.UserActivity">
+
+    <include layout="@layout/custom_toolbar" />
+
+    <ScrollView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <LinearLayout
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:background="#f9f6f1">
+
+            <RelativeLayout
+                android:id="@+id/rl_activity_user_main"
+                android:layout_width="match_parent"
+                android:layout_height="200dp"
+                android:background="#ffd7d7d7">
+
+                <TextView
+                    android:id="@+id/tv_activity_user_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="XXX"
+                    android:textSize="20sp"
+                    android:layout_marginTop="8dp"
+                    android:layout_centerHorizontal="true"
+                    android:textColor="#fff" />
+
+                <ImageView
+                    android:id="@+id/iv_activity_user_logo"
+                    android:layout_width="80dp"
+                    android:layout_height="80dp"
+                    android:layout_centerInParent="true" />
+
+                <Button
+                    android:id="@+id/btn_activity_quit"
+                    android:layout_centerHorizontal="true"
+                    android:layout_width="120dp"
+                    android:layout_height="wrap_content"
+                    android:layout_below="@id/iv_activity_user_logo"
+                    android:layout_marginTop="8dp"
+                    android:text="退出登录"
+                    android:textSize="16sp"
+                    android:textColor="#fff" />
+
+            </RelativeLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:src="#d4d4d4" />
+
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:src="#d4d4d4"
+                android:layout_marginTop="16dp" />
+
+            <RelativeLayout
+                android:id="@+id/rl_activity_user_like"
+                android:layout_width="match_parent"
+                android:background="@drawable/user_selector_item"
+                android:clickable="true"
+                android:layout_height="48dp">
+
+                <ImageView
+                    android:id="@+id/iv_activity_user_like"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="14dp"
+                    android:src="@drawable/ic_thumb_up_grey600_48dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="7dp"
+                    android:layout_toRightOf="@+id/iv_activity_user_like"
+                    android:text="我的收藏" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/arrow_right" />
+
+            </RelativeLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:src="#d4d4d4" />
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:src="#d4d4d4"
+                android:layout_marginTop="16dp" />
+
+            <RelativeLayout
+                android:id="@+id/rl_activity_user_history"
+                android:layout_width="match_parent"
+                android:background="@drawable/user_selector_item"
+                android:clickable="true"
+                android:layout_height="48dp">
+
+                <ImageView
+                    android:id="@+id/iv_activity_user_history"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
+                    android:layout_alignParentLeft="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="14dp"
+                    android:src="@drawable/ic_bookmark_outline_grey600_48dp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_centerVertical="true"
+                    android:layout_marginLeft="7dp"
+                    android:layout_toRightOf="@+id/iv_activity_user_history"
+                    android:text="听歌历史" />
+
+                <ImageView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_marginRight="10dp"
+                    android:layout_centerVertical="true"
+                    android:src="@drawable/arrow_right" />
+
+            </RelativeLayout>
+
+            <ImageView
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:src="#d4d4d4" />
+
+        </LinearLayout>
+
+    </ScrollView>
 
 </LinearLayout>

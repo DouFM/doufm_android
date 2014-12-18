@@ -91,4 +91,11 @@ public class User {
             userID = getUserID();
         }
     }
+
+    public void Quit() {
+        setUserName("");
+        setLogin(false);
+        setUserID("");
+        setUserPassword("");
+    }
 }

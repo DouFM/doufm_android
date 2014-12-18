@@ -677,13 +677,13 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         if (User.getInstance().getLogin()) {
             if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
                 tvUserLoginTitle.setText("个人中心");
-                ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_artist_300));
             }
+            ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_artist_300));
         } else {
             if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
                 tvUserLoginTitle.setText("点击登录");
-                ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_head_320));
             }
+            ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_head_320));
         }
     }
 
@@ -776,7 +776,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     startActivityForResult(intent, Constants.REQUEST_LOGIN_CODE);
                 } else if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
                     intent.setClass(MainActivity.this, UserActivity.class);
-                    startActivity(intent);
+                    startActivityForResult(intent, Constants.REQUEST_USER_CODE);
                 }
                 break;
         }
@@ -904,6 +904,13 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             case Constants.REQUEST_LOGIN_CODE:
                 if (resultCode == 100) {
                     updateLoginTitle();
+                }
+                break;
+            case Constants.REQUEST_USER_CODE:
+                if (resultCode == 100) {
+                    updateLoginTitle();
+                } else if (resultCode == 200) {
+                    //do nothing
                 }
                 break;
         }

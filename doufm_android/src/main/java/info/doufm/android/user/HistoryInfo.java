@@ -1,12 +1,14 @@
 package info.doufm.android.user;
 
 
+import io.realm.RealmObject;
+
 /**
  * 历史操作信息类
  * Create on 2014-12-13
  */
 
-public class HistoryInfo {
+public class HistoryInfo extends RealmObject {
 
     private String date;   //操作时间
     private String op;   //操作类型
