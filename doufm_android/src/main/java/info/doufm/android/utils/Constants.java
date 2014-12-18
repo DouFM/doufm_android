@@ -7,6 +7,7 @@ package info.doufm.android.utils;
 public class Constants {
     public static final int DISMISS = 1000;
     public static final int UPDATE_TIME = 2000;
+    public static final int REQUEST_LOGIN_CODE = 3000;
 
     //extra
     public static final String EXTRA_THEME = "info.doufm.android.Theme";

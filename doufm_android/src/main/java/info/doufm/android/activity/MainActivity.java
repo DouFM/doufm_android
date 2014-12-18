@@ -65,6 +65,7 @@ import info.doufm.android.info.PlaylistInfo;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
+import info.doufm.android.user.User;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
@@ -318,9 +319,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             getMusicList();
             isFirstLoad = false;
         }
-        //UpdateMenu();
+        updateLoginTitle();
     }
-
 
     private void getMusicList() {
         RequestManager.getRequestQueue().add(
@@ -628,7 +628,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
-        updateLoginTitle();
         return true;
     }
 
@@ -671,20 +670,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     }
 
     private void updateLoginTitle() {
-        if (isLogin()) {
-            if (tvUserLoginTitle.getText().toString().equals("用户登录")) {
+        if (User.getInstance().getLogin()) {
+            if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
                 tvUserLoginTitle.setText("个人中心");
             }
         } else {
             if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
-                tvUserLoginTitle.setText("用户登录");
+                tvUserLoginTitle.setText("点击登录");
             }
         }
-    }
-
-    private boolean isLogin() {
-        //判断用户是否登录
-        return false;
     }
 
     @Override
@@ -773,10 +767,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 intent.putExtra(Constants.EXTRA_THEME, mThemeNum);
                 if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
                     intent.setClass(MainActivity.this, LoginActivity.class);
+                    startActivityForResult(intent, Constants.REQUEST_LOGIN_CODE);
                 } else if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
                     intent.setClass(MainActivity.this, UserActivity.class);
+                    startActivity(intent);
                 }
-                startActivity(intent);
                 break;
         }
     }
@@ -896,4 +891,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        switch (requestCode) {
+            case Constants.REQUEST_LOGIN_CODE:
+                if (resultCode == 100) {
+                    updateLoginTitle();
+                }
+                break;
+        }
+    }
 }

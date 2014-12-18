@@ -1,6 +1,6 @@
 package info.doufm.android.activity;
 
-import android.content.Intent;
+import android.content.SharedPreferences;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -14,6 +14,8 @@ import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.CheckBox;
+import android.widget.CompoundButton;
 import android.widget.EditText;
 import android.widget.Toast;
 
@@ -30,17 +32,24 @@ import java.util.HashMap;
 import info.doufm.android.R;
 import info.doufm.android.network.JsonObjectPostRequest;
 import info.doufm.android.network.RequestManager;
+import info.doufm.android.user.User;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.Constants;
 
-public class LoginActivity extends ActionBarActivity implements View.OnClickListener {
+public class LoginActivity extends ActionBarActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
+    private static final int LOGIN_SUCCESS = 100;
+    private static final int LOGIN_ERROR = 200;
     private Toolbar mToolbar;
     private EditText etUserName, etUserPassword;
     private Button btnLogin;
     private TextWatcher mTextWatcher;
     private int themeNum;
     private StateListDrawable mStateListDrawable;
+    private boolean isLogin = false;
+    private SharedPreferences sp;
+    private CheckBox cbSavePassword;
+    private String originPassword;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,6 +62,8 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     }
 
     private void initViews() {
+        sp = getSharedPreferences("user", MODE_PRIVATE);
+        sp.edit().putBoolean("save_login_info", true).commit();
         //etUserName.set
         mStateListDrawable = new StateListDrawable();
         mStateListDrawable.addState(new int[]{-android.R.attr.state_enabled}, getResources().getDrawable(R.drawable.btn_disable));
@@ -95,6 +106,10 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         };
         etUserName.addTextChangedListener(mTextWatcher);
         etUserPassword.addTextChangedListener(mTextWatcher);
+        if (sp.getBoolean("save_login_info", false)) {
+            etUserName.setText(sp.getString("rm_user_name", ""));
+            etUserPassword.setText(sp.getString("rm_user_password", ""));
+        }
     }
 
     private void findViews() {
@@ -102,6 +117,8 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         etUserName = (EditText) findViewById(R.id.et_activity_login_user_name);
         etUserPassword = (EditText) findViewById(R.id.et_activity_login_user_password);
         btnLogin = (Button) findViewById(R.id.btn_activity_login);
+        cbSavePassword = (CheckBox) findViewById(R.id.cbSavePassword);
+        cbSavePassword.setOnCheckedChangeListener(this);
     }
 
     @Override
@@ -121,7 +138,9 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         switch (v.getId()) {
             case R.id.btn_activity_login:
                 //执行Login操作
-                Login();
+                if (!isLogin) {
+                    Login();
+                }
                 break;
         }
     }
@@ -130,6 +149,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         if (checkUserInputInfo()) {
             String userName = etUserName.getText().toString().trim();
             String userPassword = etUserPassword.getText().toString().trim();
+            originPassword = userPassword;
             //生成MD5
             userPassword = UserUtil.toLowerCaseMD5(userPassword);
             //转成成UTF-8
@@ -142,6 +162,8 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             HashMap<String, String> mMap = new HashMap<String, String>();
             mMap.put("user_name", userName);
             mMap.put("password", userPassword);
+            final String finalUserName = userName;
+            final String finalUserPassword = userPassword;
             RequestManager.getRequestQueue().add(new JsonObjectPostRequest(Constants.LOGIN_URL, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
@@ -150,9 +172,23 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                         Log.w("LOG", jsonObject.getString("user_id"));
                         if (jsonObject.get("status").equals("success")) {
                             //登录成功
-                            Toast.makeText(LoginActivity.this, "登录成功！", Toast.LENGTH_SHORT).show();
-                            startActivity(new Intent(LoginActivity.this, MainActivity.class));
-                            finish();
+                            User.getInstance().setUserName(finalUserName);
+                            User.getInstance().setUserPassword(finalUserPassword);
+                            User.getInstance().setUserID(jsonObject.getString("user_id"));
+                            User.getInstance().setLogin(true);
+                            if (cbSavePassword.isChecked()) {
+                                //记住用户名、密码、
+                                SharedPreferences.Editor editor = sp.edit();
+                                editor.putString("rm_user_name", finalUserName);
+                                editor.putString("rm_user_password", originPassword);
+                                editor.commit();
+                            }
+                            if (!isLogin) {
+                                Toast.makeText(LoginActivity.this, "登录成功！", Toast.LENGTH_SHORT).show();
+                                LoginActivity.this.setResult(LOGIN_SUCCESS);
+                                LoginActivity.this.finish();
+                                isLogin = true;
+                            }
                         } else {
                             //登录失败
                             Toast.makeText(LoginActivity.this, "账号或者密码错误！", Toast.LENGTH_LONG).show();
@@ -179,5 +215,14 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             return false;
         }
         return true;
+    }
+
+    @Override
+    public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
+        if (cbSavePassword.isChecked()) {
+            sp.edit().putBoolean("save_login_info", true).commit();
+        } else {
+            sp.edit().putBoolean("save_login_info", false).commit();
+        }
     }
 }

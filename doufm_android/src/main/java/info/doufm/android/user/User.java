@@ -1,122 +1,94 @@
 package info.doufm.android.user;
 
-import java.util.List;
-
-import info.doufm.android.info.MusicInfo;
+import android.content.Context;
 
 /**
- * 用于存储用户信息
- * Create on 2014-12-10
- */
-
-/*
-    客户端调用服务端的API完成操作
-    用户只要管理个人信息和喜欢的歌曲就可以，不喜欢的歌曲由服务端筛掉
-    故只需包含以下信息即可
+ * 用户类
  */
 public class User {
 
-    private String level;       //用户权限 disable, normal,admin
-    private String key;         //用户key
-    private String name;        //用户名
-    private String password;   //用户密码
-    private String regist_date; //注册时间
-    private int listened;     //听过的歌曲数
-    private int favor;        //喜欢的歌曲数
-    private int dislike;      //不喜欢的歌曲数
-    private int skipped;      //跳过的歌曲数
-    private List<HistoryInfo> historyList;  //操作信息列表
-    private List<MusicInfo> favorList;   //喜欢歌曲列表
+    private static Context context;
+    private static User mUser;
 
+    private String userName;
+    private String userPassword;
+    private String userID;
+    private boolean isLogin;
 
-    public String getLevel() {
-        return level;
+    public static final String TAG_SP_USER = "user";
+    public static final String TAG_SP_USER_NAME = "username";
+    public static final String TAG_SP_USER_PASSWORD = "password";
+    public static final String TAG_SP_USER_ID = "user_id";
+    public static final String TAG_SP_USER_LOGIN = "user_login";
+
+    private User() {
+        isLogin = context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getBoolean(TAG_SP_USER_LOGIN, false);
+        updateStatus(isLogin);
     }
 
-    //不需要此API
-    public void setLevel(String level) {
-        this.level = level;
+    public static void init(Context mContext) {
+        context = mContext;
     }
 
-    public String getKey() {
-        return key;
+    public static User getInstance() {
+        if (mUser == null) {
+            mUser = new User();
+        }
+        return mUser;
     }
 
-    //不需要此API
-    public void setKey(String key) {
-        this.key = key;
+    public String getUserName() {
+        if (!getLogin()) {
+            return "";
+        }
+        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getString(TAG_SP_USER_NAME, "");
     }
 
-    public String getName() {
-        return name;
+
+    public void setUserName(String userName) {
+        this.userName = userName;
+        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putString(TAG_SP_USER_NAME, userName).commit();
     }
 
-    //对密码和用户名的合法判断应放在java bean外
-    public void setName(String name) {
-        this.name = name;
+    public String getUserPassword() {
+        if (!getLogin()) {
+            return "";
+        }
+        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getString(TAG_SP_USER_PASSWORD, "");
     }
 
-    public String getPassword() {
-        return password;
+    public void setUserPassword(String userPassword) {
+        this.userPassword = userPassword;
+        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putString(TAG_SP_USER_PASSWORD, userPassword).commit();
     }
 
-    public void setPassword(String password) {
-        this.password = password;
+    public String getUserID() {
+        if (!getLogin()) {
+            return "";
+        }
+        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getString(TAG_SP_USER_ID, "");
     }
 
-    public String getRegist_date() {
-        return regist_date;
+    public void setUserID(String userID) {
+        this.userID = userID;
+        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putString(TAG_SP_USER_ID, userID).commit();
     }
 
-    public void setRegist_date(String regist_date) {
-        this.regist_date = regist_date;
+    public boolean getLogin() {
+        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getBoolean(TAG_SP_USER_LOGIN, false);
     }
 
-    public int getListened() {
-        return listened;
+    public void setLogin(boolean isLogin) {
+        this.isLogin = isLogin;
+        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putBoolean(TAG_SP_USER_LOGIN, isLogin).commit();
     }
 
-    public void setListened(int listened) {
-        this.listened = listened;
-    }
-
-    public int getFavor() {
-        return favor;
-    }
-
-    public void setFavor(int favor) {
-        this.favor = favor;
-    }
-
-    public int getDislike() {
-        return dislike;
-    }
-
-    public void setDislike(int dislike) {
-        this.dislike = dislike;
-    }
-
-    public int getSkipped() {
-        return skipped;
-    }
-
-    public void setSkipped(int skipped) {
-        this.skipped = skipped;
-    }
-
-    public List<HistoryInfo> getHistoryList() {
-        return historyList;
-    }
-
-    public void setHistoryList(List<HistoryInfo> historyList) {
-        this.historyList = historyList;
-    }
-
-    public List<MusicInfo> getFavorList() {
-        return favorList;
-    }
-
-    public void setFavorList(List<MusicInfo> favorList) {
-        this.favorList = favorList;
+    private void updateStatus(boolean isLogin) {
+        setLogin(isLogin);
+        if (isLogin) {
+            userName = getUserName();
+            userPassword = getUserPassword();
+            userID = getUserID();
+        }
     }
 }

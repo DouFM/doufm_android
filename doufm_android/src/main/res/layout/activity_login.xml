@@ -48,11 +48,22 @@
                 android:inputType="textPassword"
                 android:textSize="16dp" />
 
+            <CheckBox
+                android:layout_marginTop="8dp"
+                android:layout_below="@id/et_activity_login_user_password"
+                android:id="@+id/cbSavePassword"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginLeft="32dp"
+                android:text="记住密码"
+                android:checked="true"
+                android:textSize="16dp" />
+
             <Button
                 android:id="@+id/btn_activity_login"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/et_activity_login_user_password"
+                android:layout_below="@id/cbSavePassword"
                 android:layout_marginLeft="32dp"
                 android:layout_marginRight="32dp"
                 android:layout_marginTop="16dp"
