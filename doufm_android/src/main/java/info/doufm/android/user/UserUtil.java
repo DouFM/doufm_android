@@ -3,9 +3,12 @@ package info.doufm.android.user;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.NetworkResponse;
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
+import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 
@@ -13,12 +16,14 @@ import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import info.doufm.android.info.MusicInfo;
 import info.doufm.android.network.RequestManager;
+import info.doufm.android.utils.CacheUtil;
 
 /**
  * 用户帮助类
@@ -48,10 +53,11 @@ import info.doufm.android.network.RequestManager;
 public class UserUtil {
     private static final String TAG = "UserUtil";
 
-    private static final String USER_URL = "http://doufm.info/api/user/";
-    private static final String CURRENT_USER_URL = "http://doufm.info/api/user/current/";
-    private static final String USER_HISTORY_URL = "http://doufm.info/api/user/current/history/";
-    private static final String USER_FAVOR_URL = "http://doufm.info/api/user/current/favor";
+    private static final String USER_URL = "http://115.29.140.122:5001/api/user/";
+    private static final String TEST_LOGIN_URL = "http://115.29.140.122:5001/api/app_auth/";
+    private static final String CURRENT_USER_URL = "http://115.29.140.122:5001/api/user/current/";
+    private static final String USER_HISTORY_URL = "http://115.29.140.122:5001/api/user/current/history/";
+    private static final String USER_FAVOR_URL = "http://115.29.140.122:5001/api/user/current/favor";
 
     //操作状态常数
     public static final int STATE_INIT = 0;  //初始状态
@@ -103,6 +109,7 @@ public class UserUtil {
             dislike: 不喜欢歌曲数
         @return : boolean 表示是否注册成功
      */
+
     public int regist(String name, String password) {
         state = STATE_INIT;
         final String REGIST_URL = USER_URL + "?name=" + name + "&password=" + password;
@@ -193,14 +200,81 @@ public class UserUtil {
             dislike: 不喜欢歌曲数
             listened: 听过歌曲数
      */
+    public class JsonObjectPostRequest extends Request<JSONObject>{
+        private Map<String,String> mMap;
+        private Response.Listener<JSONObject> mListener;
+
+
+        public JsonObjectPostRequest(String url,Response.Listener<JSONObject> listener, Response.ErrorListener errorListener,Map map) {
+            super(Request.Method.POST, url, errorListener);
+            mListener=listener;
+            mMap=map;
+
+        }
+        @Override
+        protected Map<String, String> getParams() throws AuthFailureError {
+
+            return mMap;
+        }
+
+        @Override
+        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
+            try {
+                String jsonString =
+                        new String(response.data, HttpHeaderParser.parseCharset(response.headers));
+                return Response.success(new JSONObject(jsonString),
+                        HttpHeaderParser.parseCacheHeaders(response));
+            } catch (UnsupportedEncodingException e) {
+                return Response.error(new ParseError(e));
+            } catch (JSONException je) {
+                return Response.error(new ParseError(je));
+            }
+        }
+
+        @Override
+        protected void deliverResponse(JSONObject response) {
+            mListener.onResponse(response);
+
+        }
+
+    }
     public int login(String name, String password) {
-        final String LOGIN_URL = CURRENT_USER_URL + "?name=" + name + "&password=" + password;
+        HashMap<String,String> mMap=new HashMap<String,String>();
+        mMap.put("user_name",name);
+        mMap.put("password", CacheUtil.hashKeyForDisk(password));
+        RequestManager.getRequestQueue().add(new JsonObjectPostRequest(TEST_LOGIN_URL,new Response.Listener<JSONObject>(){
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                try {
+                    Log.w("LOG",jsonObject.getString("status"));
+                    Log.w("LOG",jsonObject.getString("user_id"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                state = STATE_ERROR;
+            }
+        },mMap));
+/*        final String LOGIN_URL = TEST_LOGIN_URL + "?user_name=" + name + "&password=" + CacheUtil.hashKeyForDisk(password);
         state = STATE_INIT;
+        Map<String,String> map=new HashMap<String,String>();
+        map.put("name", name);
+        map.put("password",CacheUtil.hashKeyForDisk(password));
+        JSONObject params=new JSONObject(map);
         RequestManager.getRequestQueue().add(
-                new JsonObjectRequest(Request.Method.POST, LOGIN_URL, null, new Response.Listener<JSONObject>() {
+                new JsonObjectRequest(Request.Method.POST, TEST_LOGIN_URL, params, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
+                            Log.w("LOG",jsonObject.getString("status"));
+                            Log.w("LOG",jsonObject.getString("user_id"));
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                        }
+*//*                        try {
                             if (jsonObject != null) {
                                 getUserInfoByJO(mCurrentUser, jsonObject);
                                 state = STATE_SUCCESS;
@@ -210,7 +284,7 @@ public class UserUtil {
                         } catch (JSONException e) {
                             e.printStackTrace();
                             state = STATE_OTHER;
-                        }
+                        }*//*
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -218,7 +292,7 @@ public class UserUtil {
                         state = STATE_ERROR;
                     }
                 })
-        );
+        );*/
         return state;
     }
 

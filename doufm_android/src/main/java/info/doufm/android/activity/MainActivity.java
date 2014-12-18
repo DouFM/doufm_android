@@ -169,7 +169,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     };
 
-    private String PLAYLIST_URL = "http://doufm.info/api/playlist/?start=0";
+    private String PLAYLIST_URL = "http://115.29.140.122:5001/api/playlist/?start=0";
     private boolean firstErrorFlag = true;
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
@@ -461,7 +461,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     private void playRandomMusic(String playlist_key) {
         changeMusic(false);
-        final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
+        final String MUSIC_URL = "http://115.29.140.122:5001/api/playlist/" + playlist_key + "/?num=1";
         RequestManager.getRequestQueue().add(
                 new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
                     @Override
@@ -472,8 +472,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             JSONObject jo = jsonArray.getJSONObject(0);
                             playMusicInfo.setTitle(jo.getString("title"));
                             playMusicInfo.setArtist(jo.getString("artist"));
-                            playMusicInfo.setAudio("http://doufm.info" + jo.getString("audio"));
-                            playMusicInfo.setCover("http://doufm.info" + jo.getString("cover"));
+                            playMusicInfo.setAudio("http://115.29.140.122:5001" + jo.getString("audio"));
+                            playMusicInfo.setCover("http://115.29.140.122:5001" + jo.getString("cover"));
                             mMainMediaPlayer.setDataSource(playMusicInfo.getAudio()); //这种url路径
                             mMainMediaPlayer.prepareAsync(); //prepare自动播放
                             getCoverImageRequest(playMusicInfo);
@@ -488,7 +488,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     }
 
     private void getNextMusicInfo(String playlist_key) {
-        final String MUSIC_URL = "http://doufm.info/api/playlist/" + playlist_key + "/?num=1";
+        final String MUSIC_URL = "http://115.29.140.122:5001/api/playlist/" + playlist_key + "/?num=1";
         RequestManager.getRequestQueue().add(
                 new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
                     @Override
@@ -497,8 +497,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             JSONObject jo = jsonArray.getJSONObject(0);
                             nextMusicInfo.setTitle(jo.getString("title"));
                             nextMusicInfo.setArtist(jo.getString("artist"));
-                            nextMusicInfo.setAudio("http://doufm.info" + jo.getString("audio"));
-                            nextMusicInfo.setCover("http://doufm.info" + jo.getString("cover"));
+                            nextMusicInfo.setAudio("http://115.29.140.122:5001" + jo.getString("audio"));
+                            nextMusicInfo.setCover("http://115.29.140.122:5001" + jo.getString("cover"));
                             mDownThread = new DownloadMusicThread(nextMusicInfo.getAudio());
                             mDownThread.start();
                         } catch (JSONException e) {
