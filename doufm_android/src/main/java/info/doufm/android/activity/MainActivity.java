@@ -170,7 +170,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     };
 
-    private String PLAYLIST_URL = "http://115.29.140.122:5001/api/playlist/?start=0";
+    //private String PLAYLIST_URL = "http://115.29.140.122:5001/api/playlist/?start=0";
     private boolean firstErrorFlag = true;
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
@@ -208,7 +208,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         needleDownAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_down);
         needleAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_up_down);
         mDiskAnimator = new RotateAnimator(this, ivDisk);
-        colorNum = Constants.mBackgroundColors.length;
+        colorNum = Constants.BACKGROUND_COLORS.length;
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
         mToolbar.setTitle("DouFM");
@@ -380,8 +380,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
         mShareUtil = new ShareUtil(this);
         mThemeNum = mShareUtil.getTheme();
-        mToolbar.setBackgroundColor(Color.parseColor(Constants.mActionBarColors[mThemeNum]));
-        mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[mThemeNum]));
+        mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[mThemeNum]));
+        mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
         mPlayListNum = mShareUtil.getPlayList();
     }
 
@@ -400,13 +400,13 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             getMusicList();
             isFirstLoad = false;
         }
-        UpdateMenu();
+        //UpdateMenu();
     }
 
 
     private void getMusicList() {
         RequestManager.getRequestQueue().add(
-                new JsonArrayRequest(PLAYLIST_URL, new Response.Listener<JSONArray>() {
+                new JsonArrayRequest(Constants.PLAYLIST_URL, new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray jsonArray) {
                         JSONObject jo = new JSONObject();
@@ -463,7 +463,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     private void playRandomMusic(String playlist_key) {
         changeMusic(false);
-        final String MUSIC_URL = "http://115.29.140.122:5001/api/playlist/" + playlist_key + "/?num=1";
+        final String MUSIC_URL = Constants.MUSIC_IN_PLAYLIST_URL + playlist_key + "/?num=1";
         RequestManager.getRequestQueue().add(
                 new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
                     @Override
@@ -474,8 +474,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             JSONObject jo = jsonArray.getJSONObject(0);
                             playMusicInfo.setTitle(jo.getString("title"));
                             playMusicInfo.setArtist(jo.getString("artist"));
-                            playMusicInfo.setAudio("http://115.29.140.122:5001" + jo.getString("audio"));
-                            playMusicInfo.setCover("http://115.29.140.122:5001" + jo.getString("cover"));
+                            playMusicInfo.setAudio(Constants.BASE_URL + jo.getString("audio"));
+                            playMusicInfo.setCover(Constants.BASE_URL + jo.getString("cover"));
                             mMainMediaPlayer.setDataSource(playMusicInfo.getAudio()); //这种url路径
                             mMainMediaPlayer.prepareAsync(); //prepare自动播放
                             getCoverImageRequest(playMusicInfo);
@@ -490,7 +490,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     }
 
     private void getNextMusicInfo(String playlist_key) {
-        final String MUSIC_URL = "http://115.29.140.122:5001/api/playlist/" + playlist_key + "/?num=1";
+        final String MUSIC_URL = Constants.MUSIC_IN_PLAYLIST_URL + playlist_key + "/?num=1";
         RequestManager.getRequestQueue().add(
                 new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
                     @Override
@@ -499,8 +499,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             JSONObject jo = jsonArray.getJSONObject(0);
                             nextMusicInfo.setTitle(jo.getString("title"));
                             nextMusicInfo.setArtist(jo.getString("artist"));
-                            nextMusicInfo.setAudio("http://115.29.140.122:5001" + jo.getString("audio"));
-                            nextMusicInfo.setCover("http://115.29.140.122:5001" + jo.getString("cover"));
+                            nextMusicInfo.setAudio(Constants.BASE_URL + jo.getString("audio"));
+                            nextMusicInfo.setCover(Constants.BASE_URL + jo.getString("cover"));
                             mDownThread = new DownloadMusicThread(nextMusicInfo.getAudio());
                             mDownThread.start();
                         } catch (JSONException e) {
@@ -544,7 +544,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         seekBar.setSecondaryProgress(0);
         tvCurTime.setText("00:00");
         tvTotalTime.setText("00:00");
-        //切换歌曲时立即停止正在播放的歌曲
         mMainMediaPlayer.reset();
     }
 
@@ -566,7 +565,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     @Override
                     public void onResponse(Bitmap bitmap) {
                         //对齐新歌曲信息显示时间
-                        //mPlayView.SetCDImage(bitmap);
                         ivDisk.setImageBitmap(mDiskAnimator.getCroppedBitmap(bitmap));
                         mToolbar.setTitle(musicInfo.getTitle());
                         mToolbar.setSubtitle(musicInfo.getArtist());
@@ -590,115 +588,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     .setContentText(getResources().getString(R.string.title_activity_about))
                     .show();
         } else if (item.getItemId() == R.id.user) {    //应将弹出登录界面的控件改为自定义控件而非menu
+            Intent intent = new Intent();
+            intent.putExtra(Constants.EXTRA_THEME, mThemeNum);
             if (item.getTitle().equals("用户登录")) {
-                startActivity(new Intent(MainActivity.this, LoginActivity.class));
+                intent.setClass(MainActivity.this, LoginActivity.class);
             } else if (item.getTitle().equals("个人中心")) {
-                startActivity(new Intent(MainActivity.this, UserActivity.class));
+                intent.setClass(MainActivity.this, UserActivity.class);
             }
-//            if (mUserUtil.getIsLogin()) {
-//                //已登录 应有另一套UI用于显示用户信息
-//
-//            } else
-//                new LoginDialog(this, LoginDialog.LOGIN_TYPE)
-//                        .setCustomImage(R.drawable.user)   //登录图片
-//                        .setConfirmClickListener(new LoginDialog.OnLoginDialogClickListener() {   //设置确认按钮的onClick方法
-//                            @Override
-//                            public void onClick(LoginDialog loginDialog) {
-//                                if ("登录".equals(loginDialog.getConfirmText())) {
-//                                    EditText loginNameView = loginDialog.getLoginNameView();
-//                                    EditText loginPswView = loginDialog.getLoginPswView();
-//                                    String loginName = loginNameView.getText().toString().trim();
-//                                    String loginPsw = loginPswView.getText().toString().trim();
-//                                    if ("".equals(loginName) || "".equals(loginPsw)) {
-//                                        Toast.makeText(MainActivity.this, "登录失败，用户名或密码不能为空"
-//                                                , Toast.LENGTH_SHORT).show();
-//                                        loginPswView.setText("");
-//                                    } else {
-//                                        int result = mUserUtil.login(loginName, loginPsw);
-//                                        switch (result) {
-//                                            case UserUtil.STATE_SUCCESS:
-//                                                //登录成功
-//                                                Toast.makeText(MainActivity.this, "欢迎回来！" + loginName + "O(∩_∩)O", Toast.LENGTH_SHORT);
-//                                                loginDialog.dismiss();
-//                                                break;
-//                                            case UserUtil.STATE_ERROR:
-//                                                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置@.@", Toast.LENGTH_SHORT).show();
-//                                                break;
-//                                            case UserUtil.STATE_WRONG:
-//                                                Toast.makeText(MainActivity.this, "登录失败，查无此人0.0", Toast.LENGTH_SHORT).show();
-//                                                loginNameView.setText("");
-//                                                break;
-//                                            case UserUtil.STATE_OTHER:
-//                                            case UserUtil.STATE_INIT:
-//                                                Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
-//                                                break;
-//                                        }
-//
-//                                    }
-//
-//                                } else if ("注册".equals(loginDialog.getConfirmText())) {
-//                                    EditText registNameView = loginDialog.getRegistNameView();//用户名EditView
-//                                    EditText registPswView = loginDialog.getRegistPswView();  //密码EditView
-//                                    EditText registPswConfirmView = loginDialog.getRegistPswConfirmView();  //确认密码EditView
-//                                    //注册用户
-//                                    String registName = loginDialog.getRegistNameView().getText().toString();
-//                                    String registPsw = loginDialog.getRegistPswView().getText().toString().trim();
-//                                    String registPswConfirm = loginDialog.getRegistPswConfirmView().getText().toString().trim();
-//                                    if ("".equals(registName) || "".equals(registPsw) || "".equals(registPswConfirm)) {
-//                                        Toast.makeText(MainActivity.this, "注册失败，用户名或密码不能为空"
-//                                                , Toast.LENGTH_SHORT).show();
-//                                        registPswView.setText("");
-//                                        registPswConfirmView.setText("");
-//                                    } else if (registName.contains(" ") || registPsw.contains(" ")) {
-//                                        Toast.makeText(MainActivity.this, "注册失败，用户名或密码中不能有空格"
-//                                                , Toast.LENGTH_SHORT).show();
-//                                        registPswView.setText("");
-//                                        registPswConfirmView.setText("");
-//                                    } else if (!registPsw.equals(registPswConfirm)) {
-//                                        Toast.makeText(MainActivity.this, "注册失败，两次输入的密码不一致"
-//                                                , Toast.LENGTH_SHORT).show();
-//                                        registPswView.setText("");
-//                                        registPswConfirmView.setText("");
-//                                    } else {
-//                                        int result = mUserUtil.regist(registName, registPsw);
-//                                        switch (result) {
-//                                            case UserUtil.STATE_SUCCESS:
-//                                                //注册成功
-//                                                Toast.makeText(MainActivity.this, "注册成功！" + registName + "O(∩_∩)O", Toast.LENGTH_SHORT);
-//                                                mUserUtil.login(registName, registPsw);  //自动登录
-//                                                loginDialog.dismiss();
-//                                                break;
-//                                            case UserUtil.STATE_ERROR:
-//                                                Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置@.@", Toast.LENGTH_SHORT).show();
-//                                                break;
-//                                            case UserUtil.STATE_WRONG:
-//                                                Toast.makeText(MainActivity.this, "注册失败，用户已存在0.0", Toast.LENGTH_SHORT).show();
-//                                                registPswView.setText("");
-//                                                registPswConfirmView.setText("");
-//                                                break;
-//                                            case UserUtil.STATE_OTHER:
-//                                            case UserUtil.STATE_INIT:
-//                                                Toast.makeText(MainActivity.this, "操作失败，出错啦orz", Toast.LENGTH_SHORT).show();
-//                                                break;
-//                                        }
-//                                    }
-//
-//                                }
-//                            }
-//                        }).setCancelClickListener(new LoginDialog.OnLoginDialogClickListener() {  //设置取消按钮的onClick方法
-//                    //由源码可知，registDialog对象=loginDialog对象
-//                    //通过API changeDialogType(int dialogtype)实现对话框款式的转换
-//                    @Override
-//                    public void onClick(LoginDialog loginDialog) {
-//                        if ("取消".equals(loginDialog.getCancelText())) {
-//                            loginDialog.dismiss();
-//                        } else if ("注册".equals(loginDialog.getCancelText())) {
-//                            //点击注册按钮时,跳入注册页面
-//                            loginDialog.changeDialogType(loginDialog.REGIST_TYPE);
-//                            loginDialog.setCustomImage(R.drawable.ic_launcher);
-//                        }
-//                    }
-//                }).show();
+            startActivity(intent);
 
         } else if (item.getItemId() == R.id.switch_theme) {
             int colorIndex = (int) (Math.random() * colorNum);
@@ -708,8 +605,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             if (colorIndex < 0) {
                 colorIndex = 0;
             }
-            mToolbar.setBackgroundColor(Color.parseColor(Constants.mActionBarColors[colorIndex]));
-            mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.mBackgroundColors[colorIndex]));
+            mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[colorIndex]));
+            mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[colorIndex]));
             mThemeNum = colorIndex;
         }
         return super.onOptionsItemSelected(item);
@@ -845,12 +742,37 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        updateMenu();
+        return true;
+    }
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
         this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_sample, menu);
         return true;
+    }
+
+    private void updateMenu() {
+        MenuItem menuItem = menu.findItem(R.id.user);
+        if (isLogin()) {
+            if (menuItem.getTitle().equals("用户登录")) {
+                menuItem.setTitle("个人中心");
+            }
+        } else {
+            if (menuItem.getTitle().equals("个人中心")) {
+                menuItem.setTitle("用户登录");
+            }
+        }
+    }
+
+    private boolean isLogin() {
+        //判断用户是否登录
+        return false;
     }
 
     private class ListListener implements AdapterView.OnItemClickListener {
@@ -966,24 +888,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     break;
             }
         }
-    }
-
-    private void UpdateMenu() {
-        MenuItem menuItem = menu.findItem(R.id.user);
-        if (isLogin()) {
-            if (menuItem.getTitle().equals("用户登录")) {
-                menuItem.setTitle("个人中心");
-            }
-        } else {
-            if (menuItem.getTitle().equals("个人中心")) {
-                menuItem.setTitle("用户登录");
-            }
-        }
-    }
-
-    private boolean isLogin() {
-        //判断用户是否登录
-        return false;
     }
 
 }

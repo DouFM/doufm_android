@@ -18,16 +18,17 @@ import java.util.Map;
  */
 
 public class JsonObjectPostRequest extends Request<JSONObject> {
-    private Map<String,String> mMap;
+    private Map<String, String> mMap;
     private Response.Listener<JSONObject> mListener;
 
 
-    public JsonObjectPostRequest(String url,Response.Listener<JSONObject> listener, Response.ErrorListener errorListener,Map map) {
+    public JsonObjectPostRequest(String url, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener, Map map) {
         super(Request.Method.POST, url, errorListener);
-        mListener=listener;
-        mMap=map;
+        mListener = listener;
+        mMap = map;
 
     }
+
     @Override
     protected Map<String, String> getParams() throws AuthFailureError {
 

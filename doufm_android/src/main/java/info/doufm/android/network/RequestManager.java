@@ -27,4 +27,5 @@ public class RequestManager {
             throw new IllegalStateException("No initialized");
         }
     }
+
 }

@@ -3,12 +3,9 @@ package info.doufm.android.user;
 import android.util.Log;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.NetworkResponse;
-import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
-import com.android.volley.toolbox.HttpHeaderParser;
 import com.android.volley.toolbox.JsonArrayRequest;
 import com.android.volley.toolbox.JsonObjectRequest;
 
@@ -25,7 +22,7 @@ import java.util.Map;
 
 import info.doufm.android.info.MusicInfo;
 import info.doufm.android.network.RequestManager;
-import info.doufm.android.utils.CacheUtil;
+import info.doufm.android.utils.Constants;
 
 /**
  * 用户帮助类
@@ -53,20 +50,13 @@ import info.doufm.android.utils.CacheUtil;
 */
 
 public class UserUtil {
-    private static final String TAG = "UserUtil";
-
-    private static final String USER_URL = "http://115.29.140.122:5001/api/user/";
-    private static final String TEST_LOGIN_URL = "http://115.29.140.122:5001/api/app_auth/";
-    private static final String CURRENT_USER_URL = "http://115.29.140.122:5001/api/user/current/";
-    private static final String USER_HISTORY_URL = "http://115.29.140.122:5001/api/user/current/history/";
-    private static final String USER_FAVOR_URL = "http://115.29.140.122:5001/api/user/current/favor";
-
     //操作状态常数
     public static final int STATE_INIT = 0;  //初始状态
     public static final int STATE_SUCCESS = 1; //操作成功
     public static final int STATE_WRONG = 2;   //操作失败
     public static final int STATE_ERROR = -1;  //网络出错
     public static final int STATE_OTHER = -2;  //系统出现异常
+    private static final String TAG = "UserUtil";
     private int state;        //标识操作返回状态
     private User mCurrentUser;//用于保存当前登录用户信息，若未登录则user.key = null;
     private boolean isLogin;  //判断是否已登录
@@ -75,6 +65,30 @@ public class UserUtil {
         mCurrentUser = new User();
         state = STATE_INIT;
         isLogin = false;
+    }
+
+    /**
+     * 生成全小写的MD5值
+     *
+     * @param password
+     * @return
+     */
+    public static String toLowerCaseMD5(String password) {
+        byte[] hash;
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(password.getBytes("UTF-8"));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 should be supported?", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(" UTF-8 should be supported?", e);
+        }
+
+        StringBuilder hex = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            if ((b & 0xFF) < 0x10) hex.append("0");
+            hex.append(Integer.toHexString(b & 0xFF));
+        }
+        return hex.toString().toLowerCase();
     }
 
     public boolean getIsLogin() {
@@ -113,7 +127,7 @@ public class UserUtil {
      */
     public int regist(String name, String password) {
         state = STATE_INIT;
-        final String REGIST_URL = USER_URL + "?name=" + name + "&password=" + password;
+        final String REGIST_URL = Constants.USER_URL + "?name=" + name + "&password=" + password;
         RequestManager.getRequestQueue().add(
                 new JsonObjectRequest(Request.Method.POST, REGIST_URL, null, new Response.Listener<JSONObject>() {
                     @Override
@@ -124,49 +138,6 @@ public class UserUtil {
                                 getUserInfoByJO(mCurrentUser, jsonObject);
                                 state = STATE_SUCCESS;
                                 Log.d(TAG, jsonObject.toString());
-                            } else state = STATE_WRONG;
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                            state = STATE_OTHER;
-                        }
-                    }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        state = STATE_ERROR;
-                    }
-                })
-        );
-        return state;
-
-    }
-
-    /*
-        Method GET: 获取当前登录用户信息
-        URL: /api/user/current/
-        level: None
-        Arguments: None
-        Response: 若未登录返回None，否则返回用户信息:
-            key: 用户key
-            name: 用户名
-            level: 权限
-            regist_date: 注册时间
-            favor: 喜欢歌曲数
-            listened: 听过歌曲数
-            skipped: 跳过歌曲数
-            dislike: 不喜欢歌曲数
-     */
-    public int current() {
-        state = STATE_INIT;
-        RequestManager.getRequestQueue().add(
-                new JsonObjectRequest(Request.Method.GET, CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
-                    @Override
-                    public void onResponse(JSONObject jsonObject) {
-                        try {
-                            if (jsonObject != null) {
-                                //已登录
-                                getUserInfoByJO(mCurrentUser, jsonObject);
-                                state = STATE_SUCCESS;
                             } else state = STATE_WRONG;
                         } catch (JSONException e) {
                             e.printStackTrace();
@@ -201,65 +172,10 @@ public class UserUtil {
             dislike: 不喜欢歌曲数
             listened: 听过歌曲数
      */
-    public class JsonObjectPostRequest extends Request<JSONObject>{
-        private Map<String,String> mMap;
-        private Response.Listener<JSONObject> mListener;
 
+/*    public int login(String name, String password) {
 
-        public JsonObjectPostRequest(String url,Response.Listener<JSONObject> listener, Response.ErrorListener errorListener,Map map) {
-            super(Request.Method.POST, url, errorListener);
-            mListener=listener;
-            mMap=map;
-
-        }
-        @Override
-        protected Map<String, String> getParams() throws AuthFailureError {
-
-            return mMap;
-        }
-
-        @Override
-        protected Response<JSONObject> parseNetworkResponse(NetworkResponse response) {
-            try {
-                String jsonString =
-                        new String(response.data, HttpHeaderParser.parseCharset(response.headers));
-                return Response.success(new JSONObject(jsonString),
-                        HttpHeaderParser.parseCacheHeaders(response));
-            } catch (UnsupportedEncodingException e) {
-                return Response.error(new ParseError(e));
-            } catch (JSONException je) {
-                return Response.error(new ParseError(je));
-            }
-        }
-
-        @Override
-        protected void deliverResponse(JSONObject response) {
-            mListener.onResponse(response);
-
-        }
-
-    }
-    public int login(String name, String password) {
-        HashMap<String,String> mMap=new HashMap<String,String>();
-        mMap.put("user_name",name);
-        mMap.put("password", CacheUtil.hashKeyForDisk(password));
-        RequestManager.getRequestQueue().add(new JsonObjectPostRequest(TEST_LOGIN_URL,new Response.Listener<JSONObject>(){
-            @Override
-            public void onResponse(JSONObject jsonObject) {
-                try {
-                    Log.w("LOG",jsonObject.getString("status"));
-                    Log.w("LOG",jsonObject.getString("user_id"));
-                } catch (JSONException e) {
-                    e.printStackTrace();
-                }
-            }
-        },new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                state = STATE_ERROR;
-            }
-        },mMap));
-/*        final String LOGIN_URL = TEST_LOGIN_URL + "?user_name=" + name + "&password=" + CacheUtil.hashKeyForDisk(password);
+        final String LOGIN_URL = TEST_LOGIN_URL + "?user_name=" + name + "&password=" + CacheUtil.hashKeyForDisk(password);
         state = STATE_INIT;
         Map<String,String> map=new HashMap<String,String>();
         map.put("name", name);
@@ -275,7 +191,7 @@ public class UserUtil {
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
-*//*                        try {
+                        try {
                             if (jsonObject != null) {
                                 getUserInfoByJO(mCurrentUser, jsonObject);
                                 state = STATE_SUCCESS;
@@ -285,7 +201,7 @@ public class UserUtil {
                         } catch (JSONException e) {
                             e.printStackTrace();
                             state = STATE_OTHER;
-                        }*//*
+                        }
                     }
                 }, new Response.ErrorListener() {
                     @Override
@@ -293,8 +209,51 @@ public class UserUtil {
                         state = STATE_ERROR;
                     }
                 })
-        );*/
+        );
         return state;
+    }*/
+
+    /*
+        Method GET: 获取当前登录用户信息
+        URL: /api/user/current/
+        level: None
+        Arguments: None
+        Response: 若未登录返回None，否则返回用户信息:
+            key: 用户key
+            name: 用户名
+            level: 权限
+            regist_date: 注册时间
+            favor: 喜欢歌曲数
+            listened: 听过歌曲数
+            skipped: 跳过歌曲数
+            dislike: 不喜欢歌曲数
+     */
+    public int current() {
+        state = STATE_INIT;
+        RequestManager.getRequestQueue().add(
+                new JsonObjectRequest(Request.Method.GET, Constants.CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
+                    @Override
+                    public void onResponse(JSONObject jsonObject) {
+                        try {
+                            if (jsonObject != null) {
+                                //已登录
+                                getUserInfoByJO(mCurrentUser, jsonObject);
+                                state = STATE_SUCCESS;
+                            } else state = STATE_WRONG;
+                        } catch (JSONException e) {
+                            e.printStackTrace();
+                            state = STATE_OTHER;
+                        }
+                    }
+                }, new Response.ErrorListener() {
+                    @Override
+                    public void onErrorResponse(VolleyError volleyError) {
+                        state = STATE_ERROR;
+                    }
+                })
+        );
+        return state;
+
     }
 
     /*
@@ -307,7 +266,7 @@ public class UserUtil {
     public int logout() {
         state = STATE_INIT;
         RequestManager.getRequestQueue().add(
-                new JsonObjectRequest(Request.Method.DELETE, CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
+                new JsonObjectRequest(Request.Method.DELETE, Constants.CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
 
@@ -344,10 +303,10 @@ public class UserUtil {
      */
     public int updateUserInfo(String password) {
         state = STATE_INIT;
-        final String UPDATE_URL = USER_URL + "?key=" + mCurrentUser.getKey() +
+        final String UPDATE_URL = Constants.USER_URL + "?key=" + mCurrentUser.getKey() +
                 "&level=" + mCurrentUser.getLevel() + "&password=" + password;
         RequestManager.getRequestQueue().add(
-                new JsonObjectRequest(Request.Method.POST, CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
+                new JsonObjectRequest(Request.Method.POST, Constants.CURRENT_USER_URL, null, new Response.Listener<JSONObject>() {
                     @Override
                     public void onResponse(JSONObject jsonObject) {
                         try {
@@ -398,7 +357,6 @@ public class UserUtil {
         user.setDislike(0);
     }
 
-
     /*
         Method DELETE: 删除用户
         URL:/api/user/<string:key>/
@@ -425,7 +383,7 @@ public class UserUtil {
     Response: None
      */
     public int insertHistory(String op, String music_key) {
-        final String UPDATE_OP_URL = USER_HISTORY_URL + "?op=" + op + "&key=" + music_key;
+        final String UPDATE_OP_URL = Constants.USER_HISTORY_URL + "?op=" + op + "&key=" + music_key;
         state = STATE_INIT;
         RequestManager.getRequestQueue().add(
                 new JsonObjectRequest(Request.Method.POST, UPDATE_OP_URL, null, new Response.Listener<JSONObject>() {
@@ -466,7 +424,7 @@ public class UserUtil {
         state = STATE_INIT;
         final List<MusicInfo> favorList = mCurrentUser.getFavorList();
         RequestManager.getRequestQueue().add(
-                new JsonArrayRequest(USER_FAVOR_URL, new Response.Listener<JSONArray>() {
+                new JsonArrayRequest(Constants.USER_FAVOR_URL, new Response.Listener<JSONArray>() {
                     @Override
                     public void onResponse(JSONArray jsonArray) {
                         JSONObject jo = new JSONObject();
@@ -500,29 +458,5 @@ public class UserUtil {
                     }
                 })
         );
-    }
-
-    /**
-     * 生成全小写的MD5值
-     *
-     * @param password
-     * @return
-     */
-    public static String ToLowerCaseMD5(String password) {
-        byte[] hash;
-        try {
-            hash = MessageDigest.getInstance("MD5").digest(password.getBytes("UTF-8"));
-        } catch (NoSuchAlgorithmException e) {
-            throw new RuntimeException("MD5 should be supported?", e);
-        } catch (UnsupportedEncodingException e) {
-            throw new RuntimeException(" UTF-8 should be supported?", e);
-        }
-
-        StringBuilder hex = new StringBuilder(hash.length * 2);
-        for (byte b : hash) {
-            if ((b & 0xFF) < 0x10) hex.append("0");
-            hex.append(Integer.toHexString(b & 0xFF));
-        }
-        return hex.toString().toLowerCase();
     }
 }
