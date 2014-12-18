@@ -17,6 +17,8 @@ import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,7 +111,6 @@ public class UserUtil {
             dislike: 不喜欢歌曲数
         @return : boolean 表示是否注册成功
      */
-
     public int regist(String name, String password) {
         state = STATE_INIT;
         final String REGIST_URL = USER_URL + "?name=" + name + "&password=" + password;
@@ -499,5 +500,29 @@ public class UserUtil {
                     }
                 })
         );
+    }
+
+    /**
+     * 生成全小写的MD5值
+     *
+     * @param password
+     * @return
+     */
+    public static String ToLowerCaseMD5(String password) {
+        byte[] hash;
+        try {
+            hash = MessageDigest.getInstance("MD5").digest(password.getBytes("UTF-8"));
+        } catch (NoSuchAlgorithmException e) {
+            throw new RuntimeException("MD5 should be supported?", e);
+        } catch (UnsupportedEncodingException e) {
+            throw new RuntimeException(" UTF-8 should be supported?", e);
+        }
+
+        StringBuilder hex = new StringBuilder(hash.length * 2);
+        for (byte b : hash) {
+            if ((b & 0xFF) < 0x10) hex.append("0");
+            hex.append(Integer.toHexString(b & 0xFF));
+        }
+        return hex.toString().toLowerCase();
     }
 }

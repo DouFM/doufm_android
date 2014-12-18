@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
+
     <string name="app_name">DouFm</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
@@ -19,7 +20,6 @@
     <string name="drawer_close">drawer_close</string>
     <string name="app_description">Android drawer icon with material design animation</string>
     <string name="title_activity_try_listen">DouFM试听</string>
-
     <string name="user_name">用户名</string>
     <string name="user_psw">密码</string>
     <string name="user_psw_confirm">确认密码</string>
@@ -28,5 +28,7 @@
     <string name="init_user_name">请输入用户名，长度小于20</string>
     <string name="init_user_psw">请输入密码，长度小于16</string>
     <string name="init_user_psw_confirm">请再次输入密码</string>
+    <string name="title_activity_login">LoginActivity</string>
+    <string name="title_activity_user">UserActivity</string>
 
 </resources>
