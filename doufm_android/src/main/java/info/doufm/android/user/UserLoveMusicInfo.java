@@ -7,6 +7,6 @@ import io.realm.RealmObject;
  * Time: 04:18
  * Info:
  */
-public class LikeMusicInfo extends RealmObject {
+public class UserLoveMusicInfo extends RealmObject {
 
 }

@@ -1,5 +1,6 @@
 package info.doufm.android.activity;
 
+import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -21,7 +22,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
 
     private Toolbar mToolbar;
     private int themeNum;
-    private RelativeLayout rlUserMain;
+    private RelativeLayout rlUserMain, rlUserHistory, rlUserLove;
     private ImageView ivUserLogo;
     private TextView tvUserName;
     private Button btnUserQuit;
@@ -43,6 +44,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         btnUserQuit = (Button) findViewById(R.id.btn_activity_quit);
         btnUserQuit.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[themeNum]));
         rlUserMain = (RelativeLayout) findViewById(R.id.rl_activity_user_main);
+        rlUserHistory = (RelativeLayout) findViewById(R.id.rl_activity_user_history);
         rlUserMain.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[themeNum]));
     }
 
@@ -56,6 +58,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         ivUserLogo.setImageDrawable(UserUtil.getCircleImage(this, R.drawable.default_artist_300));
         tvUserName.setText(getSharedPreferences("user", MODE_PRIVATE).getString("username", ""));
         btnUserQuit.setOnClickListener(this);
+        rlUserHistory.setOnClickListener(this);
     }
 
     @Override
@@ -76,6 +79,11 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                 User.getInstance().Quit();
                 setResult(100);
                 finish();
+                break;
+            case R.id.rl_activity_user_history:
+                Intent intent = new Intent(UserActivity.this, UserHistoryActivity.class);
+                intent.putExtra(Constants.EXTRA_THEME, themeNum);
+                startActivity(intent);
                 break;
         }
     }

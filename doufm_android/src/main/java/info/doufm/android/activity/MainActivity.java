@@ -66,11 +66,14 @@ import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
 import info.doufm.android.user.User;
+import info.doufm.android.user.UserHistoryInfo;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.ShareUtil;
 import info.doufm.android.utils.TimeFormat;
+import io.realm.Realm;
+import io.realm.RealmResults;
 import libcore.io.DiskLruCache;
 
 
@@ -125,15 +128,16 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean isFirstLoad = true;
     private boolean needleDownFlag = false;  //是否需要play needledown的动画
     private boolean loveFlag = false;
-    private Menu menu;
     private ChannelListAdapter channelListAdapter;
     private LinearLayout llLeftSlideMenu;
     private RelativeLayout rlUserLogin;
     private TextView tvUserLoginTitle;
     private ImageView ivUserLogo;
 
-    //用户操作类对象
-    private UserUtil mUserUtil;
+    private String currentMusicTitle;
+    private String currentMusicSingerName;
+    private String currentMusicURL;
+    private String currentMusicCoverURL;
 
     private ShareUtil mShareUtil;
 
@@ -233,7 +237,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mDrawerList.setVerticalScrollBarEnabled(false);
         playMusicInfo = new MusicInfo();
         nextMusicInfo = new MusicInfo();
-        mUserUtil = new UserUtil();
 
         mActionBarDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, mToolbar, R.string.drawer_open, R.string.drawer_close) {
 
@@ -392,10 +395,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         try {
                             //Log.i(TAG,"before setSource:"+System.currentTimeMillis());
                             JSONObject jo = jsonArray.getJSONObject(0);
-                            playMusicInfo.setTitle(jo.getString("title"));
-                            playMusicInfo.setArtist(jo.getString("artist"));
-                            playMusicInfo.setAudio(Constants.BASE_URL + jo.getString("audio"));
-                            playMusicInfo.setCover(Constants.BASE_URL + jo.getString("cover"));
+                            //save current music info for history
+                            currentMusicTitle = jo.getString("title");
+                            currentMusicSingerName = jo.getString("artist");
+                            currentMusicURL = Constants.BASE_URL + jo.getString("audio");
+                            currentMusicCoverURL = Constants.BASE_URL + jo.getString("cover");
+                            playMusicInfo.setTitle(currentMusicTitle);
+                            playMusicInfo.setArtist(currentMusicSingerName);
+                            playMusicInfo.setAudio(currentMusicURL);
+                            playMusicInfo.setCover(currentMusicCoverURL);
                             mMainMediaPlayer.setDataSource(playMusicInfo.getAudio()); //这种url路径
                             mMainMediaPlayer.prepareAsync(); //prepare自动播放
                             getCoverImageRequest(playMusicInfo);
@@ -470,6 +478,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private void playCacheMusic() {
         changeMusic(true);
         String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
+        currentMusicURL = key;
+        currentMusicCoverURL = playMusicInfo.getCover();
+        currentMusicSingerName = playMusicInfo.getArtist();
+        currentMusicTitle = playMusicInfo.getTitle();
+        saveUserListenHistory();
         try {
             mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
             mMainMediaPlayer.prepare();
@@ -581,6 +594,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         btnNextSong.setEnabled(true);
         btnPlay.setEnabled(true);
         getNextMusicInfo(mPlaylistInfoList.get(mPlayListNum).getKey());
+        saveUserListenHistory();
     }
 
     @Override
@@ -638,7 +652,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         // Inflate the menu; this adds items to the action bar if it is present.
-        this.menu = menu;
         getMenuInflater().inflate(R.menu.menu_sample, menu);
         return true;
     }
@@ -939,9 +952,30 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 if (resultCode == 100) {
                     updateLoginTitle();
                 } else if (resultCode == 200) {
-                    //do nothing
+                    //此代码需要保留，应该返回主界面有两种情况，这种情况不需要更新登录状态
                 }
                 break;
+        }
+    }
+
+    private void saveUserListenHistory() {
+        if (User.getInstance().getLogin()) {
+            Realm realm = Realm.getInstance(this);
+            //如果历史记录已存在，这不在保存
+            RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("musicURL", currentMusicURL).findAll();
+            if (realmResults.size() == 0) {
+                RealmResults<UserHistoryInfo> records = realm.where(UserHistoryInfo.class).findAll();
+                realm.beginTransaction();
+                //保存
+                UserHistoryInfo userHistoryInfo = realm.createObject(UserHistoryInfo.class);
+                userHistoryInfo.setHistory_id(records.size() + 1);
+                userHistoryInfo.setUserID(User.getInstance().getUserID());
+                userHistoryInfo.setTitle(currentMusicTitle);
+                userHistoryInfo.setSinger(currentMusicSingerName);
+                userHistoryInfo.setMusicURL(currentMusicURL);
+                userHistoryInfo.setCover(currentMusicCoverURL);
+                realm.commitTransaction();
+            }
         }
     }
 }

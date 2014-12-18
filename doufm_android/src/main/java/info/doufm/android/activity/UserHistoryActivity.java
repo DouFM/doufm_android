@@ -1,40 +1,67 @@
 package info.doufm.android.activity;
 
-import android.support.v7.app.ActionBarActivity;
+import android.graphics.Color;
 import android.os.Bundle;
-import android.view.Menu;
+import android.support.v7.app.ActionBarActivity;
+import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.widget.ListView;
 
 import info.doufm.android.R;
+import info.doufm.android.adapter.UserHistoryListAdapter;
+import info.doufm.android.user.UserHistoryInfo;
+import info.doufm.android.utils.Constants;
+import io.realm.Realm;
+import io.realm.RealmResults;
 
 public class UserHistoryActivity extends ActionBarActivity {
 
+    private Toolbar mToolbar;
+    private int themeNum;
+    private UserHistoryListAdapter adapter;
+    private RealmResults<UserHistoryInfo> userHistoryInfoList;
+    private ListView lvHistory;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
+
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_history);
+        themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
+        findViews();
+        initViews();
     }
 
+    private void findViews() {
+        mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
+        lvHistory = (ListView) findViewById(R.id.lvUserHistory);
+    }
 
-    @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_user_history, menu);
-        return true;
+    private void initViews() {
+        mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[themeNum]));
+        mToolbar.setTitle("听歌历史");
+        mToolbar.setTitleTextColor(Color.WHITE);
+        mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha));
+        setSupportActionBar(mToolbar);
+        LoadingHistory(userHistoryInfoList);
+        getSupportActionBar().setDisplayShowHomeEnabled(true);
+
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        // Handle action bar item clicks here. The action bar will
-        // automatically handle clicks on the Home/Up button, so long
-        // as you specify a parent activity in AndroidManifest.xml.
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_settings) {
-            return true;
+        switch (item.getItemId()) {
+            case android.R.id.home:
+                finish();
+                break;
         }
+        return true;
+    }
 
-        return super.onOptionsItemSelected(item);
+    private void LoadingHistory(RealmResults<UserHistoryInfo> userHistoryInfoList) {
+        Realm realm = Realm.getInstance(this);
+        userHistoryInfoList = realm.where(UserHistoryInfo.class).findAll();
+        adapter = new UserHistoryListAdapter(UserHistoryActivity.this, userHistoryInfoList);
+        lvHistory.setAdapter(adapter);
     }
 }
