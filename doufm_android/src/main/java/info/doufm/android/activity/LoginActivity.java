@@ -1,6 +1,7 @@
 package info.doufm.android.activity;
 
 import android.content.SharedPreferences;
+import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.StateListDrawable;
@@ -55,6 +56,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
+        setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
         findViews();
         initViews();
