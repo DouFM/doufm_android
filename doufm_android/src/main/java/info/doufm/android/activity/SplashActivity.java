@@ -8,6 +8,7 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
+import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 
@@ -27,7 +28,6 @@ import info.doufm.android.R;
  * @version 1.0
  */
 public class SplashActivity extends Activity {
-
     private Handler h = new Handler() {
         @Override
         public void handleMessage(Message msg) {
@@ -147,4 +147,5 @@ public class SplashActivity extends Activity {
             }
         }.start();
     }
+
 }
