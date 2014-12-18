@@ -18,6 +18,7 @@ import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.Toast;
 
 import com.android.volley.Response;
@@ -51,6 +52,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private SharedPreferences sp;
     private CheckBox cbSavePassword;
     private String originPassword;
+    private ImageView ivLoginLogo;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +66,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     }
 
     private void initViews() {
+        ivLoginLogo.setImageDrawable(UserUtil.getCircleImage(this,R.drawable.default_artist_300));
         sp = getSharedPreferences("user", MODE_PRIVATE);
         sp.edit().putBoolean("save_login_info", true).commit();
         //etUserName.set
@@ -121,6 +124,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         btnLogin = (Button) findViewById(R.id.btn_activity_login);
         cbSavePassword = (CheckBox) findViewById(R.id.cbSavePassword);
         cbSavePassword.setOnCheckedChangeListener(this);
+        ivLoginLogo = (ImageView) findViewById(R.id.iv_login_logo);
     }
 
     @Override

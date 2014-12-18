@@ -1,5 +1,11 @@
 package info.doufm.android.user;
 
+import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawable;
+import android.support.v4.graphics.drawable.RoundedBitmapDrawableFactory;
+
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -31,5 +37,19 @@ public class UserUtil {
             hex.append(Integer.toHexString(b & 0xFF));
         }
         return hex.toString().toLowerCase();
+    }
+
+    public static RoundedBitmapDrawable getCircleImage(Context context, int mImageID) {
+        Bitmap src = BitmapFactory.decodeResource(context.getResources(), mImageID);
+        Bitmap dst;
+        if (src.getWidth() >= src.getHeight()) {
+            dst = Bitmap.createBitmap(src, src.getWidth() / 2 - src.getHeight() / 2, 0, src.getHeight(), src.getHeight());
+        } else {
+            dst = Bitmap.createBitmap(src, src.getHeight() / 2 - src.getWidth() / 2, 0, src.getWidth(), src.getWidth());
+        }
+        RoundedBitmapDrawable rbd = RoundedBitmapDrawableFactory.create(context.getResources(), dst);
+        rbd.setCornerRadius(dst.getHeight() / 2);
+        rbd.setAntiAlias(true);
+        return rbd;
     }
 }

@@ -130,6 +130,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private LinearLayout llLeftSlideMenu;
     private RelativeLayout rlUserLogin;
     private TextView tvUserLoginTitle;
+    private ImageView ivUserLogo;
 
     //用户操作类对象
     private UserUtil mUserUtil;
@@ -220,6 +221,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         rlUserLogin = (RelativeLayout) findViewById(R.id.rl_slide_menu_header);
         rlUserLogin.setOnClickListener(this);
         tvUserLoginTitle = (TextView) findViewById(R.id.tv_user_name);
+        ivUserLogo = (ImageView) findViewById(R.id.iv_user_avatar);
         mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
         mToolbar.setTitle("DouFM");
         mToolbar.setTitleTextColor(Color.WHITE);
@@ -675,10 +677,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         if (User.getInstance().getLogin()) {
             if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
                 tvUserLoginTitle.setText("个人中心");
+                ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_artist_300));
             }
         } else {
             if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
                 tvUserLoginTitle.setText("点击登录");
+                ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_head_320));
             }
         }
     }
