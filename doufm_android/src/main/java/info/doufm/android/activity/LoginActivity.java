@@ -222,6 +222,9 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                         } else {
                             //登录失败
                             Toast.makeText(LoginActivity.this, "账号或者密码错误！", Toast.LENGTH_SHORT).show();
+                            Message msg = new Message();
+                            msg.what = DISSMIS_LOADING_DLG;
+                            handler.sendMessage(msg);
                         }
                     } catch (JSONException e) {
                         e.printStackTrace();
@@ -230,7 +233,9 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
-                    loadingDialog.dismiss();
+                    Message msg = new Message();
+                    msg.what = DISSMIS_LOADING_DLG;
+                    handler.sendMessage(msg);
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
             }, mMap));
