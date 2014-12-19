@@ -80,13 +80,11 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
         findViews();
         initViews();
-
     }
 
     private void initViews() {
         ivLoginLogo.setImageDrawable(UserUtil.getCircleImage(this, R.drawable.default_artist_300));
         sp = getSharedPreferences("user", MODE_PRIVATE);
-        sp.edit().putBoolean("save_login_info", true).commit();
         //etUserName.set
         mStateListDrawable = new StateListDrawable();
         mStateListDrawable.addState(new int[]{-android.R.attr.state_enabled}, getResources().getDrawable(R.drawable.btn_disable));
@@ -133,6 +131,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             etUserName.setText(sp.getString("rm_user_name", ""));
             etUserPassword.setText(sp.getString("rm_user_password", ""));
         }
+        sp.edit().putBoolean("save_login_info", true).apply();
     }
 
     private void findViews() {
@@ -209,7 +208,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                                 SharedPreferences.Editor editor = sp.edit();
                                 editor.putString("rm_user_name", finalUserName);
                                 editor.putString("rm_user_password", originPassword);
-                                editor.commit();
+                                editor.apply();
                             }
                             if (!isLogin) {
                                 Message msg = new Message();
@@ -252,9 +251,9 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (cbSavePassword.isChecked()) {
-            sp.edit().putBoolean("save_login_info", true).commit();
+            sp.edit().putBoolean("save_login_info", true).apply();
         } else {
-            sp.edit().putBoolean("save_login_info", false).commit();
+            sp.edit().putBoolean("save_login_info", false).apply();
         }
     }
 }

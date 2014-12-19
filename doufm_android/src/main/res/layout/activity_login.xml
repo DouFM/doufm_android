@@ -12,7 +12,7 @@
 
         <RelativeLayout
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="wrap_content">
 
             <ImageView
                 android:id="@+id/iv_login_logo"
@@ -33,7 +33,7 @@
                 android:layout_marginTop="16dp"
                 android:drawablePadding="8dp"
                 android:hint="请输入用户名"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <EditText
                 android:id="@+id/et_activity_login_user_password"
@@ -46,7 +46,7 @@
                 android:drawablePadding="8dp"
                 android:hint="请输入密码"
                 android:inputType="textPassword"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <CheckBox
                 android:layout_marginTop="8dp"
@@ -55,9 +55,10 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginLeft="32dp"
+                android:layout_marginStart="32dp"
                 android:text="记住密码"
                 android:checked="true"
-                android:textSize="16dp" />
+                android:textSize="16sp" />
 
             <Button
                 android:id="@+id/btn_activity_login"

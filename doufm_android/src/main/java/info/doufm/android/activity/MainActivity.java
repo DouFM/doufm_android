@@ -182,7 +182,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     };
 
-    //private String PLAYLIST_URL = "http://115.29.140.122:5001/api/playlist/?start=0";
     private boolean firstErrorFlag = true;
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
@@ -446,6 +445,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         );
     }
 
+    //任何情况下切换歌曲进行的操作首先考虑放入该方法中
     private void changeMusic(boolean type) {
         //true for cache,false for random
         if (type) {
@@ -464,6 +464,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
         isPlay = false;
         mMusicDuration = 0;
+        updateLoveBtn();
         btnNextSong.setEnabled(false);
         btnPlay.setEnabled(false);
         mDiskAnimator.pause();
@@ -481,7 +482,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         currentMusicCoverURL = playMusicInfo.getCover();
         currentMusicSingerName = playMusicInfo.getArtist();
         currentMusicTitle = playMusicInfo.getTitle();
-        saveUserListenHistory();
         try {
             mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
             mMainMediaPlayer.prepare();
@@ -490,6 +490,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             e.printStackTrace();
         }
         getCoverImageRequest(playMusicInfo);
+        saveUserListenHistory();
     }
 
     private void getCoverImageRequest(final MusicInfo musicInfo) {
@@ -724,7 +725,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 }
                 break;
             case R.id.btn_play_next:
-                updateLoveBtn();
                 preMusicInfo = playMusicInfo;
                 btnPreSong.setClickable(true);
                 if (hasNextCache) {
@@ -959,6 +959,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             case Constants.REQUEST_USER_CODE:
                 if (resultCode == 100) {
                     updateLoginTitle();
+                    Toast.makeText(MainActivity.this,"您已退出登录",Toast.LENGTH_SHORT).show();
                 } else if (resultCode == 200) {
                     //此代码需要保留，应该返回主界面有两种情况，这种情况不需要更新登录状态
                 }

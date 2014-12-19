@@ -42,6 +42,5 @@ public class Constants {
     //SharedPreferences
     public static final String USER_INFO = "userinfo";
     public static final String THEME = "theme";
-
     public static final String PLAYLIST = "playlist";
 }

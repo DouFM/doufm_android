@@ -2,7 +2,7 @@
 
     <style name="AppTheme" parent="Theme.AppCompat.Light.NoActionBar">
         <!--状态栏颜色-->
-        <item name="colorPrimaryDark">@color/Indigo_colorPrimaryDark</item>
+        <item name="colorPrimaryDark">@color/black</item>
         <!--Toolbar颜色-->
         <item name="colorPrimary">@color/Indigo_colorPrimary</item>
         <item name="colorAccent">@color/Indigo_accentColor</item>
