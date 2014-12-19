@@ -85,13 +85,21 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
             case R.id.rl_activity_user_history:
                 Intent intent = new Intent(UserActivity.this, UserHistoryActivity.class);
                 intent.putExtra(Constants.EXTRA_THEME, themeNum);
-                startActivity(intent);
+                startActivityForResult(intent, 0);
                 break;
             case R.id.rl_activity_user_like:
                 Intent i = new Intent(UserActivity.this, UserLikeActivity.class);
                 i.putExtra(Constants.EXTRA_THEME, themeNum);
-                startActivity(i);
+                startActivityForResult(i, 0);
                 break;
+        }
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            finish();
         }
     }
 }

@@ -32,7 +32,7 @@ public class ShareUtil {
         mEditor.putInt(Constants.PLAYLIST, listNo);
     }
 
-    public void commit() {
-        mEditor.commit();
+    public void apply() {
+        mEditor.apply();
     }
 }

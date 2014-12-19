@@ -1,10 +1,13 @@
 package info.doufm.android.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import info.doufm.android.R;
@@ -43,9 +46,21 @@ public class UserHistoryActivity extends ActionBarActivity {
         mToolbar.setTitleTextColor(Color.WHITE);
         mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha));
         setSupportActionBar(mToolbar);
-        LoadingHistory(userHistoryInfoList);
+        LoadingHistory();
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
+        lvHistory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int musicId = userHistoryInfoList.get(position).getHistory_id();
+                Intent intent = new Intent();
+                intent.setAction(Constants.ACTION_CHOOSE_MUSIC);
+                intent.putExtra(Constants.EXTRA_LIST_TYPE, Constants.HISTORY_TYPE);
+                intent.putExtra(Constants.EXTRA_MUSIC_ID, musicId);
+                sendBroadcast(intent);
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
     }
 
     @Override
@@ -58,7 +73,7 @@ public class UserHistoryActivity extends ActionBarActivity {
         return true;
     }
 
-    private void LoadingHistory(RealmResults<UserHistoryInfo> userHistoryInfoList) {
+    private void LoadingHistory() {
         Realm realm = Realm.getInstance(this);
         userHistoryInfoList = realm.where(UserHistoryInfo.class).findAll();
         adapter = new UserHistoryListAdapter(UserHistoryActivity.this, userHistoryInfoList);

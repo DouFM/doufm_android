@@ -1,10 +1,13 @@
 package info.doufm.android.activity;
 
+import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+import android.view.View;
+import android.widget.AdapterView;
 import android.widget.ListView;
 
 import info.doufm.android.R;
@@ -43,9 +46,21 @@ public class UserLikeActivity extends ActionBarActivity {
         mToolbar.setTitleTextColor(Color.WHITE);
         mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha));
         setSupportActionBar(mToolbar);
-        LoadingLoveMusic(userLoveInfoList);
+        LoadingLoveMusic();
         getSupportActionBar().setDisplayShowHomeEnabled(true);
-
+        lvLove.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                int musicId = userLoveInfoList.get(position).getLove_id();
+                Intent intent = new Intent();
+                intent.setAction(Constants.ACTION_CHOOSE_MUSIC);
+                intent.putExtra(Constants.EXTRA_LIST_TYPE, Constants.LOVE_TYPE);
+                intent.putExtra(Constants.EXTRA_MUSIC_ID, musicId);
+                sendBroadcast(intent);
+                setResult(RESULT_OK);
+                finish();
+            }
+        });
     }
 
     @Override
@@ -58,7 +73,7 @@ public class UserLikeActivity extends ActionBarActivity {
         return true;
     }
 
-    private void LoadingLoveMusic(RealmResults<UserLoveMusicInfo> userLoveInfoList) {
+    private void LoadingLoveMusic() {
         Realm realm = Realm.getInstance(this);
         userLoveInfoList = realm.where(UserLoveMusicInfo.class).findAll();
         adapter = new UserLoveListAdapter(UserLikeActivity.this, userLoveInfoList);

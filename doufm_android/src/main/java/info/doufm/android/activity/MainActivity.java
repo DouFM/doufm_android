@@ -1,7 +1,9 @@
 package info.doufm.android.activity;
 
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ActivityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
@@ -135,13 +137,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private TextView tvUserLoginTitle;
     private ImageView ivUserLogo;
 
-    private String currentMusicTitle;
+/*    private String currentMusicTitle;
     private String currentMusicSingerName;
     private String currentMusicURL;
-    private String currentMusicCoverURL;
+    private String currentMusicCoverURL;*/
 
     private ShareUtil mShareUtil;
-
+    private IntentFilter bcFilter;
+    private MusicBroadcastReceiver mReceiver;
     private boolean isPlay = false;
     //定义Handler对象
     private Handler handler = new Handler() {
@@ -308,6 +311,9 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
         mPlayListNum = mShareUtil.getPlayList();
         ivNeedle.startAnimation(needleUpAnim);
+        bcFilter = new IntentFilter(Constants.ACTION_CHOOSE_MUSIC);
+        mReceiver = new MusicBroadcastReceiver();
+        registerReceiver(mReceiver, bcFilter);
     }
 
     @Override
@@ -328,6 +334,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         updateLoginTitle();
         //列表始终滚动到顶部
         mDrawerList.setSelection(0);
+
     }
 
     private void getMusicList() {
@@ -396,15 +403,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         try {
                             //Log.i(TAG,"before setSource:"+System.currentTimeMillis());
                             JSONObject jo = jsonArray.getJSONObject(0);
-                            //save current music info for history
-                            currentMusicTitle = jo.getString("title");
-                            currentMusicSingerName = jo.getString("artist");
-                            currentMusicURL = Constants.BASE_URL + jo.getString("audio");
-                            currentMusicCoverURL = Constants.BASE_URL + jo.getString("cover");
-                            playMusicInfo.setTitle(currentMusicTitle);
-                            playMusicInfo.setArtist(currentMusicSingerName);
-                            playMusicInfo.setAudio(currentMusicURL);
-                            playMusicInfo.setCover(currentMusicCoverURL);
+                            playMusicInfo.setTitle(jo.getString("title"));
+                            playMusicInfo.setArtist(jo.getString("artist"));
+                            playMusicInfo.setAudio(Constants.BASE_URL + jo.getString("audio"));
+                            playMusicInfo.setCover(Constants.BASE_URL + jo.getString("cover"));
                             mMainMediaPlayer.setDataSource(playMusicInfo.getAudio()); //这种url路径
                             mMainMediaPlayer.prepareAsync(); //prepare自动播放
                             getCoverImageRequest(playMusicInfo);
@@ -478,10 +480,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private void playCacheMusic() {
         changeMusic(true);
         String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
-        currentMusicURL = key;
-        currentMusicCoverURL = playMusicInfo.getCover();
-        currentMusicSingerName = playMusicInfo.getArtist();
-        currentMusicTitle = playMusicInfo.getTitle();
         try {
             mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
             mMainMediaPlayer.prepare();
@@ -561,7 +559,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     @Override
                     public void onClick(SweetAlertDialog sDialog) {
                         finish();
-                        System.exit(0);
                     }
                 })
                 .show();
@@ -600,38 +597,30 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     @Override
     protected void onPause() {
         super.onPause();
-        RequestManager.getRequestQueue().cancelAll(this);
         MobclickAgent.onPause(this);
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        RequestManager.getRequestQueue().cancelAll(this);
     }
 
     @Override
     protected void onDestroy() {
         super.onDestroy();
-    }
-
-    private void PhoneIncomingListener() {
-        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
-        telephonyManager.listen(new MyPhoneListener(), PhoneStateListener.LISTEN_CALL_STATE);
-    }
-
-    @Override
-    public void finish() {
-        super.finish();
-        mShareUtil.setTheme(mThemeNum);
-        mShareUtil.setPlayList(mPlayListNum);
-        mShareUtil.commit();
-        //解决某些设备System.exit(0)进程没有被正常kill掉，而导致音乐仍然播放
+        mTimer.cancel();
+        unregisterReceiver(mReceiver);
         if (mMainMediaPlayer != null) {
             mMainMediaPlayer.stop();
             mMainMediaPlayer.release();
             mMainMediaPlayer = null;
         }
+        RequestManager.getRequestQueue().cancelAll(this);
+    }
+
+    private void PhoneIncomingListener() {
+        TelephonyManager telephonyManager = (TelephonyManager) getSystemService(Context.TELEPHONY_SERVICE);
+        telephonyManager.listen(new MyPhoneListener(), PhoneStateListener.LISTEN_CALL_STATE);
     }
 
     @Override
@@ -645,14 +634,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 exitTime = System.currentTimeMillis();
             } else {
                 finish();
-                System.exit(0);
             }
         }
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        return true;
     }
 
     @Override
@@ -688,6 +671,9 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[colorIndex]));
             mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[colorIndex]));
             mThemeNum = colorIndex;
+            mShareUtil.setTheme(mThemeNum);
+            mShareUtil.setPlayList(mPlayListNum);
+            mShareUtil.apply();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -954,6 +940,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             case Constants.REQUEST_LOGIN_CODE:
                 if (resultCode == 100) {
                     updateLoginTitle();
+                    saveUserListenHistory();
                 }
                 break;
             case Constants.REQUEST_USER_CODE:
@@ -971,7 +958,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         if (User.getInstance().getLogin()) {
             Realm realm = Realm.getInstance(this);
             //如果历史记录已存在，这不在保存
-            RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("musicURL", currentMusicURL).findAll();
+            RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
             if (realmResults.size() == 0) {
                 RealmResults<UserHistoryInfo> records = realm.where(UserHistoryInfo.class).findAll();
                 realm.beginTransaction();
@@ -979,10 +966,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 UserHistoryInfo userHistoryInfo = realm.createObject(UserHistoryInfo.class);
                 userHistoryInfo.setHistory_id(records.size() + 1);
                 userHistoryInfo.setUserID(User.getInstance().getUserID());
-                userHistoryInfo.setTitle(currentMusicTitle);
-                userHistoryInfo.setSinger(currentMusicSingerName);
-                userHistoryInfo.setMusicURL(currentMusicURL);
-                userHistoryInfo.setCover(currentMusicCoverURL);
+                userHistoryInfo.setTitle(playMusicInfo.getTitle());
+                userHistoryInfo.setSinger(playMusicInfo.getArtist());
+                userHistoryInfo.setMusicURL(playMusicInfo.getAudio());
+                userHistoryInfo.setCover(playMusicInfo.getCover());
                 realm.commitTransaction();
             }
         }
@@ -992,17 +979,17 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private void saveLoveMusic() {
         if (User.getInstance().getLogin()) {
             Realm realm = Realm.getInstance(this);
-            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", currentMusicURL).findAll();
+            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
             if (realmResults.size() == 0) {
                 RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
                 realm.beginTransaction();
                 UserLoveMusicInfo userLoveMusicInfo = realm.createObject(UserLoveMusicInfo.class);
                 userLoveMusicInfo.setLove_id(records.size() + 1);
                 userLoveMusicInfo.setUserID(User.getInstance().getUserID());
-                userLoveMusicInfo.setTitle(currentMusicTitle);
-                userLoveMusicInfo.setSinger(currentMusicSingerName);
-                userLoveMusicInfo.setMusicURL(currentMusicURL);
-                userLoveMusicInfo.setCover(currentMusicCoverURL);
+                userLoveMusicInfo.setTitle(playMusicInfo.getTitle());
+                userLoveMusicInfo.setSinger(playMusicInfo.getArtist());
+                userLoveMusicInfo.setMusicURL(playMusicInfo.getAudio());
+                userLoveMusicInfo.setCover(playMusicInfo.getCover());
                 for (int i = 1; i < records.size(); i++) {
                     records.get(i - 1).setLove_id(i);
                 }
@@ -1015,7 +1002,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private void deleteLoveMusic() {
         if (User.getInstance().getLogin()) {
             Realm realm = Realm.getInstance(this);
-            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", currentMusicURL).findAll();
+            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
             if (realmResults.size() > 0) {
                 RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
                 realm.beginTransaction();
@@ -1033,5 +1020,54 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private void updateLoveBtn() {
         loveFlag = false;
         btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+    }
+
+    private MusicInfo findMusic(byte listType, int musicId) {
+        MusicInfo tempMusicInfo = new MusicInfo();
+        Realm realm = Realm.getInstance(this);
+        if (listType == Constants.HISTORY_TYPE) {
+            RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("history_id", musicId).findAll();
+            tempMusicInfo.setTitle(realmResults.get(0).getTitle());
+            tempMusicInfo.setArtist(realmResults.get(0).getSinger());
+            tempMusicInfo.setAudio(realmResults.get(0).getMusicURL());
+            tempMusicInfo.setCover(realmResults.get(0).getCover());
+        } else if (listType == Constants.LOVE_TYPE) {
+            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("love_id", musicId).findAll();
+            tempMusicInfo.setTitle(realmResults.get(0).getTitle());
+            tempMusicInfo.setArtist(realmResults.get(0).getSinger());
+            tempMusicInfo.setAudio(realmResults.get(0).getMusicURL());
+            tempMusicInfo.setCover(realmResults.get(0).getCover());
+        }
+        return tempMusicInfo;
+    }
+
+    private class MusicBroadcastReceiver extends BroadcastReceiver {
+
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (mDownThread != null) {
+                mDownThread.runFlag = false;
+                mDownThread = null;
+            }
+            preMusicInfo = playMusicInfo;
+            btnPreSong.setClickable(true);
+            playMusicInfo = findMusic(intent.getByteExtra(Constants.EXTRA_LIST_TYPE, (byte) -1), intent.getIntExtra(Constants.EXTRA_MUSIC_ID, -1));
+            String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
+            try {
+                if (mDiskLruCache.get(key) != null) {
+                    changeMusic(true);
+                    mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
+                    mMainMediaPlayer.prepare();
+                    seekBar.setSecondaryProgress(seekBar.getMax());
+                } else {
+                    changeMusic(false);
+                    mMainMediaPlayer.setDataSource(playMusicInfo.getAudio());
+                    mMainMediaPlayer.prepareAsync();
+                }
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+            getCoverImageRequest(playMusicInfo);
+        }
     }
 }

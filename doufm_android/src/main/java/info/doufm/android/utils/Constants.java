@@ -10,8 +10,12 @@ public class Constants {
     public static final int REQUEST_LOGIN_CODE = 300;
     public static final int REQUEST_USER_CODE = 400;
 
+    //action
+    public static final String ACTION_CHOOSE_MUSIC = "info.doufm.android.action.CHOOSE_MUSIC";
     //extra
-    public static final String EXTRA_THEME = "info.doufm.android.Theme";
+    public static final String EXTRA_THEME = "info.doufm.android.theme";
+    public static final String EXTRA_MUSIC_ID = "info.doufm.android.music_id";
+    public static final String EXTRA_LIST_TYPE = "info.doufm.android.list_type";
     //API
     public static final String BASE_URL = "http://doufm.info";
     public static final String PLAYLIST_URL = BASE_URL + "/api/playlist/?start=0";
@@ -43,4 +47,6 @@ public class Constants {
     public static final String USER_INFO = "userinfo";
     public static final String THEME = "theme";
     public static final String PLAYLIST = "playlist";
+    public static final byte HISTORY_TYPE = 1;
+    public static final byte LOVE_TYPE = 2;
 }

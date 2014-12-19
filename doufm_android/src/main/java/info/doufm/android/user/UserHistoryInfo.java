@@ -13,7 +13,7 @@ public class UserHistoryInfo extends RealmObject {
     private int history_id;         //记录编号
     private String userID;          //用户id
     private String title;           //音乐标题
-    private String musicURL;        //英语路径
+    private String musicURL;        //音乐路径
     private String cover;           //封面地址
     private String singer;          //歌手
 
