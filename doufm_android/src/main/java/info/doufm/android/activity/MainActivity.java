@@ -625,6 +625,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mShareUtil.setTheme(mThemeNum);
         mShareUtil.setPlayList(mPlayListNum);
         mShareUtil.commit();
+        //解决某些设备System.exit(0)进程没有被正常kill掉，而导致音乐仍然播放
+        if (mMainMediaPlayer != null) {
+            mMainMediaPlayer.stop();
+            mMainMediaPlayer.release();
+            mMainMediaPlayer = null;
+        }
     }
 
     @Override
