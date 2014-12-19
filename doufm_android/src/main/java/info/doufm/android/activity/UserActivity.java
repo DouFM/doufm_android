@@ -45,6 +45,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         btnUserQuit.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[themeNum]));
         rlUserMain = (RelativeLayout) findViewById(R.id.rl_activity_user_main);
         rlUserHistory = (RelativeLayout) findViewById(R.id.rl_activity_user_history);
+        rlUserLove = (RelativeLayout) findViewById(R.id.rl_activity_user_like);
         rlUserMain.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[themeNum]));
     }
 
@@ -59,6 +60,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         tvUserName.setText(getSharedPreferences("user", MODE_PRIVATE).getString("username", ""));
         btnUserQuit.setOnClickListener(this);
         rlUserHistory.setOnClickListener(this);
+        rlUserLove.setOnClickListener(this);
     }
 
     @Override
@@ -84,6 +86,11 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                 Intent intent = new Intent(UserActivity.this, UserHistoryActivity.class);
                 intent.putExtra(Constants.EXTRA_THEME, themeNum);
                 startActivity(intent);
+                break;
+            case R.id.rl_activity_user_like:
+                Intent i = new Intent(UserActivity.this, UserLikeActivity.class);
+                i.putExtra(Constants.EXTRA_THEME, themeNum);
+                startActivity(i);
                 break;
         }
     }
