@@ -67,6 +67,7 @@ import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
 import info.doufm.android.user.User;
 import info.doufm.android.user.UserHistoryInfo;
+import info.doufm.android.user.UserLoveMusicInfo;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
@@ -719,6 +720,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 }
                 break;
             case R.id.btn_play_next:
+                updateLoveBtn();
                 preMusicInfo = playMusicInfo;
                 btnPreSong.setClickable(true);
                 if (hasNextCache) {
@@ -775,9 +777,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 if (User.getInstance().getLogin()) {
                     if (loveFlag) {
                         btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+                        deleteLoveMusic();
                         Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
                     } else {
                         btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
+                        saveLoveMusic();
                         Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
                     }
                     loveFlag = !loveFlag;
@@ -977,5 +981,52 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 realm.commitTransaction();
             }
         }
+    }
+
+
+    private void saveLoveMusic() {
+        if (User.getInstance().getLogin()) {
+            Realm realm = Realm.getInstance(this);
+            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", currentMusicURL).findAll();
+            if (realmResults.size() == 0) {
+                RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
+                realm.beginTransaction();
+                UserLoveMusicInfo userLoveMusicInfo = realm.createObject(UserLoveMusicInfo.class);
+                userLoveMusicInfo.setLove_id(records.size() + 1);
+                userLoveMusicInfo.setUserID(User.getInstance().getUserID());
+                userLoveMusicInfo.setTitle(currentMusicTitle);
+                userLoveMusicInfo.setSinger(currentMusicSingerName);
+                userLoveMusicInfo.setMusicURL(currentMusicURL);
+                userLoveMusicInfo.setCover(currentMusicCoverURL);
+                for (int i = 1; i < records.size(); i++) {
+                    records.get(i - 1).setLove_id(i);
+                }
+                realm.commitTransaction();
+                realm.close();
+            }
+        }
+    }
+
+    private void deleteLoveMusic() {
+        if (User.getInstance().getLogin()) {
+            Realm realm = Realm.getInstance(this);
+            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", currentMusicURL).findAll();
+            if (realmResults.size() > 0) {
+                RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
+                realm.beginTransaction();
+                //保存
+                realmResults.get(0).removeFromRealm();
+                for (int i = 1; i < records.size(); i++) {
+                    records.get(i - 1).setLove_id(i);
+                }
+                realm.commitTransaction();
+                realm.close();
+            }
+        }
+    }
+
+    private void updateLoveBtn() {
+        loveFlag = false;
+        btnLove.setBackgroundResource(R.drawable.bg_btn_love);
     }
 }
