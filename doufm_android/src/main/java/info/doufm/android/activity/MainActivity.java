@@ -307,6 +307,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[mThemeNum]));
         mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
         mPlayListNum = mShareUtil.getPlayList();
+        ivNeedle.startAnimation(needleUpAnim);
     }
 
     @Override
@@ -455,10 +456,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 needleDownFlag = true;
             }
         } else {
-            //如果不是首次播放
-            if (mDiskAnimator.notFirstFlag) {
-                needleDownFlag = true;
-            }
+            needleDownFlag = true;
             if (isPlay) {
                 ivNeedle.startAnimation(needleUpAnim);
             }

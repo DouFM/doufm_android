@@ -48,8 +48,8 @@ public class TryListenActivity extends ActionBarActivity{
     private ActionBarDrawerToggle mActionBarDrawerToggle;
     private Animation needleUpAnim;
     private Animation needleDownAnim;
-    private Animation needleAnim;
     private Button btnPlay;
+    private Button btnPlayMode;
     private boolean isPlay = false;
     private RotateAnimator mDiskAnimator;
     private ImageView ivDisk;
@@ -74,7 +74,6 @@ public class TryListenActivity extends ActionBarActivity{
                 if (isPlay) {
                     Log.i(TAG,"handler get the message, and fet currentPosition"+mediaPlayer.getCurrentPosition());
                     mMusicCurrDuration = mediaPlayer.getCurrentPosition();
-                    tvCurTime.setText(TimeFormat.msToMinAndS(mMusicCurrDuration));
                     seekBar.setProgress(mMusicCurrDuration);
                 }
             }
@@ -100,16 +99,18 @@ public class TryListenActivity extends ActionBarActivity{
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_try_listen);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        tvCurTime = (TextView) findViewById(R.id.curTimeText);
         ivDisk = (ImageView) findViewById(R.id.iv_disk);
         ivNeedle = (ImageView) findViewById(R.id.iv_needle);
         needleUpAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_up);
         needleDownAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_down);
-        needleAnim = AnimationUtils.loadAnimation(this, R.anim.rotation_up_down);
         mDiskAnimator = new RotateAnimator(this, ivDisk);
         mDrawerLayout = (DrawerLayout) findViewById(R.id.drawer_layout);
         mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
         btnPlay = (Button) findViewById(R.id.btn_start_play);
+        btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
+        btnPlayMode = (Button) findViewById(R.id.btn_play_mode);
+        btnPlayMode.setBackgroundResource(R.drawable.bg_btn_one);//单曲循环
+        btnPlayMode.setClickable(false);
         mToolbar.setTitle("DouFM");
         mToolbar.setSubtitle("试听中...");
         mToolbar.setTitleTextColor(Color.WHITE);
@@ -122,11 +123,12 @@ public class TryListenActivity extends ActionBarActivity{
         mediaPlayer.setLooping(true);
 
         //更新音乐播放进度
-        tvTotalTime = (TextView)findViewById(R.id.curTimeText);
-        tvTotalTime=(TextView)findViewById(R.id.totalTimeText);
+        tvCurTime = (TextView)findViewById(R.id.curTimeText);
+        tvTotalTime = (TextView)findViewById(R.id.totalTimeText);
         seekBar = (MySeekBar) findViewById(R.id.seekbar);
         mMusicDuration = mediaPlayer.getDuration();
         seekBar.setMax(mMusicDuration);
+        seekBar.setSecondaryProgress(mMusicDuration);
         tvTotalTime.setText(TimeFormat.msToMinAndS(mMusicDuration));
         Log.i(TAG,"on create");
         mMusicCurrDuration=0;
@@ -135,6 +137,7 @@ public class TryListenActivity extends ActionBarActivity{
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 seekBar.setProgress(progress);
                 mMusicCurrDuration = progress;
+                tvCurTime.setText(TimeFormat.msToMinAndS(progress));
                 Log.i(TAG,"current progress is " + mMusicCurrDuration);
             }
             @Override
@@ -152,6 +155,7 @@ public class TryListenActivity extends ActionBarActivity{
                 //如果进度条拉超了，则还是留在原位
                 else {
                     mMusicCurrDuration = mediaPlayer.getCurrentPosition();
+                    tvCurTime.setText(TimeFormat.msToMinAndS(mMusicCurrDuration));
                     seekBar.setProgress(mMusicCurrDuration);
                     Log.i(TAG,"after seek,still in current position "+ mMusicCurrDuration);
                 }
@@ -192,16 +196,13 @@ public class TryListenActivity extends ActionBarActivity{
         MobclickAgent.onResume(this);
         if (isFirstLoad) {
             //一旦视图可见，则播放碟片转动动画，拨杆落下，播放音乐，设置暂停按钮
+            isFirstLoad = false;
             isPlay = true;
             mediaPlayer.start();
-            needleAnim.start();
             ivNeedle.startAnimation(needleDownAnim);
-            btnPlay.setBackgroundResource(R.drawable.btn_stop_play);
             mDiskAnimator.play();
-            isFirstLoad = false;
+            mTimer.schedule(timerTask,0,1000);
         }
-        //when to invoke the mTimer.schedule(timerTask,0,1000);
-        mTimer.schedule(timerTask,0,1000);
         Log.i(TAG, "onResume");
     }
 
@@ -209,17 +210,12 @@ public class TryListenActivity extends ActionBarActivity{
     protected void onPause() {
         super.onPause();
         MobclickAgent.onPause(this);
-        mediaPlayer.pause();
-        needleAnim.cancel();
-        mDiskAnimator.pause();
         Log.i(TAG,"onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        mDiskAnimator.pause();//停止在onstart()中play的动画
-        mediaPlayer.pause();
         Log.i(TAG,"onStop");
     }
     @Override
