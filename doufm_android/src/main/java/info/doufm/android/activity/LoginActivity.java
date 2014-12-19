@@ -56,6 +56,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private SharedPreferences sp;
     private CheckBox cbSavePassword;
     private String originPassword;
+    private String mUserName;
     private ImageView ivLoginLogo;
 
     private SweetAlertDialog loadingDialog;
@@ -177,6 +178,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             String userName = etUserName.getText().toString().trim();
             String userPassword = etUserPassword.getText().toString().trim();
             originPassword = userPassword;
+            mUserName =  userName;
             //生成MD5
             userPassword = UserUtil.toLowerCaseMD5(userPassword);
             //转成成UTF-8
@@ -189,7 +191,6 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             HashMap<String, String> mMap = new HashMap<String, String>();
             mMap.put("user_name", userName);
             mMap.put("password", userPassword);
-            final String finalUserName = userName;
             final String finalUserPassword = userPassword;
             RequestManager.getRequestQueue().add(new JsonObjectPostRequest(Constants.LOGIN_URL, new Response.Listener<JSONObject>() {
                 @Override
@@ -199,14 +200,14 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                         Log.w("LOG", jsonObject.getString("user_id"));
                         if (jsonObject.get("status").equals("success")) {
                             //登录成功
-                            User.getInstance().setUserName(finalUserName);
+                            User.getInstance().setUserName(mUserName);
                             User.getInstance().setUserPassword(finalUserPassword);
                             User.getInstance().setUserID(jsonObject.getString("user_id"));
                             User.getInstance().setLogin(true);
                             if (cbSavePassword.isChecked()) {
                                 //记住用户名、密码、
                                 SharedPreferences.Editor editor = sp.edit();
-                                editor.putString("rm_user_name", finalUserName);
+                                editor.putString("rm_user_name", mUserName);//如果写入UTF-8格式，读取时会显示乱码
                                 editor.putString("rm_user_password", originPassword);
                                 editor.apply();
                             }
