@@ -106,7 +106,7 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:text="00:00"
-                android:textColor="@color/gray"
+                android:textColor="@color/white"
                 android:textSize="12sp" />
 
             <info.doufm.android.playview.MySeekBar
@@ -125,7 +125,7 @@
                 android:layout_weight="1"
                 android:gravity="end"
                 android:text="00:00"
-                android:textColor="@color/gray"
+                android:textColor="@color/white"
                 android:textSize="12sp" />
         </LinearLayout>
 

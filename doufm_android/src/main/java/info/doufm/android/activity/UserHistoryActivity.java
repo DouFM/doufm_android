@@ -5,6 +5,7 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
@@ -15,6 +16,7 @@ import info.doufm.android.adapter.UserHistoryListAdapter;
 import info.doufm.android.user.UserHistoryInfo;
 import info.doufm.android.utils.Constants;
 import io.realm.Realm;
+import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class UserHistoryActivity extends ActionBarActivity {
@@ -73,10 +75,18 @@ public class UserHistoryActivity extends ActionBarActivity {
         return true;
     }
 
+
     private void LoadingHistory() {
         Realm realm = Realm.getInstance(this);
         userHistoryInfoList = realm.where(UserHistoryInfo.class).findAll();
         adapter = new UserHistoryListAdapter(UserHistoryActivity.this, userHistoryInfoList);
         lvHistory.setAdapter(adapter);
+        //解决java.lang.IllegalStateException: The content of the adapter has changed but ListView did not receive a notification.
+        realm.addChangeListener(new RealmChangeListener() {
+            @Override
+            public void onChange() {
+                adapter.notifyDataSetChanged();
+            }
+        });
     }
 }
