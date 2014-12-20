@@ -19,6 +19,7 @@ import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.widget.Toolbar;
 import android.telephony.PhoneStateListener;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
@@ -64,6 +65,7 @@ import info.doufm.android.R;
 import info.doufm.android.adapter.ChannelListAdapter;
 import info.doufm.android.info.MusicInfo;
 import info.doufm.android.info.PlaylistInfo;
+import info.doufm.android.network.JsonObjectPostRequest;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
@@ -401,13 +403,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     public void onResponse(JSONArray jsonArray) {
                         //请求随机播放音乐文件信息
                         try {
-                            //Log.i(TAG,"before setSource:"+System.currentTimeMillis());
                             JSONObject jo = jsonArray.getJSONObject(0);
                             playMusicInfo.setTitle(jo.getString("title"));
                             playMusicInfo.setArtist(jo.getString("artist"));
-                            playMusicInfo.setAudio(Constants.BASE_URL + jo.getString("audio"));
-                            playMusicInfo.setCover(Constants.BASE_URL + jo.getString("cover"));
-                            mMainMediaPlayer.setDataSource(playMusicInfo.getAudio()); //这种url路径
+                            playMusicInfo.setAudio(jo.getString("audio"));
+                            playMusicInfo.setCover(jo.getString("cover"));
+                            mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio()); //这种url路径
                             mMainMediaPlayer.prepareAsync(); //prepare自动播放
                             getCoverImageRequest(playMusicInfo);
                         } catch (JSONException e) {
@@ -430,8 +431,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             JSONObject jo = jsonArray.getJSONObject(0);
                             nextMusicInfo.setTitle(jo.getString("title"));
                             nextMusicInfo.setArtist(jo.getString("artist"));
-                            nextMusicInfo.setAudio(Constants.BASE_URL + jo.getString("audio"));
-                            nextMusicInfo.setCover(Constants.BASE_URL + jo.getString("cover"));
+                            nextMusicInfo.setAudio(jo.getString("audio"));
+                            nextMusicInfo.setCover(jo.getString("cover"));
                             mDownThread = new DownloadMusicThread(nextMusicInfo.getAudio());
                             mDownThread.start();
                         } catch (JSONException e) {
@@ -474,6 +475,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         seekBar.setSecondaryProgress(0);
         tvCurTime.setText("00:00");
         tvTotalTime.setText("00:00");
+        //单曲循环模式下切换歌曲回到随机播放状态
+        if (playLoopFlag) {
+            playLoopFlag = false;
+            btnPlayMode.setBackgroundResource(R.drawable.bg_btn_shuffle);//随机播放
+        }
         mMainMediaPlayer.reset();
     }
 
@@ -492,7 +498,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     }
 
     private void getCoverImageRequest(final MusicInfo musicInfo) {
-        RequestManager.getRequestQueue().add(new ImageRequest(musicInfo.getCover(), new Response.Listener<Bitmap>() {
+        RequestManager.getRequestQueue().add(new ImageRequest(Constants.BASE_URL + musicInfo.getCover(), new Response.Listener<Bitmap>() {
                     @Override
                     public void onResponse(Bitmap bitmap) {
                         //对齐新歌曲信息显示时间
@@ -743,7 +749,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         seekBar.setSecondaryProgress(seekBar.getMax());
                     } else {
                         changeMusic(false);
-                        mMainMediaPlayer.setDataSource(playMusicInfo.getAudio());
+                        mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio());
                         mMainMediaPlayer.prepareAsync();
                     }
                 } catch (IOException e) {
@@ -857,7 +863,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 DiskLruCache.Editor editor = mDiskLruCache.edit(key);
                 if (editor != null) {
                     OutputStream outputStream = editor.newOutputStream(0);
-                    if (downloadUrlToStream(url, outputStream)) {
+                    if (downloadUrlToStream(Constants.BASE_URL + url, outputStream)) {
                         editor.commit();
                         hasNextCache = true;
                     } else {
@@ -956,6 +962,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     private void saveUserListenHistory() {
         if (User.getInstance().getLogin()) {
+            //本地保存
             Realm realm = Realm.getInstance(this);
             //如果历史记录已存在，这不在保存
             RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
@@ -972,6 +979,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 userHistoryInfo.setCover(playMusicInfo.getCover());
                 realm.commitTransaction();
             }
+            //上传服务器
+            uploadUserOp("listened", playMusicInfo.getAudio());
         }
     }
 
@@ -996,6 +1005,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 realm.commitTransaction();
                 realm.close();
             }
+            //上传服务器
+            uploadUserOp("favor", playMusicInfo.getAudio());
         }
     }
 
@@ -1017,6 +1028,26 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
+    private void uploadUserOp(String opType, String musicKey) {
+        HashMap<String, String> mMap = new HashMap<String, String>();
+        mMap.put("op", opType);
+        mMap.put("key", musicKey);
+        RequestManager.getRequestQueue().add(new JsonObjectPostRequest(Constants.USER_HISTORY_URL, new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                try {
+                    Log.w("LOG", jsonObject.getString("status"));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.e("LOG", "网络错误");
+            }
+        }, mMap));
+    }
     private void updateLoveBtn() {
         loveFlag = false;
         btnLove.setBackgroundResource(R.drawable.bg_btn_love);
@@ -1061,7 +1092,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     seekBar.setSecondaryProgress(seekBar.getMax());
                 } else {
                     changeMusic(false);
-                    mMainMediaPlayer.setDataSource(playMusicInfo.getAudio());
+                    mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio());
                     mMainMediaPlayer.prepareAsync();
                 }
             } catch (IOException e) {
