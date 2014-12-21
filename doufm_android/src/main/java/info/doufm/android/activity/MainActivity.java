@@ -951,7 +951,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             case Constants.REQUEST_USER_CODE:
                 if (resultCode == 100) {
                     updateLoginTitle();
-                    Toast.makeText(MainActivity.this,"您已退出登录",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "您已退出登录", Toast.LENGTH_SHORT).show();
                 } else if (resultCode == 200) {
                     //此代码需要保留，应该返回主界面有两种情况，这种情况不需要更新登录状态
                 }
@@ -964,22 +964,24 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             //本地保存
             Realm realm = Realm.getInstance(this);
             //如果历史记录已存在，这不在保存
-            RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
-            if (realmResults.size() == 0) {
-                RealmResults<UserHistoryInfo> records = realm.where(UserHistoryInfo.class).findAll();
-                realm.beginTransaction();
-                //保存
-                UserHistoryInfo userHistoryInfo = realm.createObject(UserHistoryInfo.class);
-                userHistoryInfo.setHistory_id(records.size() + 1);
-                userHistoryInfo.setUserID(User.getInstance().getUserID());
-                userHistoryInfo.setTitle(playMusicInfo.getTitle());
-                userHistoryInfo.setSinger(playMusicInfo.getArtist());
-                userHistoryInfo.setMusicURL(playMusicInfo.getAudio());
-                userHistoryInfo.setCover(playMusicInfo.getCover());
-                realm.commitTransaction();
+            if (playMusicInfo.getAudio() != null) {
+                RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
+                if (realmResults.size() == 0) {
+                    RealmResults<UserHistoryInfo> records = realm.where(UserHistoryInfo.class).findAll();
+                    realm.beginTransaction();
+                    //保存
+                    UserHistoryInfo userHistoryInfo = realm.createObject(UserHistoryInfo.class);
+                    userHistoryInfo.setHistory_id(records.size() + 1);
+                    userHistoryInfo.setUserID(User.getInstance().getUserID());
+                    userHistoryInfo.setTitle(playMusicInfo.getTitle());
+                    userHistoryInfo.setSinger(playMusicInfo.getArtist());
+                    userHistoryInfo.setMusicURL(playMusicInfo.getAudio());
+                    userHistoryInfo.setCover(playMusicInfo.getCover());
+                    realm.commitTransaction();
+                }
+                //上传服务器
+                uploadUserOp("listened", playMusicInfo.getAudio());
             }
-            //上传服务器
-            uploadUserOp("listened", playMusicInfo.getAudio());
         }
     }
 
@@ -987,42 +989,46 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private void saveLoveMusic() {
         if (User.getInstance().getLogin()) {
             Realm realm = Realm.getInstance(this);
-            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
-            if (realmResults.size() == 0) {
-                RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
-                realm.beginTransaction();
-                UserLoveMusicInfo userLoveMusicInfo = realm.createObject(UserLoveMusicInfo.class);
-                userLoveMusicInfo.setLove_id(records.size() + 1);
-                userLoveMusicInfo.setUserID(User.getInstance().getUserID());
-                userLoveMusicInfo.setTitle(playMusicInfo.getTitle());
-                userLoveMusicInfo.setSinger(playMusicInfo.getArtist());
-                userLoveMusicInfo.setMusicURL(playMusicInfo.getAudio());
-                userLoveMusicInfo.setCover(playMusicInfo.getCover());
-                for (int i = 1; i < records.size(); i++) {
-                    records.get(i - 1).setLove_id(i);
+            if (playMusicInfo.getAudio() != null) {
+                RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
+                if (realmResults.size() == 0) {
+                    RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
+                    realm.beginTransaction();
+                    UserLoveMusicInfo userLoveMusicInfo = realm.createObject(UserLoveMusicInfo.class);
+                    userLoveMusicInfo.setLove_id(records.size() + 1);
+                    userLoveMusicInfo.setUserID(User.getInstance().getUserID());
+                    userLoveMusicInfo.setTitle(playMusicInfo.getTitle());
+                    userLoveMusicInfo.setSinger(playMusicInfo.getArtist());
+                    userLoveMusicInfo.setMusicURL(playMusicInfo.getAudio());
+                    userLoveMusicInfo.setCover(playMusicInfo.getCover());
+                    for (int i = 1; i < records.size(); i++) {
+                        records.get(i - 1).setLove_id(i);
+                    }
+                    realm.commitTransaction();
+                    realm.close();
                 }
-                realm.commitTransaction();
-                realm.close();
+                //上传服务器
+                uploadUserOp("favor", playMusicInfo.getAudio());
             }
-            //上传服务器
-            uploadUserOp("favor", playMusicInfo.getAudio());
         }
     }
 
     private void deleteLoveMusic() {
         if (User.getInstance().getLogin()) {
-            Realm realm = Realm.getInstance(this);
-            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
-            if (realmResults.size() > 0) {
-                RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
-                realm.beginTransaction();
-                //保存
-                realmResults.get(0).removeFromRealm();
-                for (int i = 1; i < records.size(); i++) {
-                    records.get(i - 1).setLove_id(i);
+            if (playMusicInfo.getAudio() != null) {
+                Realm realm = Realm.getInstance(this);
+                RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
+                if (realmResults.size() > 0) {
+                    RealmResults<UserLoveMusicInfo> records = realm.where(UserLoveMusicInfo.class).findAll();
+                    realm.beginTransaction();
+                    //保存
+                    realmResults.get(0).removeFromRealm();
+                    for (int i = 1; i < records.size(); i++) {
+                        records.get(i - 1).setLove_id(i);
+                    }
+                    realm.commitTransaction();
+                    realm.close();
                 }
-                realm.commitTransaction();
-                realm.close();
             }
         }
     }
@@ -1047,6 +1053,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
         }, mMap));
     }
+
     private void updateLoveBtn() {
         Realm realm = Realm.getInstance(this);
         RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
