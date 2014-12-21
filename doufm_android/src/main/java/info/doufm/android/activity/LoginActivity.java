@@ -40,6 +40,7 @@ import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.User;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.Constants;
+import info.doufm.android.utils.ShareUtil;
 
 public class LoginActivity extends ActionBarActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
@@ -58,6 +59,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private String originPassword;
     private String mUserName;
     private ImageView ivLoginLogo;
+    private ShareUtil shareUtil;
 
     private SweetAlertDialog loadingDialog;
 
@@ -78,7 +80,8 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
+        shareUtil = new ShareUtil(this);
+        themeNum = shareUtil.getTheme();
         findViews();
         initViews();
     }
@@ -178,7 +181,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             String userName = etUserName.getText().toString().trim();
             String userPassword = etUserPassword.getText().toString().trim();
             originPassword = userPassword;
-            mUserName =  userName;
+            mUserName = userName;
             //生成MD5
             userPassword = UserUtil.toLowerCaseMD5(userPassword);
             //转成成UTF-8

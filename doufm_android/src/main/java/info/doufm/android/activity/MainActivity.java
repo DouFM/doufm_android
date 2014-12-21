@@ -139,11 +139,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private TextView tvUserLoginTitle;
     private ImageView ivUserLogo;
 
-/*    private String currentMusicTitle;
-    private String currentMusicSingerName;
-    private String currentMusicURL;
-    private String currentMusicCoverURL;*/
-
     private ShareUtil mShareUtil;
     private IntentFilter bcFilter;
     private MusicBroadcastReceiver mReceiver;
