@@ -138,6 +138,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         sp.edit().putBoolean("save_login_info", true).apply();
     }
 
+
     private void findViews() {
         mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
         etUserName = (EditText) findViewById(R.id.et_activity_login_user_name);
@@ -147,6 +148,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         cbSavePassword.setOnCheckedChangeListener(this);
         ivLoginLogo = (ImageView) findViewById(R.id.iv_login_logo);
     }
+
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
@@ -195,9 +197,15 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             mMap.put("user_name", userName);
             mMap.put("password", userPassword);
             final String finalUserPassword = userPassword;
-            RequestManager.getRequestQueue().add(new JsonObjectPostRequest(Constants.LOGIN_URL, new Response.Listener<JSONObject>() {
+            JsonObjectPostRequest jsonObjectPostRequest = new JsonObjectPostRequest(Constants.LOGIN_URL, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
+                    try {
+                        shareUtil.setLocalCookie(jsonObject.getString("Cookie"));
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+                    Log.w("LOG", "jsonObject from onResponse "+jsonObject.toString());
                     try {
                         Log.w("LOG", jsonObject.getString("status"));
                         Log.w("LOG", jsonObject.getString("user_id"));
@@ -237,13 +245,21 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
+                    Log.w("LOG",volleyError.getMessage(),volleyError);
                     Message msg = new Message();
                     msg.what = DISSMIS_LOADING_DLG;
                     handler.sendMessage(msg);
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
-            }, mMap));
+            }, mMap){
+                @Override
+                public String getResponseCookie() {
+                    return super.getResponseCookie();
+                }
+            };
+            RequestManager.getRequestQueue().add(jsonObjectPostRequest);
         }
+        Log.w("LOG","cookie from sharePreference "+ shareUtil.getLocalCookie());
     }
 
     private boolean checkUserInputInfo() {
