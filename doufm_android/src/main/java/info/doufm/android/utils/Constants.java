@@ -47,6 +47,7 @@ public class Constants {
     public static final String USER_INFO = "userinfo";
     public static final String THEME = "theme";
     public static final String PLAYLIST = "playlist";
+    public static final String COOKIE = "cookie";
     public static final byte HISTORY_TYPE = 1;
     public static final byte LOVE_TYPE = 2;
 }

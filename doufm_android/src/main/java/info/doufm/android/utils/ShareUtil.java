@@ -32,6 +32,10 @@ public class ShareUtil {
         mEditor.putInt(Constants.PLAYLIST, listNo);
     }
 
+    public void setLocalCookie(String cookie){mEditor.putString(Constants.COOKIE,cookie);}
+
+    public String getLocalCookie(){return mPreferences.getString(Constants.COOKIE,"");}
+
     public void apply() {
         mEditor.apply();
     }
