@@ -23,15 +23,20 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.R;
@@ -60,6 +65,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private String mUserName;
     private ImageView ivLoginLogo;
     private ShareUtil shareUtil;
+    private Map<String,String> sendHeader = new HashMap<String,String>();
 
     private SweetAlertDialog loadingDialog;
 
@@ -200,8 +206,10 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             JsonObjectPostRequest jsonObjectPostRequest = new JsonObjectPostRequest(Constants.LOGIN_URL, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
+                    //从response的jsonObject中取出cookie的值，存入sharePreference
                     try {
                         shareUtil.setLocalCookie(jsonObject.getString("Cookie"));
+                        shareUtil.apply();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -252,14 +260,37 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
             }, mMap){
+
                 @Override
-                public String getResponseCookie() {
-                    return super.getResponseCookie();
+                public void setSendCookie(String cookieKey, String cookieValue) {
+                    super.setSendCookie(cookieKey, cookieValue);
                 }
             };
+            String localCookieStr = shareUtil.getLocalCookie();
+            String cookieKey ="";
+            String cookieValue ="";
+            //取出“=”前，作为cookieKey
+            Pattern pattern=Pattern.compile(".*?=");
+            Matcher m=pattern.matcher(localCookieStr);
+            if(m.find()){
+                cookieKey = m.group();
+            }
+            cookieKey = cookieKey.substring(0,cookieKey.length()-1);//去掉“=”
+            Log.w("LOG","Login request with cookieKey "+ cookieKey);
+            //取出“=”后，作为cookieValue
+            Pattern pattern2 = Pattern.compile("=.*;");
+            Matcher m2 = pattern2.matcher(localCookieStr);
+            if(m2.find()){
+                cookieValue = m2.group();
+            }
+            cookieValue = cookieValue.substring(1,cookieValue.length()-1);//去掉“=”和";"
+            Log.w("LOG","Login request with cookieValue "+ cookieValue);
+            if(!cookieKey.equals("")&&!cookieValue.equals("")){
+                jsonObjectPostRequest.setSendCookie(cookieKey,cookieValue);
+                Log.w("LOG","Login send request with cookieKey "+ cookieKey+" and cookieValue "+cookieValue);
+            }
             RequestManager.getRequestQueue().add(jsonObjectPostRequest);
         }
-        Log.w("LOG","cookie from sharePreference "+ shareUtil.getLocalCookie());
     }
 
     private boolean checkUserInputInfo() {
