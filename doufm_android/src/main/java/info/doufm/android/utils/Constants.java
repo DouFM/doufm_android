@@ -22,6 +22,7 @@ public class Constants {
     public static final String MUSIC_IN_PLAYLIST_URL = BASE_URL + "/api/playlist/";
     public static final String TEST_URL = "http://115.29.140.122:5001";
     public static final String LOGIN_URL = TEST_URL + "/api/app_auth/";
+    public static final String LOGOUT_URL = TEST_URL+"/api/user/logout/";
     public static final String USER_URL = TEST_URL + "/api/user/";
     public static final String CURRENT_USER_URL = TEST_URL + "/api/user/current/";
     public static final String USER_HISTORY_URL = TEST_URL + "/api/user/current/history/";

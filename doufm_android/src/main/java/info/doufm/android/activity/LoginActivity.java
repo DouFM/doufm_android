@@ -241,7 +241,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                             }
                         } else {
                             //登录失败
-                            Toast.makeText(LoginActivity.this, "账号或者密码错误！", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "账号密码错误或重复登录", Toast.LENGTH_SHORT).show();
                             Message msg = new Message();
                             msg.what = DISSMIS_LOADING_DLG;
                             handler.sendMessage(msg);
@@ -260,10 +260,10 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
             }, mMap);
-            /*String localCookieStr = shareUtil.getLocalCookie();
+            String localCookieStr = shareUtil.getLocalCookie();
             if(!localCookieStr.equals("")){
                 jsonObjectPostRequest.setSendCookie(localCookieStr);
-            }*/
+            }
             RequestManager.getRequestQueue().add(jsonObjectPostRequest);
         }
     }
