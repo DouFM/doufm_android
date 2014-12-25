@@ -46,8 +46,8 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
     private Button btnUserQuit;
     private ShareUtil shareUtil;
     private String localCookieStr;
-    private String cookieKey;
-    private String cookieValue;
+    //private String cookieKey;
+    //private String cookieValue;
     private Map<String,String> sendHeader = new HashMap<String,String>();
 
     @Override
@@ -58,10 +58,10 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
         shareUtil=new ShareUtil(this);
 
-        //取出cookie,利用正则表达式将localCookieStr拆分成键和值
+        //取出cookie
         localCookieStr = shareUtil.getLocalCookie();
         //取出“=”前，作为cookieKey
-        Pattern pattern=Pattern.compile(".*?=");
+        /*Pattern pattern=Pattern.compile(".*?=");
         Matcher m=pattern.matcher(localCookieStr);
         if(m.find()){
             cookieKey = m.group();
@@ -75,7 +75,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
             cookieValue = m2.group();
         }
         cookieValue = cookieValue.substring(1,cookieValue.length()-1);//去掉“=”和";"
-        Log.w("LOG","cookieValue "+ cookieValue);
+        Log.w("LOG","cookieValue "+ cookieValue);*/
         findViews();
         initViews();
     }
@@ -167,7 +167,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
             }
         });
         //给发给服务器的请求的头里加入cookie
-        jsonObjectPostRequestWithCookie.setCookie(cookieKey,cookieValue);
+        jsonObjectPostRequestWithCookie.setCookie(localCookieStr);
         RequestManager.getRequestQueue().add(jsonObjectPostRequestWithCookie);
     }
 

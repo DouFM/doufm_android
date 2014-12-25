@@ -259,36 +259,11 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     handler.sendMessage(msg);
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
-            }, mMap){
-
-                @Override
-                public void setSendCookie(String cookieKey, String cookieValue) {
-                    super.setSendCookie(cookieKey, cookieValue);
-                }
-            };
-            String localCookieStr = shareUtil.getLocalCookie();
-            String cookieKey ="";
-            String cookieValue ="";
-            //取出“=”前，作为cookieKey
-            Pattern pattern=Pattern.compile(".*?=");
-            Matcher m=pattern.matcher(localCookieStr);
-            if(m.find()){
-                cookieKey = m.group();
-            }
-            cookieKey = cookieKey.substring(0,cookieKey.length()-1);//去掉“=”
-            Log.w("LOG","Login request with cookieKey "+ cookieKey);
-            //取出“=”后，作为cookieValue
-            Pattern pattern2 = Pattern.compile("=.*;");
-            Matcher m2 = pattern2.matcher(localCookieStr);
-            if(m2.find()){
-                cookieValue = m2.group();
-            }
-            cookieValue = cookieValue.substring(1,cookieValue.length()-1);//去掉“=”和";"
-            Log.w("LOG","Login request with cookieValue "+ cookieValue);
-            if(!cookieKey.equals("")&&!cookieValue.equals("")){
-                jsonObjectPostRequest.setSendCookie(cookieKey,cookieValue);
-                Log.w("LOG","Login send request with cookieKey "+ cookieKey+" and cookieValue "+cookieValue);
-            }
+            }, mMap);
+            /*String localCookieStr = shareUtil.getLocalCookie();
+            if(!localCookieStr.equals("")){
+                jsonObjectPostRequest.setSendCookie(localCookieStr);
+            }*/
             RequestManager.getRequestQueue().add(jsonObjectPostRequest);
         }
     }

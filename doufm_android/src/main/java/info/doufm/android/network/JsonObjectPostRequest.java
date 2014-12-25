@@ -58,7 +58,7 @@ public class JsonObjectPostRequest extends Request<JSONObject> {
                 Log.w("LOG","cookie from server "+ cookieFromResponse);
             }
             //去掉cookie末尾的分号
-            cookieFromResponse = cookieFromResponse.substring(11);
+            cookieFromResponse = cookieFromResponse.substring(11,cookieFromResponse.length()-1);
             Log.w("LOG","cookie substring "+ cookieFromResponse);
             //将cookie字符串添加到jsonObject中，该jsonObject会被deliverResponse递交，调用请求时则能在onResponse中得到
             JSONObject jsonObject = new JSONObject(jsonString);
@@ -82,7 +82,7 @@ public class JsonObjectPostRequest extends Request<JSONObject> {
     public Map<String, String> getHeaders() throws AuthFailureError {
         return sendHeader;
     }
-    public void setSendCookie(String cookieKey,String cookieValue){
-        sendHeader.put(cookieKey,cookieValue);
+    public void setSendCookie(String cookie){
+        sendHeader.put("Cookie",cookie);
     }
 }
