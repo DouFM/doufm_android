@@ -239,9 +239,22 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                                 LoginActivity.this.finish();
                                 isLogin = true;
                             }
-                        } else {
+                        } else if(jsonObject.get("status").equals("already login")){
                             //登录失败
-                            Toast.makeText(LoginActivity.this, "账号密码错误或重复登录", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "该用户已登录", Toast.LENGTH_SHORT).show();
+                            Message msg = new Message();
+                            msg.what = DISSMIS_LOADING_DLG;
+                            handler.sendMessage(msg);
+                        }
+                        else if(jsonObject.get("status").equals("can not get rs response")){
+                            //登录失败
+                            Toast.makeText(LoginActivity.this, "连接服务器失败", Toast.LENGTH_SHORT).show();
+                            Message msg = new Message();
+                            msg.what = DISSMIS_LOADING_DLG;
+                            handler.sendMessage(msg);
+                        }
+                        else{
+                            Toast.makeText(LoginActivity.this, "啊哦，服务器出错了", Toast.LENGTH_SHORT).show();
                             Message msg = new Message();
                             msg.what = DISSMIS_LOADING_DLG;
                             handler.sendMessage(msg);

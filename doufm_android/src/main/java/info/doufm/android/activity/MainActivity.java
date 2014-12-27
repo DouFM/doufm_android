@@ -65,7 +65,9 @@ import info.doufm.android.R;
 import info.doufm.android.adapter.ChannelListAdapter;
 import info.doufm.android.info.MusicInfo;
 import info.doufm.android.info.PlaylistInfo;
+import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.JsonObjectPostRequest;
+import info.doufm.android.network.JsonObjectRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
 import info.doufm.android.playview.RotateAnimator;
@@ -143,6 +145,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private IntentFilter bcFilter;
     private MusicBroadcastReceiver mReceiver;
     private boolean isPlay = false;
+    private ShareUtil shareUtil;
+    private String localCookie;
     //定义Handler对象
     private Handler handler = new Handler() {
         @Override
@@ -210,6 +214,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        shareUtil = new ShareUtil(this);
+        localCookie = shareUtil.getLocalCookie();
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         tvCurTime = (TextView) findViewById(R.id.curTimeText);
         tvTotalTime = (TextView) findViewById(R.id.totalTimeText);
@@ -325,7 +331,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         MobclickAgent.onResume(this);
         mListLisener = new ListListener();
         if (isFirstLoad) {
-            getMusicList();
+            try {
+                getMusicList();
+            } catch (AuthFailureError authFailureError) {
+                authFailureError.printStackTrace();
+            }
             isFirstLoad = false;
         }
         updateLoginTitle();
@@ -334,45 +344,33 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     }
 
-    private void getMusicList() {
-        RequestManager.getRequestQueue().add(
-                new JsonArrayRequest(Constants.PLAYLIST_URL, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray jsonArray) {
-                        JSONObject jo = new JSONObject();
-                        try {
-                            for (int i = 0; i < jsonArray.length(); i++) {
-                                jo = jsonArray.getJSONObject(i);
-                                PlaylistInfo playlistInfo = new PlaylistInfo();
-                                playlistInfo.setKey(jo.getString("key"));
-                                playlistInfo.setName(jo.getString("name"));
-                                mLeftResideMenuItemTitleList.add(jo.getString("name"));
-                                playlistInfo.setMusic_list(jo.getString("music_list"));
-                                mPlaylistInfoList.add(playlistInfo);
-                            }
-                            channelListAdapter = new ChannelListAdapter(MainActivity.this, mLeftResideMenuItemTitleList);
-                            mDrawerList.setAdapter(channelListAdapter);
-                            mDrawerList.setOnItemClickListener(mListLisener);
-                            isLoadingSuccess = true;
-                            initPlayer();
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        }
+    private void getMusicList() throws AuthFailureError {
+        JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.PLAYLIST_URL, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                JSONObject jo = new JSONObject();
+                try {
+                    for (int i = 0; i < jsonArray.length(); i++) {
+                        jo = jsonArray.getJSONObject(i);
+                        PlaylistInfo playlistInfo = new PlaylistInfo();
+                        playlistInfo.setKey(jo.getString("key"));
+                        playlistInfo.setName(jo.getString("name"));
+                        mLeftResideMenuItemTitleList.add(jo.getString("name"));
+                        playlistInfo.setMusic_list(jo.getString("music_list"));
+                        mPlaylistInfoList.add(playlistInfo);
                     }
-                }, errorListener) {
-                    /**
-                     * 添加自定义HTTP Header
-                     * @return
-                     * @throws com.android.volley.AuthFailureError
-                     */
-                    @Override
-                    public Map<String, String> getHeaders() throws AuthFailureError {
-                        Map<String, String> params = new HashMap<String, String>();
-                        params.put("User-Agent", "Android:1.0:2009chenqc@163.com");
-                        return params;
-                    }
+                    channelListAdapter = new ChannelListAdapter(MainActivity.this, mLeftResideMenuItemTitleList);
+                    mDrawerList.setAdapter(channelListAdapter);
+                    mDrawerList.setOnItemClickListener(mListLisener);
+                    isLoadingSuccess = true;
+                    initPlayer();
+                } catch (JSONException e) {
+                    e.printStackTrace();
                 }
-        );
+            }
+        }, errorListener);
+        jsonArrayRequestWithCookie.setCookie(localCookie);
+        RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
     }
 
     private void initPlayer() {
@@ -385,35 +383,40 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         mMainMediaPlayer.setOnBufferingUpdateListener(this);
         mMainMediaPlayer.setOnPreparedListener(this);
         mTimer.schedule(timerTask, 0, 1000);
-        playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
-        Toast.makeText(this, "已加载频道" + "『" + mPlaylistInfoList.get(mPlayListNum).getName() + "』", Toast.LENGTH_SHORT).show();
+        try {
+            playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
+        }finally {
+            Toast.makeText(this, "已加载频道" + "『" + mPlaylistInfoList.get(mPlayListNum).getName() + "』", Toast.LENGTH_SHORT).show();
+        }
     }
 
-    private void playRandomMusic(String playlist_key) {
+    private void playRandomMusic(String playlist_key) throws AuthFailureError {
         changeMusic(false);
         final String MUSIC_URL = Constants.MUSIC_IN_PLAYLIST_URL + playlist_key + "/?num=1";
-        RequestManager.getRequestQueue().add(
-                new JsonArrayRequest(MUSIC_URL, new Response.Listener<JSONArray>() {
-                    @Override
-                    public void onResponse(JSONArray jsonArray) {
-                        //请求随机播放音乐文件信息
-                        try {
-                            JSONObject jo = jsonArray.getJSONObject(0);
-                            playMusicInfo.setTitle(jo.getString("title"));
-                            playMusicInfo.setArtist(jo.getString("artist"));
-                            playMusicInfo.setAudio(jo.getString("audio"));
-                            playMusicInfo.setCover(jo.getString("cover"));
-                            mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio()); //这种url路径
-                            mMainMediaPlayer.prepareAsync(); //prepare自动播放
-                            getCoverImageRequest(playMusicInfo);
-                        } catch (JSONException e) {
-                            e.printStackTrace();
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    }
-                }, errorListener)
-        );
+        JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(MUSIC_URL, new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                //请求随机播放音乐文件信息
+                try {
+                    JSONObject jo = jsonArray.getJSONObject(0);
+                    playMusicInfo.setTitle(jo.getString("title"));
+                    playMusicInfo.setArtist(jo.getString("artist"));
+                    playMusicInfo.setAudio(jo.getString("audio"));
+                    playMusicInfo.setCover(jo.getString("cover"));
+                    mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio()); //这种url路径
+                    mMainMediaPlayer.prepareAsync(); //prepare自动播放
+                    getCoverImageRequest(playMusicInfo);
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }, errorListener);
+        jsonArrayRequestWithCookie.setCookie(localCookie);
+        RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
     }
 
     private void getNextMusicInfo(String playlist_key) {
@@ -533,7 +536,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 mDownThread = null;
             }
             playMusicInfo = new MusicInfo();
-            playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+            try {
+                playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+            } catch (AuthFailureError authFailureError) {
+                authFailureError.printStackTrace();
+            }
         }
     }
 
@@ -724,7 +731,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         mDownThread = null;
                     }
                     playMusicInfo = new MusicInfo();
-                    playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+                    try {
+                        playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+                    } catch (AuthFailureError authFailureError) {
+                        authFailureError.printStackTrace();
+                    }
                 }
                 break;
             case R.id.btn_play_previous:
@@ -768,11 +779,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     if (loveFlag) {
                         btnLove.setBackgroundResource(R.drawable.bg_btn_love);
                         deleteLoveMusic();
-                        Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
                     } else {
                         btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
                         saveLoveMusic();
-                        Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
                     }
                     loveFlag = !loveFlag;
                 } else {
@@ -833,7 +844,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     mDownThread = null;
                 }
                 playMusicInfo = new MusicInfo();
-                playRandomMusic(mPlaylistInfoList.get(position).getKey());
+                try {
+                    playRandomMusic(mPlaylistInfoList.get(position).getKey());
+                } catch (AuthFailureError authFailureError) {
+                    authFailureError.printStackTrace();
+                }
             }
         }
     }
@@ -975,11 +990,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.commitTransaction();
                 }
                 //上传服务器
-                uploadUserOp("listened", playMusicInfo.getAudio());
+                try {
+                    uploadUserOp("listened", playMusicInfo.getAudio());
+                } catch (AuthFailureError authFailureError) {
+                    authFailureError.printStackTrace();
+                }
             }
         }
     }
-
 
     private void saveLoveMusic() {
         if (User.getInstance().getLogin()) {
@@ -1003,7 +1021,13 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.close();
                 }
                 //上传服务器
-                uploadUserOp("favor", playMusicInfo.getAudio());
+                try {
+                    uploadUserOp("favor", playMusicInfo.getAudio());
+                } catch (AuthFailureError authFailureError) {
+                    authFailureError.printStackTrace();
+                }finally {
+                    Toast.makeText(MainActivity.this,"已为您收藏本歌",Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
@@ -1024,19 +1048,32 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.commitTransaction();
                     realm.close();
                 }
+                //上传服务器，重复操作表示取消原先的操作
+                try {
+                    uploadUserOp("favor", playMusicInfo.getAudio());
+                } catch (AuthFailureError authFailureError) {
+                    authFailureError.printStackTrace();
+                }finally {
+                    Toast.makeText(MainActivity.this,"已为您取消收藏本歌",Toast.LENGTH_SHORT).show();
+                }
             }
         }
     }
 
-    private void uploadUserOp(String opType, String musicKey) {
-        HashMap<String, String> mMap = new HashMap<String, String>();
+    private void uploadUserOp(String opType, String musicKey) throws AuthFailureError {
+        final HashMap<String, String> mMap = new HashMap<String, String>();
         mMap.put("op", opType);
         mMap.put("key", musicKey);
-        RequestManager.getRequestQueue().add(new JsonObjectPostRequest(Constants.USER_HISTORY_URL, new Response.Listener<JSONObject>() {
+        JsonObjectRequestWithCookie jsonObjectRequestWithCookie = new JsonObjectRequestWithCookie(Constants.USER_HISTORY_URL,null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
                 try {
-                    Log.w("LOG", jsonObject.getString("status"));
+                    if(jsonObject.getString("status").equals("success")){
+                        Log.w("LOG", "post /api/use/history/ success");
+                    }
+                    else{
+                        Log.w("LOG", "post /api/use/history/ failure");
+                    }
                 } catch (JSONException e) {
                     e.printStackTrace();
                 }
@@ -1044,9 +1081,16 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Log.e("LOG", "网络错误");
+                Log.w("LOG", "网络错误");
             }
-        }, mMap));
+        }){
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                return mMap;
+            }
+        };
+        jsonObjectRequestWithCookie.setCookie(localCookie);
+        RequestManager.getRequestQueue().add(jsonObjectRequestWithCookie);
     }
 
     private void updateLoveBtn() {

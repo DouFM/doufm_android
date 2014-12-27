@@ -31,6 +31,7 @@ public class JsonObjectRequestWithCookie extends JsonObjectRequest {
 
     //发送请求时，往Header中添加cookie，可以一并发送
     public void setCookie(String cookie) throws AuthFailureError {
+        mHeaders.put("User-Agent", "Android:1.0:2009chenqc@163.com");
         mHeaders.put("Cookie",cookie);
     }
 }

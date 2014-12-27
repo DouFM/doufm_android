@@ -60,22 +60,6 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
 
         //取出cookie
         localCookieStr = shareUtil.getLocalCookie();
-        //取出“=”前，作为cookieKey
-        /*Pattern pattern=Pattern.compile(".*?=");
-        Matcher m=pattern.matcher(localCookieStr);
-        if(m.find()){
-            cookieKey = m.group();
-        }
-        cookieKey = cookieKey.substring(0,cookieKey.length()-1);//去掉“=”
-        Log.w("LOG","cookieKey "+ cookieKey);
-        //取出“=”后，作为cookieValue
-        Pattern pattern2 = Pattern.compile("=.*;");
-        Matcher m2 = pattern2.matcher(localCookieStr);
-        if(m2.find()){
-            cookieValue = m2.group();
-        }
-        cookieValue = cookieValue.substring(1,cookieValue.length()-1);//去掉“=”和";"
-        Log.w("LOG","cookieValue "+ cookieValue);*/
         findViews();
         initViews();
     }
@@ -125,6 +109,10 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                     quit();
                 } catch (AuthFailureError authFailureError) {
                     authFailureError.printStackTrace();
+                }finally{
+                    shareUtil.setLocalCookie("");
+                    shareUtil.apply();
+                    Log.w("LOG","delete localCookie in sharePreference");
                 }
                 User.getInstance().Quit();
                 setResult(100);

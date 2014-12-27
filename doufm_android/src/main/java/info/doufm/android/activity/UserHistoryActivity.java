@@ -88,5 +88,6 @@ public class UserHistoryActivity extends ActionBarActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+
     }
 }

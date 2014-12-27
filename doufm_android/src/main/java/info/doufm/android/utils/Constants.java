@@ -20,14 +20,24 @@ public class Constants {
     public static final String BASE_URL = "http://doufm.info";
     public static final String PLAYLIST_URL = BASE_URL + "/api/playlist/?start=0";
     public static final String MUSIC_IN_PLAYLIST_URL = BASE_URL + "/api/playlist/";
+    //测试api
     public static final String TEST_URL = "http://115.29.140.122:5001";
     public static final String LOGIN_URL = TEST_URL + "/api/app_auth/";
+    public static final String MUSIC_URL = TEST_URL +"/api/music/";
+    public static final String CHANNEL_URL = TEST_URL +"/api/channel/";
     public static final String LOGOUT_URL = TEST_URL+"/api/user/logout/";
-    public static final String USER_URL = TEST_URL + "/api/user/";
-    public static final String CURRENT_USER_URL = TEST_URL + "/api/user/current/";
+    public static final String USER_PROFILE_URL =TEST_URL+"/api/user/profile/";
+    public static final String USER_HISTORY =TEST_URL+"/api/user/history/";
+    public static final String USER_MUSIC_URL =TEST_URL+"/api/user/music/";
+    public static final String TEST_PLAYLIST_URL =TEST_URL+"/api/playlist/";
+    public static final String TEST_PLAYLIST_MUSIC =TEST_URL+"/api/playlist/<string:key>/";
     public static final String USER_HISTORY_URL = TEST_URL + "/api/user/current/history/";
 
-    public static final String USER_FAVOR_URL = TEST_URL + "/api/user/current/favor";
+    /*public static final String USER_URL = TEST_URL + "/api/user/";
+    public static final String CURRENT_USER_URL = TEST_URL + "/api/user/current/";
+    public static final String USER_FAVOR_URL = TEST_URL + "/api/user/current/favor";*/
+
+
     //Meterial Design主题(500 300 100)
     public static final String[] ACTIONBAR_COLORS = {"#607d8b", "#ff5722", "#795548",
             "#ffc107", "#ff9800", "#259b24",
