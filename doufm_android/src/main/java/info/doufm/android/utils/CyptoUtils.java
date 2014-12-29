@@ -18,6 +18,7 @@ import javax.crypto.spec.IvParameterSpec;
 public class CyptoUtils {
 
     public static final String ALGORITHM_DES = "DES/CBC/PKCS5Padding";
+    public static final String KEY = "doufmpasswordkey";
 
     /**
      * DES算法，加密
