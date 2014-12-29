@@ -13,7 +13,7 @@ import java.util.Map;
  * Created by lsc on 2014/12/24.
  */
 public class JsonObjectRequestWithCookie extends JsonObjectRequest {
-    private Map<String,  String> mHeaders=new HashMap<>(1);
+    private Map<String, String> mHeaders = new HashMap<>();
 
     public JsonObjectRequestWithCookie(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
         super(method, url, jsonRequest, listener, errorListener);

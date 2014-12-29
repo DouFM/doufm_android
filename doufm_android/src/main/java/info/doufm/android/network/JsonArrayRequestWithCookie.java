@@ -15,7 +15,7 @@ import java.util.Map;
  * Created by lsc on 2014/12/27.
  */
 public class JsonArrayRequestWithCookie extends JsonArrayRequest {
-    private Map<String,  String> mHeaders=new HashMap<>(1);
+    private Map<String, String> mHeaders = new HashMap<>();
 
     public JsonArrayRequestWithCookie(String url, Response.Listener<JSONArray> listener, Response.ErrorListener errorListener) {
         super(url, listener, errorListener);
@@ -28,4 +28,5 @@ public class JsonArrayRequestWithCookie extends JsonArrayRequest {
     public void setCookie(String cookie) throws AuthFailureError {
         mHeaders.put("Cookie",cookie);
     }
+
 }
