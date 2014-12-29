@@ -202,6 +202,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                 public void onResponse(JSONObject jsonObject) {
                     try {
                         shareUtil.setLocalCookie(jsonObject.getString("Cookie"));
+                        shareUtil.apply();
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
