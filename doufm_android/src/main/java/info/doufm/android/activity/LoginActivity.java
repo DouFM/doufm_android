@@ -23,15 +23,20 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.R;
@@ -61,6 +66,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private String mUserName;
     private ImageView ivLoginLogo;
     private ShareUtil shareUtil;
+    private Map<String,String> sendHeader = new HashMap<String,String>();
 
     private SweetAlertDialog loadingDialog;
 
@@ -201,6 +207,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             JsonObjectPostRequest jsonObjectPostRequest = new JsonObjectPostRequest(Constants.LOGIN_URL, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
+                    //从response的jsonObject中取出cookie的值，存入sharePreference
                     try {
                         shareUtil.setLocalCookie(jsonObject.getString("Cookie"));
                         shareUtil.apply();
@@ -233,9 +240,22 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                                 LoginActivity.this.finish();
                                 isLogin = true;
                             }
-                        } else {
+                        } else if(jsonObject.get("status").equals("already login")){
                             //登录失败
-                            Toast.makeText(LoginActivity.this, "账号或者密码错误！", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(LoginActivity.this, "该用户已登录", Toast.LENGTH_SHORT).show();
+                            Message msg = new Message();
+                            msg.what = DISSMIS_LOADING_DLG;
+                            handler.sendMessage(msg);
+                        }
+                        else if(jsonObject.get("status").equals("can not get rs response")){
+                            //登录失败
+                            Toast.makeText(LoginActivity.this, "连接服务器失败", Toast.LENGTH_SHORT).show();
+                            Message msg = new Message();
+                            msg.what = DISSMIS_LOADING_DLG;
+                            handler.sendMessage(msg);
+                        }
+                        else{
+                            Toast.makeText(LoginActivity.this, "啊哦，服务器出错了", Toast.LENGTH_SHORT).show();
                             Message msg = new Message();
                             msg.what = DISSMIS_LOADING_DLG;
                             handler.sendMessage(msg);
@@ -253,15 +273,13 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     handler.sendMessage(msg);
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
-            }, mMap){
-                @Override
-                public String getResponseCookie() {
-                    return super.getResponseCookie();
-                }
-            };
+            }, mMap);
+            String localCookieStr = shareUtil.getLocalCookie();
+            if(!localCookieStr.equals("")){
+                jsonObjectPostRequest.setSendCookie(localCookieStr);
+            }
             RequestManager.getRequestQueue().add(jsonObjectPostRequest);
         }
-        Log.w("LOG","cookie from sharePreference "+ shareUtil.getLocalCookie());
     }
 
     private boolean checkUserInputInfo() {
