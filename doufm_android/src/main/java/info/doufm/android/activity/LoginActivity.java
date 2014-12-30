@@ -63,7 +63,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private SharedPreferences sp;
     private CheckBox cbSavePassword;
     private String originPassword;
-    private String mUserName;
+    private String originName;
     private ImageView ivLoginLogo;
     private ShareUtil shareUtil;
     private Map<String,String> sendHeader = new HashMap<String,String>();
@@ -140,7 +140,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         etUserPassword.addTextChangedListener(mTextWatcher);
         if (sp.getBoolean("save_login_info", false)) {
             etUserName.setText(sp.getString("rm_user_name", ""));
-            etUserPassword.setText(CyptoUtils.decode(CyptoUtils.KEY,sp.getString("rm_user_password", "")));
+            etUserPassword.setText(CyptoUtils.decode(CyptoUtils.KEY, sp.getString("rm_user_password", "")));
         }
         sp.edit().putBoolean("save_login_info", true).apply();
     }
@@ -190,9 +190,9 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             String userName = etUserName.getText().toString().trim();
             String userPassword = etUserPassword.getText().toString().trim();
             originPassword = userPassword;
-            mUserName = userName;
             //生成MD5
             userPassword = UserUtil.toLowerCaseMD5(userPassword);
+
             //转成成UTF-8
             try {
                 userName = URLEncoder.encode(userName, "UTF-8");
@@ -203,7 +203,6 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             HashMap<String, String> mMap = new HashMap<String, String>();
             mMap.put("user_name", userName);
             mMap.put("password", userPassword);
-            final String finalUserPassword = userPassword;
             JsonObjectPostRequest jsonObjectPostRequest = new JsonObjectPostRequest(Constants.LOGIN_URL, new Response.Listener<JSONObject>() {
                 @Override
                 public void onResponse(JSONObject jsonObject) {
@@ -216,19 +215,19 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     }
                     Log.w("LOG", "jsonObject from onResponse "+jsonObject.toString());
                     try {
-                        Log.w("LOG", jsonObject.getString("status"));
-                        Log.w("LOG", jsonObject.getString("user_id"));
                         if (jsonObject.get("status").equals("success")) {
                             //登录成功
-                            User.getInstance().setUserName(mUserName);
-                            User.getInstance().setUserPassword(finalUserPassword);
+                            //登录时不分区用户名大小写，但是后台记录的用户名是有区分大小写的
+                            originName = jsonObject.getString("user_name");
+                            User.getInstance().setUserName(originName);
+                            User.getInstance().setUserPassword(originPassword);
                             User.getInstance().setUserID(jsonObject.getString("user_id"));
                             User.getInstance().setLogin(true);
                             if (cbSavePassword.isChecked()) {
                                 //记住用户名、密码、
                                 SharedPreferences.Editor editor = sp.edit();
-                                editor.putString("rm_user_name", mUserName);//如果写入UTF-8格式，读取时会显示乱码
-                                editor.putString("rm_user_password", CyptoUtils.encode(CyptoUtils.KEY,originPassword));
+                                editor.putString("rm_user_name", originName);
+                                editor.putString("rm_user_password", CyptoUtils.encode(CyptoUtils.KEY, originPassword));
                                 editor.apply();
                             }
                             if (!isLogin) {

@@ -20,7 +20,6 @@ import org.json.JSONArray;
 
 import info.doufm.android.R;
 import info.doufm.android.adapter.UserHistoryListAdapter;
-import info.doufm.android.adapter.UserHistoryListFromServerAdapter;
 import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserHistoryInfo;
@@ -36,7 +35,6 @@ public class UserHistoryActivity extends ActionBarActivity {
     private int themeNum;
     private UserHistoryListAdapter adapter;
     private RealmResults<UserHistoryInfo> userHistoryInfoList;
-    private UserHistoryListFromServerAdapter apiAdapter;
     private ListView lvHistory;
     private ShareUtil shareUtil;
     private String localCookie;
