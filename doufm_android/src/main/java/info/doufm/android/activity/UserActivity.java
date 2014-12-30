@@ -20,6 +20,7 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -29,6 +30,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import info.doufm.android.R;
+import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.JsonObjectRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.User;
@@ -122,6 +124,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                 Intent intent = new Intent(UserActivity.this, UserHistoryActivity.class);
                 intent.putExtra(Constants.EXTRA_THEME, themeNum);
                 startActivityForResult(intent, 0);
+
                 break;
             case R.id.rl_activity_user_like:
                 Intent i = new Intent(UserActivity.this, UserLikeActivity.class);

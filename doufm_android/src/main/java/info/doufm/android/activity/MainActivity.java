@@ -1005,11 +1005,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.commitTransaction();
                 }
                 //上传服务器
-                Log.w("LOG","saveListMusic music key "+ playMusicInfo.getKey());
-                try {
-                    uploadUserOp("listened", playMusicInfo.getKey());
-                } catch (AuthFailureError authFailureError) {
-                    authFailureError.printStackTrace();
+                if(playMusicInfo.getKey()!=null){
+                    try {
+                        uploadUserOp("listened", playMusicInfo.getKey());
+                    } catch (AuthFailureError authFailureError) {
+                        authFailureError.printStackTrace();
+                    }
                 }
             }
         }
@@ -1037,7 +1038,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.close();
                 }
                 //上传服务器
-                //Log.w("LOG","saveLoveMusic music key "+ playMusicInfo.getKey());
                 if(playMusicInfo.getKey()!=null){
                     try {
                         uploadUserOp("favor", playMusicInfo.getKey());
@@ -1067,18 +1067,18 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.close();
                 }
                 //上传服务器，重复操作表示取消原先的操作
-                //Log.w("LOG","deleteLoveMusic music key "+ playMusicInfo.getKey());
-                try {
-                    uploadUserOp("favor", playMusicInfo.getKey());
-                } catch (AuthFailureError authFailureError) {
-                    authFailureError.printStackTrace();
+                if(playMusicInfo.getKey()!=null){
+                    try {
+                        uploadUserOp("favor", playMusicInfo.getKey());
+                    } catch (AuthFailureError authFailureError) {
+                        authFailureError.printStackTrace();
+                    }
                 }
             }
         }
     }
 
     private void uploadUserOp(String opType, String musicKey) throws AuthFailureError {
-        Log.w("LOG","invoke uploadUserOp with "+ opType+" and "+musicKey);
         HashMap<String, String> opMap = new HashMap<String, String>();
         opMap.put("op", opType);
         opMap.put("key", musicKey);
@@ -1088,10 +1088,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             public void onResponse(JSONObject jsonObject) {
                 Log.w("LOG","get response jsonObject from post user history"+jsonObject.toString());
                 try {
-                    if(jsonObject.getString("status").equals("success")){
-                        Log.w("LOG", "post /api/use/history/ success");
-                    }
-                    else{
+                    if(jsonObject.getString("status").equals("listened_success")){
+                        Log.w("LOG", "post listened success");
+                    } else if(jsonObject.getString("status").equals("favor_success")){
+                        Log.w("LOG","favor success");
+                    }else if(jsonObject.getString("status").equals("dislike_success")) {
+                        Log.w("LOG", "dislike success");
+                    }else if(jsonObject.getString("status").equals("shared_success")) {
+                        Log.w("LOG", "shared success");
+                    }else{
                         Log.w("LOG", "post /api/use/history/ failure");
                     }
                 } catch (JSONException e) {
@@ -1104,6 +1109,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 Log.w("LOG", "操作失败");
             }
         },opMap);
+        ShareUtil shareUtil1 = new ShareUtil(MainActivity.this);
+        String localCookie = shareUtil1.getLocalCookie();
         jsonObjectRequestWithCookie.setCookie(localCookie);
         RequestManager.getRequestQueue().add(jsonObjectRequestWithCookie);
     }

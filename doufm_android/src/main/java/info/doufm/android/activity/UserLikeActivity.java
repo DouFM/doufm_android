@@ -5,15 +5,26 @@ import android.graphics.Color;
 import android.os.Bundle;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
 
+import com.android.volley.AuthFailureError;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+
+import org.json.JSONArray;
+
 import info.doufm.android.R;
 import info.doufm.android.adapter.UserLoveListAdapter;
+import info.doufm.android.adapter.UserMusicAdapter;
+import info.doufm.android.network.JsonArrayRequestWithCookie;
+import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserLoveMusicInfo;
 import info.doufm.android.utils.Constants;
+import info.doufm.android.utils.ShareUtil;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -23,6 +34,7 @@ public class UserLikeActivity extends ActionBarActivity {
     private int themeNum;
     private UserLoveListAdapter adapter;
     private RealmResults<UserLoveMusicInfo> userLoveInfoList;
+    private UserMusicAdapter userMusicAdapter;
     private ListView lvLove;
 
     @Override
@@ -75,10 +87,34 @@ public class UserLikeActivity extends ActionBarActivity {
 
     private void LoadingLoveMusic() {
         Realm realm = Realm.getInstance(this);
-        userLoveInfoList = realm.where(UserLoveMusicInfo.class).findAll();
-        adapter = new UserLoveListAdapter(UserLikeActivity.this, userLoveInfoList);
-        adapter.notifyDataSetChanged();
-        lvLove.setAdapter(adapter);
-
+        if(realm!=null){
+            userLoveInfoList = realm.where(UserLoveMusicInfo.class).findAll();
+            adapter = new UserLoveListAdapter(UserLikeActivity.this, userLoveInfoList);
+            adapter.notifyDataSetChanged();
+            lvLove.setAdapter(adapter);
+        }
+        //如果缓存不可用，从服务器获取用户的收藏列表
+        else{
+            JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL+"?type=favor&start=0&end=30",new Response.Listener<JSONArray>(){
+                @Override
+                public void onResponse(JSONArray jsonArray) {
+                    userMusicAdapter = new UserMusicAdapter(UserLikeActivity.this,jsonArray);
+                    lvLove.setAdapter(userMusicAdapter);
+                }
+            },new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    Log.w("LOG", "show favor history error " + volleyError);
+                }
+            });
+            try {
+                ShareUtil shareUtil1 = new ShareUtil(UserLikeActivity.this);
+                String localCookie = shareUtil1.getLocalCookie();
+                jsonArrayRequestWithCookie.setCookie(localCookie);
+            } catch (AuthFailureError authFailureError) {
+                authFailureError.printStackTrace();
+            }
+            RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
+        }
     }
 }

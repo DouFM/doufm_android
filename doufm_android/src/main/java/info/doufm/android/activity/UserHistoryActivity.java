@@ -10,17 +10,18 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
-import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
 import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import info.doufm.android.R;
 import info.doufm.android.adapter.UserHistoryListAdapter;
-import info.doufm.android.adapter.UserHistoryListFromServerAdapter;
+import info.doufm.android.adapter.UserMusicAdapter;
 import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserHistoryInfo;
@@ -36,7 +37,7 @@ public class UserHistoryActivity extends ActionBarActivity {
     private int themeNum;
     private UserHistoryListAdapter adapter;
     private RealmResults<UserHistoryInfo> userHistoryInfoList;
-    private UserHistoryListFromServerAdapter apiAdapter;
+    private UserMusicAdapter userMusicAdapter;
     private ListView lvHistory;
     private ShareUtil shareUtil;
     private String localCookie;
@@ -98,30 +99,40 @@ public class UserHistoryActivity extends ActionBarActivity {
 
     private void LoadingHistory() throws AuthFailureError {
         Realm realm = Realm.getInstance(this);
-        userHistoryInfoList = realm.where(UserHistoryInfo.class).findAll();
-        adapter = new UserHistoryListAdapter(UserHistoryActivity.this, userHistoryInfoList);
-        lvHistory.setAdapter(adapter);
-        //解决java.lang.IllegalStateException: The content of the adapter has changed but ListView did not receive a notification.
-        realm.addChangeListener(new RealmChangeListener() {
-            @Override
-            public void onChange() {
-                adapter.notifyDataSetChanged();
+        if(realm!=null){
+            userHistoryInfoList = realm.where(UserHistoryInfo.class).findAll();
+            adapter = new UserHistoryListAdapter(UserHistoryActivity.this, userHistoryInfoList);
+            lvHistory.setAdapter(adapter);
+            //解决java.lang.IllegalStateException: The content of the adapter has changed but ListView did not receive a notification.
+            realm.addChangeListener(new RealmChangeListener() {
+                @Override
+                public void onChange() {
+                    adapter.notifyDataSetChanged();
+                }
+            });
+        }
+         //如果缓存不可用，从服务器获取用户的收藏列表
+        else{
+            JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL+"?type=listened&start=0&end=30",new Response.Listener<JSONArray>(){
+                @Override
+                public void onResponse(JSONArray jsonArray) {
+                    userMusicAdapter = new UserMusicAdapter(UserHistoryActivity.this,jsonArray);
+                    lvHistory.setAdapter(userMusicAdapter);
+                }
+            },new Response.ErrorListener() {
+                @Override
+                public void onErrorResponse(VolleyError volleyError) {
+                    Log.w("LOG","show listen history error "+ volleyError);
+                }
+            });
+            try {
+                ShareUtil shareUtil1 = new ShareUtil(UserHistoryActivity.this);
+                String localCookie = shareUtil1.getLocalCookie();
+                jsonArrayRequestWithCookie.setCookie(localCookie);
+            } catch (AuthFailureError authFailureError) {
+                authFailureError.printStackTrace();
             }
-        });
-        /*JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_HISTORY_URL,new Response.Listener<JSONArray>() {
-            @Override
-            public void onResponse(JSONArray jsonArray) {
-                apiAdapter = new UserHistoryListFromServerAdapter(UserHistoryActivity.this,jsonArray);
-                lvHistory.setAdapter(apiAdapter);
-            }
-        },new Response.ErrorListener(){
-            @Override
-            public void onErrorResponse(VolleyError volleyError) {
-                Toast.makeText(UserHistoryActivity.this, "从服务器加载听歌记录失败", Toast.LENGTH_SHORT).show();
-            }
-        });
-        jsonArrayRequestWithCookie.setCookie(localCookie);
-        RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);*/
-
+            RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
+        }
     }
 }

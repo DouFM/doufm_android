@@ -1,14 +1,11 @@
 package info.doufm.android.network;
 
 import android.content.IntentFilter;
-
 import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
-
 import org.json.JSONObject;
-
 import java.util.HashMap;
 import java.util.Map;
 
