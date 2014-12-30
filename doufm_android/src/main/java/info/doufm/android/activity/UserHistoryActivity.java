@@ -21,7 +21,9 @@ import org.json.JSONObject;
 
 import info.doufm.android.R;
 import info.doufm.android.adapter.UserHistoryListAdapter;
+
 import info.doufm.android.adapter.UserMusicAdapter;
+
 import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserHistoryInfo;
