@@ -50,7 +50,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
     private String localCookieStr;
     //private String cookieKey;
     //private String cookieValue;
-    private Map<String,String> sendHeader = new HashMap<String,String>();
+    private Map<String, String> sendHeader = new HashMap<String, String>();
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -58,7 +58,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         setContentView(R.layout.activity_user);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
-        shareUtil=new ShareUtil(this);
+        shareUtil = new ShareUtil(this);
 
         //取出cookie
         localCookieStr = shareUtil.getLocalCookie();
@@ -111,7 +111,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                     quit();
                 } catch (AuthFailureError authFailureError) {
                     authFailureError.printStackTrace();
-                }finally{
+                } finally {
                     /*shareUtil.setLocalCookie("");
                     shareUtil.apply();
                     Log.w("LOG","delete localCookie in sharePreference");*/
@@ -133,30 +133,30 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                 break;
         }
     }
+
     //退出登录
     public void quit() throws AuthFailureError {
-        JsonObjectRequestWithCookie jsonObjectPostRequestWithCookie = new JsonObjectRequestWithCookie(Constants.LOGOUT_URL,null,new Response.Listener<JSONObject>() {
+        JsonObjectRequestWithCookie jsonObjectPostRequestWithCookie = new JsonObjectRequestWithCookie(Constants.LOGOUT_URL, null, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
-                Log.w("LOG","quite response jsonObject "+ jsonObject.toString());
-                try{
-                    if(jsonObject.getString("status").equals("success")){
+                Log.w("LOG", "quite response jsonObject " + jsonObject.toString());
+                try {
+                    if (jsonObject.getString("status").equals("success")) {
                         Toast.makeText(UserActivity.this, "您已退出登录", Toast.LENGTH_SHORT).show();
                         shareUtil.setLocalCookie("");
                         shareUtil.apply();
-                        Log.w("LOG","delete localCookie in sharePreference");
-                    }
-                    else if(jsonObject.getString("status").equals("have not login")){
+                        Log.w("LOG", "delete localCookie in sharePreference");
+                    } else if (jsonObject.getString("status").equals("have not login")) {
                         Toast.makeText(UserActivity.this, "您尚未登录，无法退出", Toast.LENGTH_SHORT).show();
                     }
-                }catch (JSONException e) {
+                } catch (JSONException e) {
                     e.printStackTrace();
                 }
             }
-        },new Response.ErrorListener() {
+        }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Log.w("LOG",volleyError.getMessage(),volleyError);
+                Log.w("LOG", volleyError.getMessage(), volleyError);
                 Toast.makeText(UserActivity.this, "网络错误，稍后再试", Toast.LENGTH_SHORT).show();
             }
         });

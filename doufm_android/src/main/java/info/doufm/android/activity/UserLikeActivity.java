@@ -87,21 +87,21 @@ public class UserLikeActivity extends ActionBarActivity {
 
     private void LoadingLoveMusic() {
         Realm realm = Realm.getInstance(this);
-        if(realm!=null){
+        if (realm != null) {
             userLoveInfoList = realm.where(UserLoveMusicInfo.class).findAll();
             adapter = new UserLoveListAdapter(UserLikeActivity.this, userLoveInfoList);
             adapter.notifyDataSetChanged();
             lvLove.setAdapter(adapter);
         }
         //如果缓存不可用，从服务器获取用户的收藏列表
-        else{
-            JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL+"?type=favor&start=0&end=30",new Response.Listener<JSONArray>(){
+        else {
+            JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=favor&start=0&end=30", new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray jsonArray) {
-                    userMusicAdapter = new UserMusicAdapter(UserLikeActivity.this,jsonArray);
+                    userMusicAdapter = new UserMusicAdapter(UserLikeActivity.this, jsonArray);
                     lvLove.setAdapter(userMusicAdapter);
                 }
-            },new Response.ErrorListener() {
+            }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
                     Log.w("LOG", "show favor history error " + volleyError);

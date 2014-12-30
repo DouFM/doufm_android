@@ -1,6 +1,7 @@
 package info.doufm.android.activity;
 
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -10,9 +11,11 @@ import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.media.AudioManager;
 import android.media.MediaPlayer;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
+import android.provider.Settings;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.app.ActionBarDrawerToggle;
@@ -36,7 +39,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
-import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
@@ -57,7 +59,6 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -67,7 +68,6 @@ import info.doufm.android.adapter.ChannelListAdapter;
 import info.doufm.android.info.MusicInfo;
 import info.doufm.android.info.PlaylistInfo;
 import info.doufm.android.network.JsonArrayRequestWithCookie;
-import info.doufm.android.network.JsonObjectPostRequest;
 import info.doufm.android.network.JsonObjectRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.playview.MySeekBar;
@@ -188,6 +188,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     };
 
     private boolean firstErrorFlag = true;
+
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
@@ -196,15 +197,32 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 firstErrorFlag = false;
                 new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("网络连接出错啦...")
-                        .setConfirmText("退出")
+                        .setCancelText("检测网络设置")
+                        .setConfirmText("退出应用")
+                        .showCancelButton(true)
+                        .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
+                            @Override
+                            public void onClick(SweetAlertDialog sDialog) {
+                                Intent intent = null;
+                                if (Build.VERSION.SDK_INT > 11) {
+                                    //Android 3.0以上版本跳转至Wifi设置界面
+                                    intent = new Intent(Settings.ACTION_WIFI_SETTINGS);
+                                } else {
+                                    //Android 3.0以下版本跳转至Wifi设置界面
+                                    intent = new Intent();
+                                    ComponentName componentName = new ComponentName("com.android.settings", "com.android.settings.WirelessSettings");
+                                    intent.setComponent(componentName);
+                                    intent.setAction("android.intent.action.VIEW");
+                                }
+                                startActivity(intent);
+                            }
+                        })
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
                             @Override
                             public void onClick(SweetAlertDialog sDialog) {
-                                finish();
-                                System.exit(0);
+                                MainActivity.this.finish();
                             }
-                        })
-                        .show();
+                        }).show();
             }
         }
     };
@@ -359,7 +377,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         mLeftResideMenuItemTitleList.add(jo.getString("name"));
                         playlistInfo.setMusic_list(jo.getString("music_list"));
                         mPlaylistInfoList.add(playlistInfo);
-                        Log.w("LOG","key  "+playlistInfo.getKey());
+                        Log.w("LOG", "key  " + playlistInfo.getKey());
                     }
                     channelListAdapter = new ChannelListAdapter(MainActivity.this, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(channelListAdapter);
@@ -389,7 +407,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
         } catch (AuthFailureError authFailureError) {
             authFailureError.printStackTrace();
-        }finally {
+        } finally {
             Toast.makeText(this, "已加载频道" + "『" + mPlaylistInfoList.get(mPlayListNum).getName() + "』", Toast.LENGTH_SHORT).show();
         }
     }
@@ -984,7 +1002,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
-    private void saveUserListenHistory(){
+    private void saveUserListenHistory() {
         if (User.getInstance().getLogin()) {
             //本地保存
             Realm realm = Realm.getInstance(this);
@@ -1005,7 +1023,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.commitTransaction();
                 }
                 //上传服务器
-                if(playMusicInfo.getKey()!=null){
+                if (playMusicInfo.getKey() != null) {
                     try {
                         uploadUserOp("listened", playMusicInfo.getKey());
                     } catch (AuthFailureError authFailureError) {
@@ -1016,7 +1034,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
-    private void saveLoveMusic(){
+    private void saveLoveMusic() {
         if (User.getInstance().getLogin()) {
             Realm realm = Realm.getInstance(this);
             if (playMusicInfo.getAudio() != null) {
@@ -1038,7 +1056,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.close();
                 }
                 //上传服务器
-                if(playMusicInfo.getKey()!=null){
+                if (playMusicInfo.getKey() != null) {
                     try {
                         uploadUserOp("favor", playMusicInfo.getKey());
                     } catch (AuthFailureError authFailureError) {
@@ -1050,7 +1068,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
-    private void deleteLoveMusic(){
+    private void deleteLoveMusic() {
         if (User.getInstance().getLogin()) {
             if (playMusicInfo.getAudio() != null) {
                 Realm realm = Realm.getInstance(this);
@@ -1067,7 +1085,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.close();
                 }
                 //上传服务器，重复操作表示取消原先的操作
-                if(playMusicInfo.getKey()!=null){
+                if (playMusicInfo.getKey() != null) {
                     try {
                         uploadUserOp("favor", playMusicInfo.getKey());
                     } catch (AuthFailureError authFailureError) {
@@ -1083,20 +1101,20 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         opMap.put("op", opType);
         opMap.put("key", musicKey);
         JSONObject opJsonObject = new JSONObject(opMap);
-        JsonObjectRequestWithCookie jsonObjectRequestWithCookie = new JsonObjectRequestWithCookie(Constants.USER_HISTORY_URL,opJsonObject, new Response.Listener<JSONObject>() {
+        JsonObjectRequestWithCookie jsonObjectRequestWithCookie = new JsonObjectRequestWithCookie(Constants.USER_HISTORY_URL, opJsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
-                Log.w("LOG","get response jsonObject from post user history"+jsonObject.toString());
+                Log.w("LOG", "get response jsonObject from post user history" + jsonObject.toString());
                 try {
-                    if(jsonObject.getString("status").equals("listened_success")){
+                    if (jsonObject.getString("status").equals("listened_success")) {
                         Log.w("LOG", "post listened success");
-                    } else if(jsonObject.getString("status").equals("favor_success")){
-                        Log.w("LOG","favor success");
-                    }else if(jsonObject.getString("status").equals("dislike_success")) {
+                    } else if (jsonObject.getString("status").equals("favor_success")) {
+                        Log.w("LOG", "favor success");
+                    } else if (jsonObject.getString("status").equals("dislike_success")) {
                         Log.w("LOG", "dislike success");
-                    }else if(jsonObject.getString("status").equals("shared_success")) {
+                    } else if (jsonObject.getString("status").equals("shared_success")) {
                         Log.w("LOG", "shared success");
-                    }else{
+                    } else {
                         Log.w("LOG", "post /api/use/history/ failure");
                     }
                 } catch (JSONException e) {
@@ -1108,7 +1126,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             public void onErrorResponse(VolleyError volleyError) {
                 Log.w("LOG", "操作失败");
             }
-        },opMap);
+        }, opMap);
         ShareUtil shareUtil1 = new ShareUtil(MainActivity.this);
         String localCookie = shareUtil1.getLocalCookie();
         jsonObjectRequestWithCookie.setCookie(localCookie);

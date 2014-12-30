@@ -63,6 +63,7 @@ public class UserHistoryListAdapter extends BaseAdapter {
         viewHolder.singerName.setText(userHistoryInfo.getSinger());
         return convertView;
     }
+
     private class ViewHolder {
         ImageView historyIcon;
         TextView musicTitle;

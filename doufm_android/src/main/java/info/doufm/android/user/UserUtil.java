@@ -15,6 +15,7 @@ import java.security.NoSuchAlgorithmException;
  * Created on 2014-12-07
  */
 public class UserUtil {
+
     /**
      * 生成全小写的MD5值
      *
@@ -39,6 +40,13 @@ public class UserUtil {
         return hex.toString().toLowerCase();
     }
 
+    /**
+     * 使用AppCompat-V7生成圆形图片
+     *
+     * @param context
+     * @param mImageID
+     * @return
+     */
     public static RoundedBitmapDrawable getCircleImage(Context context, int mImageID) {
         Bitmap src = BitmapFactory.decodeResource(context.getResources(), mImageID);
         Bitmap dst;

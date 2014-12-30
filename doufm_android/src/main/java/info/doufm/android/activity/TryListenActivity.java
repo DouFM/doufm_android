@@ -39,8 +39,8 @@ import info.doufm.android.utils.TimeFormat;
  *
  * @author Lqh
  */
-public class TryListenActivity extends ActionBarActivity{
-    protected static final String TAG="seekBar";
+public class TryListenActivity extends ActionBarActivity {
+    protected static final String TAG = "seekBar";
     private MediaPlayer mediaPlayer;
 
     private Toolbar mToolbar;
@@ -57,22 +57,22 @@ public class TryListenActivity extends ActionBarActivity{
     //来电标志:只当正在播放的情况下有来电时置为true
     private boolean phoneCome = false;
     //更新播放进度及时间
-    private TextView tvCurTime,tvTotalTime;
+    private TextView tvCurTime, tvTotalTime;
     private boolean seekNow = false; //互斥变量，防止定时器与SeekBar拖动时进度冲突
     private MySeekBar seekBar;
     private int mMusicDuration;            //音乐总时间
     private int mMusicCurrDuration;        //当前播放时间
     private Timer mTimer = new Timer();  //计时器
-    private boolean isFirstLoad =true;
+    private boolean isFirstLoad = true;
     //定义Handler对象
     private Handler handler = new Handler() {
         @Override
         public void handleMessage(Message msg) {
             if (msg.what == Constants.UPDATE_TIME) {
-                Log.i(TAG,"handler get the message");
+                Log.i(TAG, "handler get the message");
                 //更新音乐播放状态
                 if (isPlay) {
-                    Log.i(TAG,"handler get the message, and fet currentPosition"+mediaPlayer.getCurrentPosition());
+                    Log.i(TAG, "handler get the message, and fet currentPosition" + mediaPlayer.getCurrentPosition());
                     mMusicCurrDuration = mediaPlayer.getCurrentPosition();
                     seekBar.setProgress(mMusicCurrDuration);
                 }
@@ -89,7 +89,7 @@ public class TryListenActivity extends ActionBarActivity{
                 Message msg = new Message();
                 msg.what = Constants.UPDATE_TIME;
                 handler.sendMessage(msg);
-                Log.i(TAG,"i have schedule the timerTask");
+                Log.i(TAG, "i have schedule the timerTask");
             }
         }
     };
@@ -123,43 +123,44 @@ public class TryListenActivity extends ActionBarActivity{
         mediaPlayer.setLooping(true);
 
         //更新音乐播放进度
-        tvCurTime = (TextView)findViewById(R.id.curTimeText);
-        tvTotalTime = (TextView)findViewById(R.id.totalTimeText);
+        tvCurTime = (TextView) findViewById(R.id.curTimeText);
+        tvTotalTime = (TextView) findViewById(R.id.totalTimeText);
         seekBar = (MySeekBar) findViewById(R.id.seekbar);
         mMusicDuration = mediaPlayer.getDuration();
         seekBar.setMax(mMusicDuration);
         seekBar.setSecondaryProgress(mMusicDuration);
         tvTotalTime.setText(TimeFormat.msToMinAndS(mMusicDuration));
-        Log.i(TAG,"on create");
-        mMusicCurrDuration=0;
+        Log.i(TAG, "on create");
+        mMusicCurrDuration = 0;
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
                 seekBar.setProgress(progress);
                 mMusicCurrDuration = progress;
                 tvCurTime.setText(TimeFormat.msToMinAndS(progress));
-                Log.i(TAG,"current progress is " + mMusicCurrDuration);
+                Log.i(TAG, "current progress is " + mMusicCurrDuration);
             }
+
             @Override
             public void onStartTrackingTouch(SeekBar seekBar) {
                 seekNow = true;
-                Log.i(TAG,"start seek");
+                Log.i(TAG, "start seek");
             }
 
             @Override
             public void onStopTrackingTouch(SeekBar seekBar) {
                 if (mMusicDuration != 0 && mMusicCurrDuration <= mMusicDuration) {
                     mediaPlayer.seekTo(mMusicCurrDuration);
-                    Log.i(TAG,"after seek, seek to current time"+ mMusicCurrDuration);
+                    Log.i(TAG, "after seek, seek to current time" + mMusicCurrDuration);
                 }
                 //如果进度条拉超了，则还是留在原位
                 else {
                     mMusicCurrDuration = mediaPlayer.getCurrentPosition();
                     tvCurTime.setText(TimeFormat.msToMinAndS(mMusicCurrDuration));
                     seekBar.setProgress(mMusicCurrDuration);
-                    Log.i(TAG,"after seek,still in current position "+ mMusicCurrDuration);
+                    Log.i(TAG, "after seek,still in current position " + mMusicCurrDuration);
                 }
-                seekNow=false;
+                seekNow = false;
             }
         });
 
@@ -187,7 +188,7 @@ public class TryListenActivity extends ActionBarActivity{
     protected void onStart() {
         super.onStart();
         PhoneIncomingListener();
-        Log.i(TAG,"onStart");
+        Log.i(TAG, "onStart");
     }
 
     @Override
@@ -201,7 +202,7 @@ public class TryListenActivity extends ActionBarActivity{
             mediaPlayer.start();
             ivNeedle.startAnimation(needleDownAnim);
             mDiskAnimator.play();
-            mTimer.schedule(timerTask,0,1000);
+            mTimer.schedule(timerTask, 0, 1000);
         }
         Log.i(TAG, "onResume");
     }
@@ -210,14 +211,15 @@ public class TryListenActivity extends ActionBarActivity{
     protected void onPause() {
         super.onPause();
         MobclickAgent.onPause(this);
-        Log.i(TAG,"onPause");
+        Log.i(TAG, "onPause");
     }
 
     @Override
     protected void onStop() {
         super.onStop();
-        Log.i(TAG,"onStop");
+        Log.i(TAG, "onStop");
     }
+
     @Override
     protected void onDestroy() {
         super.onDestroy();
@@ -226,7 +228,7 @@ public class TryListenActivity extends ActionBarActivity{
             mediaPlayer.release();
             mediaPlayer = null;
         }
-        Log.i(TAG,"onDestroy");
+        Log.i(TAG, "onDestroy");
     }
 
     private void PhoneIncomingListener() {

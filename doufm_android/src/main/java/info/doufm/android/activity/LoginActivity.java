@@ -23,11 +23,9 @@ import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.Toast;
 
-import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
-import org.apache.http.cookie.Cookie;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -35,8 +33,6 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import cn.pedant.SweetAlert.SweetAlertDialog;
 import info.doufm.android.R;
@@ -66,7 +62,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private String originName;
     private ImageView ivLoginLogo;
     private ShareUtil shareUtil;
-    private Map<String,String> sendHeader = new HashMap<String,String>();
+    private Map<String, String> sendHeader = new HashMap<String, String>();
 
     private SweetAlertDialog loadingDialog;
 
@@ -213,7 +209,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    Log.w("LOG", "jsonObject from onResponse "+jsonObject.toString());
+                    Log.w("LOG", "jsonObject from onResponse " + jsonObject.toString());
                     try {
                         if (jsonObject.get("status").equals("success")) {
                             //登录成功
@@ -239,21 +235,19 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                                 LoginActivity.this.finish();
                                 isLogin = true;
                             }
-                        } else if(jsonObject.get("status").equals("already login")){
+                        } else if (jsonObject.get("status").equals("already login")) {
                             //登录失败
                             Toast.makeText(LoginActivity.this, "该用户已登录", Toast.LENGTH_SHORT).show();
                             Message msg = new Message();
                             msg.what = DISSMIS_LOADING_DLG;
                             handler.sendMessage(msg);
-                        }
-                        else if(jsonObject.get("status").equals("can not get rs response")){
+                        } else if (jsonObject.get("status").equals("can not get rs response")) {
                             //登录失败
                             Toast.makeText(LoginActivity.this, "连接服务器失败", Toast.LENGTH_SHORT).show();
                             Message msg = new Message();
                             msg.what = DISSMIS_LOADING_DLG;
                             handler.sendMessage(msg);
-                        }
-                        else{
+                        } else {
                             Toast.makeText(LoginActivity.this, "啊哦，服务器出错了", Toast.LENGTH_SHORT).show();
                             Message msg = new Message();
                             msg.what = DISSMIS_LOADING_DLG;
@@ -266,7 +260,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
             }, new Response.ErrorListener() {
                 @Override
                 public void onErrorResponse(VolleyError volleyError) {
-                    Log.w("LOG",volleyError.getMessage(),volleyError);
+                    Log.w("LOG", volleyError.getMessage(), volleyError);
                     Message msg = new Message();
                     msg.what = DISSMIS_LOADING_DLG;
                     handler.sendMessage(msg);
@@ -274,7 +268,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                 }
             }, mMap);
             String localCookieStr = shareUtil.getLocalCookie();
-            if(!localCookieStr.equals("")){
+            if (!localCookieStr.equals("")) {
                 jsonObjectPostRequest.setSendCookie(localCookieStr);
             }
             RequestManager.getRequestQueue().add(jsonObjectPostRequest);

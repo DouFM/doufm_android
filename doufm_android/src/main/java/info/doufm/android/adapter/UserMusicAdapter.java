@@ -24,11 +24,12 @@ public class UserMusicAdapter extends BaseAdapter {
     private Context context;
     private LayoutInflater layoutInflater;
 
-    public UserMusicAdapter(Context context, JSONArray jsonArray){
+    public UserMusicAdapter(Context context, JSONArray jsonArray) {
         layoutInflater = LayoutInflater.from(context);
         this.userHistoryInfos = jsonArray;
         this.context = context;
     }
+
     @Override
     public int getCount() {
         return userHistoryInfos.length();
@@ -38,7 +39,7 @@ public class UserMusicAdapter extends BaseAdapter {
     public Object getItem(int position) {
         JSONObject userHistoryInfo = null;
         try {
-           userHistoryInfo = userHistoryInfos.getJSONObject(position);
+            userHistoryInfo = userHistoryInfos.getJSONObject(position);
         } catch (JSONException e) {
             e.printStackTrace();
         }
@@ -93,6 +94,7 @@ public class UserMusicAdapter extends BaseAdapter {
         }
         return convertView;
     }
+
     private class ViewHolder {
         ImageView historyIcon;
         TextView musicTitle;
