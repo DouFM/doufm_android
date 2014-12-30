@@ -2,6 +2,41 @@
 <items version="2" >
 
     <item
+<<<<<<< HEAD
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/com.android.support/appcompat-v7/21.0.3/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="81d42bf983a8741f4888a6e333e454e4a5e0eeb7">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/classes-27ac8b89a96e575d41dbf2ab0a4041886ffede70.jar" />
+    </item>
+    <item
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/libs/umeng-analytics-v5.2.4.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="0f9eccf79ae6006e4346725b09114182dca0c023">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/umeng-analytics-v5.2.4-f97d1ff872d23e15dae9a056c1df5f277606b804.jar" />
+    </item>
+    <item
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/classes.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="2c91c949a45a21cdecf26e03951e46c7beec9ad8">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/classes-530d7c01bea98a8f464afe9e1d4ed0b13553151c.jar" />
+    </item>
+    <item
+        jar="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/exploded-aar/com.android.support/support-v4/21.0.3/libs/internal_impl-21.0.3.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="01ec05bfbafcc07646ba813000bf2ef11742dd03">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/internal_impl-21.0.3-785b7b53530605bb9a55cfaea2270e4d16308073.jar" />
+    </item>
+    <item
+        jar="/Users/tutorchen/AndroidSDK/sdk/extras/android/m2repository/com/android/support/support-annotations/21.0.3/support-annotations-21.0.3.jar"
+        jumboMode="false"
+        revision="21.1.1"
+        sha1="4b74cefe1f0c1b819e7260c8627a14674e37fd35">
+        <dex dex="/Users/tutorchen/AndroidStudioProjects/Test/DouFM-Android/doufm_android/build/intermediates/pre-dexed/debug/support-annotations-21.0.3-d89ad0949799c4d3c05212e614090478be38ec63.jar" />
+=======
         jar="C:\Users\lsc\.gradle\caches\modules-2\files-2.1\com.umeng.analytics\analytics\5.2.4\f9eccf79ae6006e4346725b09114182dca0c023\analytics-5.2.4.jar"
         jumboMode="false"
         revision="21.1.1"
@@ -70,6 +105,7 @@
         revision="21.1.1"
         sha1="57487745ce450899f9f250d5ae5c092a682cd041">
         <dex dex="F:\git_my_android\DouFM-Android\doufm_android\build\intermediates\pre-dexed\debug\classes-71ae71815b0732b8a527659e92555b0798e70935.jar" />
+>>>>>>> a653bcb7d07af356b6770f61eecd8c4fa1a079b7
     </item>
 
 </items>

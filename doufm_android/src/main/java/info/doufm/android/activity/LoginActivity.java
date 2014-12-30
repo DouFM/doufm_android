@@ -45,6 +45,7 @@ import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.User;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.Constants;
+import info.doufm.android.utils.CyptoUtils;
 import info.doufm.android.utils.ShareUtil;
 
 public class LoginActivity extends ActionBarActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
@@ -139,7 +140,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         etUserPassword.addTextChangedListener(mTextWatcher);
         if (sp.getBoolean("save_login_info", false)) {
             etUserName.setText(sp.getString("rm_user_name", ""));
-            etUserPassword.setText(sp.getString("rm_user_password", ""));
+            etUserPassword.setText(CyptoUtils.decode(CyptoUtils.KEY,sp.getString("rm_user_password", "")));
         }
         sp.edit().putBoolean("save_login_info", true).apply();
     }
@@ -227,7 +228,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                                 //记住用户名、密码、
                                 SharedPreferences.Editor editor = sp.edit();
                                 editor.putString("rm_user_name", mUserName);//如果写入UTF-8格式，读取时会显示乱码
-                                editor.putString("rm_user_password", originPassword);
+                                editor.putString("rm_user_password", CyptoUtils.encode(CyptoUtils.KEY,originPassword));
                                 editor.apply();
                             }
                             if (!isLogin) {
