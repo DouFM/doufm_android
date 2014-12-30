@@ -110,9 +110,9 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                 } catch (AuthFailureError authFailureError) {
                     authFailureError.printStackTrace();
                 }finally{
-                    shareUtil.setLocalCookie("");
+                    /*shareUtil.setLocalCookie("");
                     shareUtil.apply();
-                    Log.w("LOG","delete localCookie in sharePreference");
+                    Log.w("LOG","delete localCookie in sharePreference");*/
                 }
                 User.getInstance().Quit();
                 setResult(100);
@@ -139,6 +139,9 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                 try{
                     if(jsonObject.getString("status").equals("success")){
                         Toast.makeText(UserActivity.this, "您已退出登录", Toast.LENGTH_SHORT).show();
+                        shareUtil.setLocalCookie("");
+                        shareUtil.apply();
+                        Log.w("LOG","delete localCookie in sharePreference");
                     }
                     else if(jsonObject.getString("status").equals("have not login")){
                         Toast.makeText(UserActivity.this, "您尚未登录，无法退出", Toast.LENGTH_SHORT).show();

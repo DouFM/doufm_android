@@ -10,11 +10,22 @@ import android.view.MenuItem;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ListView;
+import android.widget.Toast;
+
+import com.android.volley.AuthFailureError;
+import com.android.volley.Response;
+import com.android.volley.VolleyError;
+
+import org.json.JSONArray;
 
 import info.doufm.android.R;
 import info.doufm.android.adapter.UserHistoryListAdapter;
+import info.doufm.android.adapter.UserHistoryListFromServerAdapter;
+import info.doufm.android.network.JsonArrayRequestWithCookie;
+import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserHistoryInfo;
 import info.doufm.android.utils.Constants;
+import info.doufm.android.utils.ShareUtil;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -25,7 +36,10 @@ public class UserHistoryActivity extends ActionBarActivity {
     private int themeNum;
     private UserHistoryListAdapter adapter;
     private RealmResults<UserHistoryInfo> userHistoryInfoList;
+    private UserHistoryListFromServerAdapter apiAdapter;
     private ListView lvHistory;
+    private ShareUtil shareUtil;
+    private String localCookie;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +49,8 @@ public class UserHistoryActivity extends ActionBarActivity {
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
         findViews();
         initViews();
+        shareUtil = new ShareUtil(this);
+        localCookie = shareUtil.getLocalCookie();
     }
 
     private void findViews() {
@@ -48,7 +64,11 @@ public class UserHistoryActivity extends ActionBarActivity {
         mToolbar.setTitleTextColor(Color.WHITE);
         mToolbar.setNavigationIcon(getResources().getDrawable(R.drawable.abc_ic_ab_back_mtrl_am_alpha));
         setSupportActionBar(mToolbar);
-        LoadingHistory();
+        try {
+            LoadingHistory();
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
+        }
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         lvHistory.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
@@ -76,7 +96,7 @@ public class UserHistoryActivity extends ActionBarActivity {
     }
 
 
-    private void LoadingHistory() {
+    private void LoadingHistory() throws AuthFailureError {
         Realm realm = Realm.getInstance(this);
         userHistoryInfoList = realm.where(UserHistoryInfo.class).findAll();
         adapter = new UserHistoryListAdapter(UserHistoryActivity.this, userHistoryInfoList);
@@ -88,6 +108,20 @@ public class UserHistoryActivity extends ActionBarActivity {
                 adapter.notifyDataSetChanged();
             }
         });
+        /*JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_HISTORY_URL,new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                apiAdapter = new UserHistoryListFromServerAdapter(UserHistoryActivity.this,jsonArray);
+                lvHistory.setAdapter(apiAdapter);
+            }
+        },new Response.ErrorListener(){
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Toast.makeText(UserHistoryActivity.this, "从服务器加载听歌记录失败", Toast.LENGTH_SHORT).show();
+            }
+        });
+        jsonArrayRequestWithCookie.setCookie(localCookie);
+        RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);*/
 
     }
 }

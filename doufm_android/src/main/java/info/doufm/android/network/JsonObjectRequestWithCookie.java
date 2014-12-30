@@ -1,6 +1,9 @@
 package info.doufm.android.network;
 
+import android.content.IntentFilter;
+
 import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.toolbox.JsonObjectRequest;
 
@@ -14,14 +17,14 @@ import java.util.Map;
  */
 public class JsonObjectRequestWithCookie extends JsonObjectRequest {
     private Map<String, String> mHeaders = new HashMap<>();
+    public JsonObjectRequestWithCookie(String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener,Map<String,String> map) {
+        super(Request.Method.POST, url, jsonRequest, listener, errorListener);
 
-    public JsonObjectRequestWithCookie(int method, String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener) {
-        super(method, url, jsonRequest, listener, errorListener);
     }
-
     public JsonObjectRequestWithCookie(String url, JSONObject jsonRequest, Response.Listener<JSONObject> listener, Response.ErrorListener errorListener){
         super(url, jsonRequest, listener, errorListener);
     }
+
 
     //拿到客户端发起的http请求的Header
     @Override

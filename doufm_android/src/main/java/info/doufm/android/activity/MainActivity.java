@@ -36,6 +36,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.android.volley.AuthFailureError;
+import com.android.volley.Request;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.ImageRequest;
@@ -358,6 +359,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         mLeftResideMenuItemTitleList.add(jo.getString("name"));
                         playlistInfo.setMusic_list(jo.getString("music_list"));
                         mPlaylistInfoList.add(playlistInfo);
+                        Log.w("LOG","key  "+playlistInfo.getKey());
                     }
                     channelListAdapter = new ChannelListAdapter(MainActivity.this, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(channelListAdapter);
@@ -392,7 +394,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
-    private void playRandomMusic(String playlist_key) throws AuthFailureError {
+    private void playRandomMusic(final String playlist_key) throws AuthFailureError {
         changeMusic(false);
         final String MUSIC_URL = Constants.MUSIC_IN_PLAYLIST_URL + playlist_key + "/?num=1";
         JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(MUSIC_URL, new Response.Listener<JSONArray>() {
@@ -405,6 +407,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     playMusicInfo.setArtist(jo.getString("artist"));
                     playMusicInfo.setAudio(jo.getString("audio"));
                     playMusicInfo.setCover(jo.getString("cover"));
+                    playMusicInfo.setKey(jo.getString("key"));
                     mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio()); //这种url路径
                     mMainMediaPlayer.prepareAsync(); //prepare自动播放
                     getCoverImageRequest(playMusicInfo);
@@ -508,6 +511,17 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         );
     }
 
+    private void updateLoveBtn() {
+        Realm realm = Realm.getInstance(this);
+        RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
+        if (realmResults.size() > 0) {
+            loveFlag = true;
+            btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
+        } else {
+            loveFlag = false;
+            btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+        }
+    }
 
     @Override
     protected void onPostCreate(Bundle savedInstanceState) {
@@ -599,6 +613,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         btnPlay.setEnabled(true);
         getNextMusicInfo(mPlaylistInfoList.get(mPlayListNum).getKey());
         saveUserListenHistory();
+
     }
 
     @Override
@@ -779,11 +794,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     if (loveFlag) {
                         btnLove.setBackgroundResource(R.drawable.bg_btn_love);
                         deleteLoveMusic();
-                        //Toast.makeText(getApplicationContext(), "您已取消收藏", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "为您取消收藏", Toast.LENGTH_SHORT).show();
                     } else {
                         btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
                         saveLoveMusic();
-                        //Toast.makeText(getApplicationContext(), "您已收藏本歌", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getApplicationContext(), "为您收藏本歌", Toast.LENGTH_SHORT).show();
                     }
                     loveFlag = !loveFlag;
                 } else {
@@ -969,7 +984,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
-    private void saveUserListenHistory() {
+    private void saveUserListenHistory(){
         if (User.getInstance().getLogin()) {
             //本地保存
             Realm realm = Realm.getInstance(this);
@@ -990,8 +1005,9 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.commitTransaction();
                 }
                 //上传服务器
+                Log.w("LOG","saveListMusic music key "+ playMusicInfo.getKey());
                 try {
-                    uploadUserOp("listened", playMusicInfo.getAudio());
+                    uploadUserOp("listened", playMusicInfo.getKey());
                 } catch (AuthFailureError authFailureError) {
                     authFailureError.printStackTrace();
                 }
@@ -999,7 +1015,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     }
 
-    private void saveLoveMusic() {
+    private void saveLoveMusic(){
         if (User.getInstance().getLogin()) {
             Realm realm = Realm.getInstance(this);
             if (playMusicInfo.getAudio() != null) {
@@ -1021,18 +1037,20 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.close();
                 }
                 //上传服务器
-                try {
-                    uploadUserOp("favor", playMusicInfo.getAudio());
-                } catch (AuthFailureError authFailureError) {
-                    authFailureError.printStackTrace();
-                }finally {
-                    Toast.makeText(MainActivity.this,"已为您收藏本歌",Toast.LENGTH_SHORT).show();
+                //Log.w("LOG","saveLoveMusic music key "+ playMusicInfo.getKey());
+                if(playMusicInfo.getKey()!=null){
+                    try {
+                        uploadUserOp("favor", playMusicInfo.getKey());
+                    } catch (AuthFailureError authFailureError) {
+                        authFailureError.printStackTrace();
+                    }
                 }
+
             }
         }
     }
 
-    private void deleteLoveMusic() {
+    private void deleteLoveMusic(){
         if (User.getInstance().getLogin()) {
             if (playMusicInfo.getAudio() != null) {
                 Realm realm = Realm.getInstance(this);
@@ -1049,24 +1067,26 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     realm.close();
                 }
                 //上传服务器，重复操作表示取消原先的操作
+                //Log.w("LOG","deleteLoveMusic music key "+ playMusicInfo.getKey());
                 try {
-                    uploadUserOp("favor", playMusicInfo.getAudio());
+                    uploadUserOp("favor", playMusicInfo.getKey());
                 } catch (AuthFailureError authFailureError) {
                     authFailureError.printStackTrace();
-                }finally {
-                    Toast.makeText(MainActivity.this,"已为您取消收藏本歌",Toast.LENGTH_SHORT).show();
                 }
             }
         }
     }
 
     private void uploadUserOp(String opType, String musicKey) throws AuthFailureError {
-        final HashMap<String, String> mMap = new HashMap<String, String>();
-        mMap.put("op", opType);
-        mMap.put("key", musicKey);
-        JsonObjectRequestWithCookie jsonObjectRequestWithCookie = new JsonObjectRequestWithCookie(Constants.USER_HISTORY_URL,null, new Response.Listener<JSONObject>() {
+        Log.w("LOG","invoke uploadUserOp with "+ opType+" and "+musicKey);
+        HashMap<String, String> opMap = new HashMap<String, String>();
+        opMap.put("op", opType);
+        opMap.put("key", musicKey);
+        JSONObject opJsonObject = new JSONObject(opMap);
+        JsonObjectRequestWithCookie jsonObjectRequestWithCookie = new JsonObjectRequestWithCookie(Constants.USER_HISTORY_URL,opJsonObject, new Response.Listener<JSONObject>() {
             @Override
             public void onResponse(JSONObject jsonObject) {
+                Log.w("LOG","get response jsonObject from post user history"+jsonObject.toString());
                 try {
                     if(jsonObject.getString("status").equals("success")){
                         Log.w("LOG", "post /api/use/history/ success");
@@ -1081,28 +1101,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError volleyError) {
-                Log.w("LOG", "网络错误");
+                Log.w("LOG", "操作失败");
             }
-        }){
-            @Override
-            protected Map<String, String> getParams() throws AuthFailureError {
-                return mMap;
-            }
-        };
+        },opMap);
         jsonObjectRequestWithCookie.setCookie(localCookie);
         RequestManager.getRequestQueue().add(jsonObjectRequestWithCookie);
-    }
-
-    private void updateLoveBtn() {
-        Realm realm = Realm.getInstance(this);
-        RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
-        if (realmResults.size() > 0) {
-            loveFlag = true;
-            btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
-        } else {
-            loveFlag = false;
-            btnLove.setBackgroundResource(R.drawable.bg_btn_love);
-        }
     }
 
     private MusicInfo findMusic(byte listType, int musicId) {
