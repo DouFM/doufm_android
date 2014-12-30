@@ -54,6 +54,9 @@ public class Constants {
     //SharedPreferences
     public static final String USER_INFO = "userinfo";
     public static final String THEME = "theme";
+    public static final String SAVE_USER_LOGIN_INFO_FLAG = "save_login_info_flag";
+    public static final String LOGIN_USR_NAME = "rm_user_name";
+    public static final String LOGIN_USR_PASSWORD = "rm_user_password";
     public static final String PLAYLIST = "playlist";
     public static final String COOKIE = "cookie";
     public static final byte HISTORY_TYPE = 1;

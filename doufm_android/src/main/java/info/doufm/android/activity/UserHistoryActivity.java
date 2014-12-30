@@ -1,5 +1,6 @@
 package info.doufm.android.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserHistoryInfo;
 import info.doufm.android.utils.Constants;
-import info.doufm.android.utils.ShareUtil;
+import info.doufm.android.utils.SharedPreferencesUtils;
 import io.realm.Realm;
 import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
@@ -37,19 +38,19 @@ public class UserHistoryActivity extends ActionBarActivity {
     private RealmResults<UserHistoryInfo> userHistoryInfoList;
     private UserMusicAdapter userMusicAdapter;
     private ListView lvHistory;
-    private ShareUtil shareUtil;
     private String localCookie;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_history);
+        context = this;
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
         findViews();
         initViews();
-        shareUtil = new ShareUtil(this);
-        localCookie = shareUtil.getLocalCookie();
+        localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
     }
 
     private void findViews() {
@@ -124,8 +125,7 @@ public class UserHistoryActivity extends ActionBarActivity {
                 }
             });
             try {
-                ShareUtil shareUtil1 = new ShareUtil(UserHistoryActivity.this);
-                String localCookie = shareUtil1.getLocalCookie();
+                String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
                 jsonArrayRequestWithCookie.setCookie(localCookie);
             } catch (AuthFailureError authFailureError) {
                 authFailureError.printStackTrace();

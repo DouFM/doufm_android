@@ -2,6 +2,9 @@ package info.doufm.android.user;
 
 import android.content.Context;
 
+import info.doufm.android.utils.CyptoUtils;
+import info.doufm.android.utils.SharedPreferencesUtils;
+
 /**
  * 用户类
  */
@@ -15,14 +18,13 @@ public class User {
     private String userID;
     private boolean isLogin;
 
-    public static final String TAG_SP_USER = "user";
     public static final String TAG_SP_USER_NAME = "username";
     public static final String TAG_SP_USER_PASSWORD = "password";
     public static final String TAG_SP_USER_ID = "user_id";
     public static final String TAG_SP_USER_LOGIN = "user_login";
 
     private User() {
-        isLogin = context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getBoolean(TAG_SP_USER_LOGIN, false);
+        isLogin = SharedPreferencesUtils.getBoolean(context, TAG_SP_USER_LOGIN, false);
         updateStatus(isLogin);
     }
 
@@ -41,46 +43,46 @@ public class User {
         if (!getLogin()) {
             return "";
         }
-        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getString(TAG_SP_USER_NAME, "");
+        return SharedPreferencesUtils.getString(context, TAG_SP_USER_NAME, "");
     }
 
 
     public void setUserName(String userName) {
         this.userName = userName;
-        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putString(TAG_SP_USER_NAME, userName).commit();
+        SharedPreferencesUtils.putString(context, TAG_SP_USER_NAME, userName);
     }
 
     public String getUserPassword() {
         if (!getLogin()) {
             return "";
         }
-        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getString(TAG_SP_USER_PASSWORD, "");
+        return CyptoUtils.decode(CyptoUtils.KEY, SharedPreferencesUtils.getString(context, TAG_SP_USER_PASSWORD, ""));
     }
 
     public void setUserPassword(String userPassword) {
         this.userPassword = userPassword;
-        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putString(TAG_SP_USER_PASSWORD, userPassword).commit();
+        SharedPreferencesUtils.putString(context, TAG_SP_USER_PASSWORD, CyptoUtils.encode(CyptoUtils.KEY, userPassword));
     }
 
     public String getUserID() {
         if (!getLogin()) {
             return "";
         }
-        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getString(TAG_SP_USER_ID, "");
+        return SharedPreferencesUtils.getString(context, TAG_SP_USER_ID, "");
     }
 
     public void setUserID(String userID) {
         this.userID = userID;
-        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putString(TAG_SP_USER_ID, userID).commit();
+        SharedPreferencesUtils.putString(context, TAG_SP_USER_ID, userID);
     }
 
     public boolean getLogin() {
-        return context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).getBoolean(TAG_SP_USER_LOGIN, false);
+        return SharedPreferencesUtils.getBoolean(context, TAG_SP_USER_LOGIN, false);
     }
 
     public void setLogin(boolean isLogin) {
         this.isLogin = isLogin;
-        context.getSharedPreferences(TAG_SP_USER, Context.MODE_PRIVATE).edit().putBoolean(TAG_SP_USER_LOGIN, isLogin).commit();
+        SharedPreferencesUtils.putBoolean(context, TAG_SP_USER_LOGIN, isLogin);
     }
 
     private void updateStatus(boolean isLogin) {

@@ -78,7 +78,7 @@ import info.doufm.android.user.UserLoveMusicInfo;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
-import info.doufm.android.utils.ShareUtil;
+import info.doufm.android.utils.SharedPreferencesUtils;
 import info.doufm.android.utils.TimeFormat;
 import io.realm.Realm;
 import io.realm.RealmResults;
@@ -141,13 +141,11 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private RelativeLayout rlUserLogin;
     private TextView tvUserLoginTitle;
     private ImageView ivUserLogo;
-
-    private ShareUtil mShareUtil;
     private IntentFilter bcFilter;
     private MusicBroadcastReceiver mReceiver;
     private boolean isPlay = false;
-    private ShareUtil shareUtil;
     private String localCookie;
+    private Context context;
     //定义Handler对象
     private Handler handler = new Handler() {
         @Override
@@ -233,8 +231,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-        shareUtil = new ShareUtil(this);
-        localCookie = shareUtil.getLocalCookie();
+        context = this;
+        localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         tvCurTime = (TextView) findViewById(R.id.curTimeText);
         tvTotalTime = (TextView) findViewById(R.id.totalTimeText);
@@ -327,11 +325,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             e.printStackTrace();
         }
 
-        mShareUtil = new ShareUtil(this);
-        mThemeNum = mShareUtil.getTheme();
+        mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 12);
         mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[mThemeNum]));
         mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
-        mPlayListNum = mShareUtil.getPlayList();
+        mPlayListNum = SharedPreferencesUtils.getInt(context, Constants.PLAYLIST, 0);
         ivNeedle.startAnimation(needleUpAnim);
         bcFilter = new IntentFilter(Constants.ACTION_CHOOSE_MUSIC);
         mReceiver = new MusicBroadcastReceiver();
@@ -711,9 +708,8 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[colorIndex]));
             mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[colorIndex]));
             mThemeNum = colorIndex;
-            mShareUtil.setTheme(mThemeNum);
-            mShareUtil.setPlayList(mPlayListNum);
-            mShareUtil.apply();
+            SharedPreferencesUtils.putInt(context, Constants.THEME, mThemeNum);
+            SharedPreferencesUtils.putInt(context, Constants.PLAYLIST, mPlayListNum);
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1127,8 +1123,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 Log.w("LOG", "操作失败");
             }
         }, opMap);
-        ShareUtil shareUtil1 = new ShareUtil(MainActivity.this);
-        String localCookie = shareUtil1.getLocalCookie();
+        String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
         jsonObjectRequestWithCookie.setCookie(localCookie);
         RequestManager.getRequestQueue().add(jsonObjectRequestWithCookie);
     }

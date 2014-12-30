@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.os.Bundle;
-import android.os.Message;
 import android.support.v7.app.ActionBarActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
@@ -20,23 +19,19 @@ import com.android.volley.AuthFailureError;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 
-import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import info.doufm.android.R;
-import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.JsonObjectRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.User;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.Constants;
-import info.doufm.android.utils.ShareUtil;
+import info.doufm.android.utils.SharedPreferencesUtils;
 
 public class UserActivity extends ActionBarActivity implements View.OnClickListener {
 
@@ -46,10 +41,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
     private ImageView ivUserLogo;
     private TextView tvUserName;
     private Button btnUserQuit;
-    private ShareUtil shareUtil;
     private String localCookieStr;
-    //private String cookieKey;
-    //private String cookieValue;
     private Map<String, String> sendHeader = new HashMap<String, String>();
 
     @Override
@@ -58,10 +50,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         setContentView(R.layout.activity_user);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
-        shareUtil = new ShareUtil(this);
-
-        //取出cookie
-        localCookieStr = shareUtil.getLocalCookie();
+        localCookieStr = SharedPreferencesUtils.getString(this, Constants.COOKIE, "");
         findViews();
         initViews();
     }
@@ -143,8 +132,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
                 try {
                     if (jsonObject.getString("status").equals("success")) {
                         Toast.makeText(UserActivity.this, "您已退出登录", Toast.LENGTH_SHORT).show();
-                        shareUtil.setLocalCookie("");
-                        shareUtil.apply();
+                        SharedPreferencesUtils.putString(UserActivity.this, Constants.COOKIE, "");
                         Log.w("LOG", "delete localCookie in sharePreference");
                     } else if (jsonObject.getString("status").equals("have not login")) {
                         Toast.makeText(UserActivity.this, "您尚未登录，无法退出", Toast.LENGTH_SHORT).show();

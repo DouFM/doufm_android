@@ -1,5 +1,6 @@
 package info.doufm.android.activity;
 
+import android.content.Context;
 import android.content.Intent;
 import android.graphics.Color;
 import android.os.Bundle;
@@ -24,7 +25,7 @@ import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserLoveMusicInfo;
 import info.doufm.android.utils.Constants;
-import info.doufm.android.utils.ShareUtil;
+import info.doufm.android.utils.SharedPreferencesUtils;
 import io.realm.Realm;
 import io.realm.RealmResults;
 
@@ -36,12 +37,14 @@ public class UserLikeActivity extends ActionBarActivity {
     private RealmResults<UserLoveMusicInfo> userLoveInfoList;
     private UserMusicAdapter userMusicAdapter;
     private ListView lvLove;
+    private Context context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
 
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_user_like);
+        context = this;
         themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
         findViews();
         initViews();
@@ -108,8 +111,7 @@ public class UserLikeActivity extends ActionBarActivity {
                 }
             });
             try {
-                ShareUtil shareUtil1 = new ShareUtil(UserLikeActivity.this);
-                String localCookie = shareUtil1.getLocalCookie();
+                String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
                 jsonArrayRequestWithCookie.setCookie(localCookie);
             } catch (AuthFailureError authFailureError) {
                 authFailureError.printStackTrace();

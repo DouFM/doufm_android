@@ -1,6 +1,6 @@
 package info.doufm.android.activity;
 
-import android.content.SharedPreferences;
+import android.content.Context;
 import android.content.pm.ActivityInfo;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
@@ -42,7 +42,7 @@ import info.doufm.android.user.User;
 import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.CyptoUtils;
-import info.doufm.android.utils.ShareUtil;
+import info.doufm.android.utils.SharedPreferencesUtils;
 
 public class LoginActivity extends ActionBarActivity implements View.OnClickListener, CompoundButton.OnCheckedChangeListener {
 
@@ -56,15 +56,14 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     private int themeNum;
     private StateListDrawable mStateListDrawable;
     private boolean isLogin = false;
-    private SharedPreferences sp;
     private CheckBox cbSavePassword;
     private String originPassword;
     private String originName;
     private ImageView ivLoginLogo;
-    private ShareUtil shareUtil;
     private Map<String, String> sendHeader = new HashMap<String, String>();
 
     private SweetAlertDialog loadingDialog;
+    private Context context;
 
     private Handler handler = new Handler() {
         @Override
@@ -83,15 +82,14 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
-        shareUtil = new ShareUtil(this);
-        themeNum = shareUtil.getTheme();
+        context = this;
+        themeNum = SharedPreferencesUtils.getInt(this, Constants.THEME, 0);
         findViews();
         initViews();
     }
 
     private void initViews() {
         ivLoginLogo.setImageDrawable(UserUtil.getCircleImage(this, R.drawable.default_artist_300));
-        sp = getSharedPreferences("user", MODE_PRIVATE);
         //etUserName.set
         mStateListDrawable = new StateListDrawable();
         mStateListDrawable.addState(new int[]{-android.R.attr.state_enabled}, getResources().getDrawable(R.drawable.btn_disable));
@@ -134,11 +132,11 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         };
         etUserName.addTextChangedListener(mTextWatcher);
         etUserPassword.addTextChangedListener(mTextWatcher);
-        if (sp.getBoolean("save_login_info", false)) {
-            etUserName.setText(sp.getString("rm_user_name", ""));
-            etUserPassword.setText(CyptoUtils.decode(CyptoUtils.KEY, sp.getString("rm_user_password", "")));
+        if (SharedPreferencesUtils.getBoolean(context, Constants.SAVE_USER_LOGIN_INFO_FLAG, false)) {
+            etUserName.setText(SharedPreferencesUtils.getString(context, Constants.LOGIN_USR_NAME, ""));
+            etUserPassword.setText(CyptoUtils.decode(CyptoUtils.KEY, SharedPreferencesUtils.getString(context, Constants.LOGIN_USR_PASSWORD, "")));
         }
-        sp.edit().putBoolean("save_login_info", true).apply();
+        SharedPreferencesUtils.putBoolean(context, Constants.SAVE_USER_LOGIN_INFO_FLAG, true);
     }
 
 
@@ -204,8 +202,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                 public void onResponse(JSONObject jsonObject) {
                     //从response的jsonObject中取出cookie的值，存入sharePreference
                     try {
-                        shareUtil.setLocalCookie(jsonObject.getString("Cookie"));
-                        shareUtil.apply();
+                        SharedPreferencesUtils.putString(LoginActivity.this, Constants.COOKIE, jsonObject.getString("Cookie"));
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
@@ -221,11 +218,10 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                             User.getInstance().setLogin(true);
                             if (cbSavePassword.isChecked()) {
                                 //记住用户名、密码、
-                                SharedPreferences.Editor editor = sp.edit();
-                                editor.putString("rm_user_name", originName);
-                                editor.putString("rm_user_password", CyptoUtils.encode(CyptoUtils.KEY, originPassword));
-                                editor.apply();
+                                SharedPreferencesUtils.putString(context, Constants.LOGIN_USR_NAME, originName);
+                                SharedPreferencesUtils.putString(context, Constants.LOGIN_USR_PASSWORD, CyptoUtils.encode(CyptoUtils.KEY, originPassword));
                             }
+
                             if (!isLogin) {
                                 Message msg = new Message();
                                 msg.what = DISSMIS_LOADING_DLG;
@@ -267,7 +263,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
             }, mMap);
-            String localCookieStr = shareUtil.getLocalCookie();
+            String localCookieStr = SharedPreferencesUtils.getString(LoginActivity.this, Constants.COOKIE, "");
             if (!localCookieStr.equals("")) {
                 jsonObjectPostRequest.setSendCookie(localCookieStr);
             }
@@ -290,9 +286,9 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
     @Override
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (cbSavePassword.isChecked()) {
-            sp.edit().putBoolean("save_login_info", true).apply();
+            SharedPreferencesUtils.putBoolean(context, Constants.SAVE_USER_LOGIN_INFO_FLAG, true);
         } else {
-            sp.edit().putBoolean("save_login_info", false).apply();
+            SharedPreferencesUtils.putBoolean(context, Constants.SAVE_USER_LOGIN_INFO_FLAG, false);
         }
     }
 }
