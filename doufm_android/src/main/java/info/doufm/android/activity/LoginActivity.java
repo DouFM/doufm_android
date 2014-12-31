@@ -83,7 +83,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
         setContentView(R.layout.activity_login);
         setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
         context = this;
-        themeNum = SharedPreferencesUtils.getInt(this, Constants.THEME, 0);
+        themeNum = getIntent().getIntExtra(Constants.EXTRA_THEME, 13);
         findViews();
         initViews();
     }

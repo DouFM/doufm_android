@@ -325,7 +325,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             e.printStackTrace();
         }
 
-        mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 12);
+        mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 13);
         mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[mThemeNum]));
         mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
         mPlayListNum = SharedPreferencesUtils.getInt(context, Constants.PLAYLIST, 0);
@@ -528,13 +528,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     private void updateLoveBtn() {
         Realm realm = Realm.getInstance(this);
-        RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
-        if (realmResults.size() > 0) {
-            loveFlag = true;
-            btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
-        } else {
-            loveFlag = false;
-            btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+        if (playMusicInfo.getAudio() != null) {
+            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
+            if (realmResults.size() > 0) {
+                loveFlag = true;
+                btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
+            } else {
+                loveFlag = false;
+                btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+            }
         }
     }
 
