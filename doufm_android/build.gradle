@@ -12,7 +12,9 @@ android {
     }
     buildTypes {
         release {
-            minifyEnabled false
+             //Automatically remove unused resources
+             minifyEnabled true;
+             shrinkResources true
             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
