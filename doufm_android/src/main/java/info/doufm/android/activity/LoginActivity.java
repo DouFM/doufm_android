@@ -201,12 +201,14 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                 @Override
                 public void onResponse(JSONObject jsonObject) {
                     //从response的jsonObject中取出cookie的值，存入sharePreference
+                    Log.w("LOG", "jsonObject from onResponse " + jsonObject.toString());
                     try {
-                        SharedPreferencesUtils.putString(LoginActivity.this, Constants.COOKIE, jsonObject.getString("Cookie"));
+                        if(!jsonObject.getString("Cookie").equals("")){
+                            SharedPreferencesUtils.putString(LoginActivity.this, Constants.COOKIE, jsonObject.getString("Cookie"));
+                        }
                     } catch (JSONException e) {
                         e.printStackTrace();
                     }
-                    Log.w("LOG", "jsonObject from onResponse " + jsonObject.toString());
                     try {
                         if (jsonObject.get("status").equals("success")) {
                             //登录成功
@@ -263,10 +265,11 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     Toast.makeText(LoginActivity.this, "网络错误，登录失败！", Toast.LENGTH_SHORT).show();
                 }
             }, mMap);
-            String localCookieStr = SharedPreferencesUtils.getString(LoginActivity.this, Constants.COOKIE, "");
+            //发起登录请求时不向服务器发送cookie，就可以多台设备登录一个账号了
+            /*String localCookieStr = SharedPreferencesUtils.getString(LoginActivity.this, Constants.COOKIE, "");
             if (!localCookieStr.equals("")) {
                 jsonObjectPostRequest.setSendCookie(localCookieStr);
-            }
+            }*/
             RequestManager.getRequestQueue().add(jsonObjectPostRequest);
         }
     }

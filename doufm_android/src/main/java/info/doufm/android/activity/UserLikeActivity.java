@@ -89,15 +89,16 @@ public class UserLikeActivity extends ActionBarActivity {
     }
 
     private void LoadingLoveMusic() {
-        Realm realm = Realm.getInstance(this);
+        /*Realm realm = Realm.getInstance(this);
         if (realm != null) {
             userLoveInfoList = realm.where(UserLoveMusicInfo.class).findAll();
             adapter = new UserLoveListAdapter(UserLikeActivity.this, userLoveInfoList);
             adapter.notifyDataSetChanged();
             lvLove.setAdapter(adapter);
-        }
-        //如果缓存不可用，从服务器获取用户的收藏列表
-        else {
+        }*/
+
+        //如果从服务器获取用户历史记录，则可以显示该账号在多台设备的历史记录。如果处理从realm和从服务器获取历史记录的关系？ 之前写的if else好像不好用
+        //else {
             JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=favor&start=0&end=30", new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray jsonArray) {
@@ -117,6 +118,6 @@ public class UserLikeActivity extends ActionBarActivity {
                 authFailureError.printStackTrace();
             }
             RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
-        }
+       // }
     }
 }

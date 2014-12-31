@@ -97,7 +97,7 @@ public class UserHistoryActivity extends ActionBarActivity {
 
 
     private void LoadingHistory() throws AuthFailureError {
-        Realm realm = Realm.getInstance(this);
+        /*Realm realm = Realm.getInstance(this);
         if (realm != null) {
             userHistoryInfoList = realm.where(UserHistoryInfo.class).findAll();
             adapter = new UserHistoryListAdapter(UserHistoryActivity.this, userHistoryInfoList);
@@ -109,9 +109,9 @@ public class UserHistoryActivity extends ActionBarActivity {
                     adapter.notifyDataSetChanged();
                 }
             });
-        }
-        //如果缓存不可用，从服务器获取用户的收藏列表
-        else {
+        }*/
+        //如果从服务器获取用户历史记录，则可以显示该账号在多台设备的历史记录。如果处理从realm和从服务器获取历史记录的关系？
+        //else {
             JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=listened&start=0&end=30", new Response.Listener<JSONArray>() {
                 @Override
                 public void onResponse(JSONArray jsonArray) {
@@ -131,6 +131,6 @@ public class UserHistoryActivity extends ActionBarActivity {
                 authFailureError.printStackTrace();
             }
             RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
-        }
+       // }
     }
 }
