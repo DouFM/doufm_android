@@ -423,6 +423,13 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     playMusicInfo.setAudio(jo.getString("audio"));
                     playMusicInfo.setCover(jo.getString("cover"));
                     playMusicInfo.setKey(jo.getString("key"));
+                    if (mMainMediaPlayer == null) {
+                        mMainMediaPlayer = new MediaPlayer();
+                        mMainMediaPlayer.setOnCompletionListener(MainActivity.this);
+                        mMainMediaPlayer.setOnErrorListener(MainActivity.this);
+                        mMainMediaPlayer.setOnBufferingUpdateListener(MainActivity.this);
+                        mMainMediaPlayer.setOnPreparedListener(MainActivity.this);
+                    }
                     mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio()); //这种url路径
                     mMainMediaPlayer.prepareAsync(); //prepare自动播放
                     getCoverImageRequest(playMusicInfo);
