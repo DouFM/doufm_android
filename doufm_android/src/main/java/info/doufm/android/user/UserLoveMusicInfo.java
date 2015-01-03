@@ -1,5 +1,7 @@
 package info.doufm.android.user;
 
+import java.io.Serializable;
+
 import io.realm.RealmObject;
 
 /**
@@ -7,10 +9,11 @@ import io.realm.RealmObject;
  * Time: 04:18
  * Info:
  */
-public class UserLoveMusicInfo extends RealmObject {
+public class UserLoveMusicInfo extends RealmObject implements Serializable {
 
     private int love_id;         //记录编号
     private String userID;          //用户id
+    private String key;             //音乐ID
     private String title;           //音乐标题
     private String musicURL;        //音乐路径
     private String cover;           //封面地址
@@ -62,5 +65,13 @@ public class UserLoveMusicInfo extends RealmObject {
 
     public void setSinger(String singer) {
         this.singer = singer;
+    }
+
+    public String getKey() {
+        return key;
+    }
+
+    public void setKey(String key) {
+        this.key = key;
     }
 }

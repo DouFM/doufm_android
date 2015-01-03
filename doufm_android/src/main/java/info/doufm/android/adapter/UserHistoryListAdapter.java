@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import info.doufm.android.R;
 import info.doufm.android.user.UserHistoryInfo;
 import io.realm.RealmResults;
@@ -19,11 +21,12 @@ import io.realm.RealmResults;
  */
 public class UserHistoryListAdapter extends BaseAdapter {
 
-    private RealmResults<UserHistoryInfo> userHistoryInfos;
+    //private RealmResults<UserHistoryInfo> userHistoryInfos;
+    private ArrayList<UserHistoryInfo> userHistoryInfos;
     private Context context;
     private LayoutInflater layoutInflater;
 
-    public UserHistoryListAdapter(Context context, RealmResults<UserHistoryInfo> userHistoryInfos) {
+    public UserHistoryListAdapter(Context context, ArrayList<UserHistoryInfo> userHistoryInfos) {
         this.context = context;
         this.userHistoryInfos = userHistoryInfos;
         layoutInflater = LayoutInflater.from(context);

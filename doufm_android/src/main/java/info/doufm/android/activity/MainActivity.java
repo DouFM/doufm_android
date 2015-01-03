@@ -54,6 +54,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -1018,7 +1019,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     private void saveUserListenHistory() {
         if (User.getInstance().getLogin()) {
-            //本地保存
+/*            //本地保存
             Realm realm = Realm.getInstance(this);
             //如果历史记录已存在，这不在保存
             if (playMusicInfo.getAudio() != null) {
@@ -1035,7 +1036,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     userHistoryInfo.setMusicURL(playMusicInfo.getAudio());
                     userHistoryInfo.setCover(playMusicInfo.getCover());
                     realm.commitTransaction();
-                }
+                }*/
                 //上传服务器
                 if (playMusicInfo.getKey() != null) {
                     try {
@@ -1044,7 +1045,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         authFailureError.printStackTrace();
                     }
                 }
-            }
         }
     }
 
@@ -1146,21 +1146,23 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         RequestManager.getRequestQueue().add(jsonObjectRequestWithCookie);
     }
 
-    private MusicInfo findMusic(byte listType, int musicId) {
+    private MusicInfo findMusic(Intent intent) {
         MusicInfo tempMusicInfo = new MusicInfo();
-        Realm realm = Realm.getInstance(this);
+        byte listType = intent.getByteExtra(Constants.EXTRA_LIST_TYPE, (byte) -1);
         if (listType == Constants.HISTORY_TYPE) {
-            RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("history_id", musicId).findAll();
-            tempMusicInfo.setTitle(realmResults.get(0).getTitle());
-            tempMusicInfo.setArtist(realmResults.get(0).getSinger());
-            tempMusicInfo.setAudio(realmResults.get(0).getMusicURL());
-            tempMusicInfo.setCover(realmResults.get(0).getCover());
+            UserHistoryInfo userHistoryInfo = (UserHistoryInfo) intent.getSerializableExtra(Constants.EXTRA_MUSIC_ID);
+            tempMusicInfo.setKey(userHistoryInfo.getKey());
+            tempMusicInfo.setTitle(userHistoryInfo.getTitle());
+            tempMusicInfo.setArtist(userHistoryInfo.getSinger());
+            tempMusicInfo.setAudio(userHistoryInfo.getMusicURL());
+            tempMusicInfo.setCover(userHistoryInfo.getCover());
         } else if (listType == Constants.LOVE_TYPE) {
-            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("love_id", musicId).findAll();
-            tempMusicInfo.setTitle(realmResults.get(0).getTitle());
-            tempMusicInfo.setArtist(realmResults.get(0).getSinger());
-            tempMusicInfo.setAudio(realmResults.get(0).getMusicURL());
-            tempMusicInfo.setCover(realmResults.get(0).getCover());
+            UserLoveMusicInfo userLoveMusicInfo = (UserLoveMusicInfo) intent.getSerializableExtra(Constants.EXTRA_MUSIC_ID);
+            tempMusicInfo.setKey(userLoveMusicInfo.getKey());
+            tempMusicInfo.setTitle(userLoveMusicInfo.getTitle());
+            tempMusicInfo.setArtist(userLoveMusicInfo.getSinger());
+            tempMusicInfo.setAudio(userLoveMusicInfo.getMusicURL());
+            tempMusicInfo.setCover(userLoveMusicInfo.getCover());
         }
         return tempMusicInfo;
     }
@@ -1175,7 +1177,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
             preMusicInfo = playMusicInfo;
             btnPreSong.setClickable(true);
-            playMusicInfo = findMusic(intent.getByteExtra(Constants.EXTRA_LIST_TYPE, (byte) -1), intent.getIntExtra(Constants.EXTRA_MUSIC_ID, -1));
+            playMusicInfo = findMusic(intent);
             String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
             try {
                 if (mDiskLruCache.get(key) != null) {
@@ -1183,6 +1185,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
                     mMainMediaPlayer.prepare();
                     seekBar.setSecondaryProgress(seekBar.getMax());
+                    saveUserListenHistory();
                 } else {
                     changeMusic(false);
                     mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio());
