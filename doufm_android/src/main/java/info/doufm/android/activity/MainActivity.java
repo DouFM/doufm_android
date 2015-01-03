@@ -75,7 +75,6 @@ import info.doufm.android.playview.RotateAnimator;
 import info.doufm.android.user.User;
 import info.doufm.android.user.UserHistoryInfo;
 import info.doufm.android.user.UserLoveMusicInfo;
-import info.doufm.android.user.UserUtil;
 import info.doufm.android.utils.CacheUtil;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.SharedPreferencesUtils;
@@ -140,7 +139,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private LinearLayout llLeftSlideMenu;
     private RelativeLayout rlUserLogin;
     private TextView tvUserLoginTitle;
-    private ImageView ivUserLogo;
+    private ImageView ivLoginArea;
     private IntentFilter bcFilter;
     private MusicBroadcastReceiver mReceiver;
     private boolean isPlay = false;
@@ -248,7 +247,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         rlUserLogin = (RelativeLayout) findViewById(R.id.rl_slide_menu_header);
         rlUserLogin.setOnClickListener(this);
         tvUserLoginTitle = (TextView) findViewById(R.id.tv_user_name);
-        ivUserLogo = (ImageView) findViewById(R.id.iv_user_avatar);
+        ivLoginArea = (ImageView) findViewById(R.id.iv_login_area);
         mToolbar = (Toolbar) findViewById(R.id.toolbar_custom);
         mToolbar.setTitle("DouFM");
         mToolbar.setTitleTextColor(Color.WHITE);
@@ -354,7 +353,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
             isFirstLoad = false;
         }
-        updateLoginTitle();
+        updateLoginArea();
         //列表始终滚动到顶部
         mDrawerList.setSelection(0);
 
@@ -721,20 +720,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         return super.onOptionsItemSelected(item);
     }
 
-    private void updateLoginTitle() {
-        if (User.getInstance().getLogin()) {
-            if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
-                tvUserLoginTitle.setText("个人中心");
-            }
-            ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_artist_300));
-        } else {
-            if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
-                tvUserLoginTitle.setText("点击登录");
-            }
-            ivUserLogo.setImageDrawable(UserUtil.getCircleImage(MainActivity.this, R.drawable.default_head_320));
-        }
-    }
-
     @Override
     public void onClick(View v) {
         switch (v.getId()) {
@@ -833,12 +818,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 }
                 Intent intent = new Intent();
                 intent.putExtra(Constants.EXTRA_THEME, mThemeNum);
-                if (tvUserLoginTitle.getText().toString().equals("点击登录")) {
-                    intent.setClass(MainActivity.this, LoginActivity.class);
-                    startActivityForResult(intent, Constants.REQUEST_LOGIN_CODE);
-                } else if (tvUserLoginTitle.getText().toString().equals("个人中心")) {
+                if (User.getInstance().getLogin()) {
                     intent.setClass(MainActivity.this, UserActivity.class);
                     startActivityForResult(intent, Constants.REQUEST_USER_CODE);
+                } else {
+                    intent.setClass(MainActivity.this, LoginActivity.class);
+                    startActivityForResult(intent, Constants.REQUEST_LOGIN_CODE);
                 }
                 break;
         }
@@ -990,13 +975,13 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         switch (requestCode) {
             case Constants.REQUEST_LOGIN_CODE:
                 if (resultCode == 100) {
-                    updateLoginTitle();
+                    updateLoginArea();
                     saveUserListenHistory();
                 }
                 break;
             case Constants.REQUEST_USER_CODE:
                 if (resultCode == 100) {
-                    updateLoginTitle();
+                    updateLoginArea();
                     Toast.makeText(MainActivity.this, "您已退出登录", Toast.LENGTH_SHORT).show();
                 } else if (resultCode == 200) {
                     //此代码需要保留，应该返回主界面有两种情况，这种情况不需要更新登录状态
@@ -1181,6 +1166,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                 e.printStackTrace();
             }
             getCoverImageRequest(playMusicInfo);
+        }
+    }
+
+    private void updateLoginArea() {
+        if (User.getInstance().getLogin()) {
+            tvUserLoginTitle.setText("你好," + SharedPreferencesUtils.getString(this, Constants.LOGIN_USR_NAME, ""));
+        } else {
+            tvUserLoginTitle.setText("使用睿思账号登陆");
         }
     }
 }
