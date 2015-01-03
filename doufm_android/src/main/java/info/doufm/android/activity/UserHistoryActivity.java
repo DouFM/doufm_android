@@ -26,8 +26,6 @@ import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserHistoryInfo;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.SharedPreferencesUtils;
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
 import io.realm.RealmResults;
 
 public class UserHistoryActivity extends ActionBarActivity {
@@ -112,25 +110,25 @@ public class UserHistoryActivity extends ActionBarActivity {
         }*/
         //如果从服务器获取用户历史记录，则可以显示该账号在多台设备的历史记录。如果处理从realm和从服务器获取历史记录的关系？
         //else {
-            JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=listened&start=0&end=30", new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray jsonArray) {
-                    userMusicAdapter = new UserMusicAdapter(UserHistoryActivity.this, jsonArray);
-                    lvHistory.setAdapter(userMusicAdapter);
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    Log.w("LOG", "show listen history error " + volleyError);
-                }
-            });
-            try {
-                String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
-                jsonArrayRequestWithCookie.setCookie(localCookie);
-            } catch (AuthFailureError authFailureError) {
-                authFailureError.printStackTrace();
+        JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=listened&start=0&end=30", new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                userMusicAdapter = new UserMusicAdapter(UserHistoryActivity.this, jsonArray);
+                lvHistory.setAdapter(userMusicAdapter);
             }
-            RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
-       // }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.w("LOG", "show listen history error " + volleyError);
+            }
+        });
+        try {
+            String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
+            jsonArrayRequestWithCookie.setCookie(localCookie);
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
+        }
+        RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
+        // }
     }
 }

@@ -108,9 +108,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean playLoopFlag = false;
 
     private int colorNum;
+    private SweetAlertDialog mErrorDlg;
 
     //菜单列表监听器
-    private ListListener mListLisener;
+    private ListListener mListListener;
 
     //播放界面相关
     private Button btnPlay;
@@ -185,17 +186,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     };
 
-    private boolean firstErrorFlag = true;
+    //private boolean firstErrorFlag = true;
 
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            timerTask.cancel();
-            if (firstErrorFlag) {
-                firstErrorFlag = false;
-                new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
+            if (mErrorDlg == null) {
+                mErrorDlg = new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("网络连接出错啦...")
-                        .setCancelText("检测网络设置")
+                        .setCancelText("设置网络")
                         .setConfirmText("退出应用")
                         .showCancelButton(true)
                         .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -212,7 +211,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                                     intent.setComponent(componentName);
                                     intent.setAction("android.intent.action.VIEW");
                                 }
-                                startActivity(intent);
+                                startActivityForResult(intent, Constants.REQUEST_WIFI_SETTING_CODE);
                             }
                         })
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -220,7 +219,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             public void onClick(SweetAlertDialog sDialog) {
                                 MainActivity.this.finish();
                             }
-                        }).show();
+                        });
+                mErrorDlg.show();
+            } else {
+                if (!mErrorDlg.isShowing()) {
+                    mErrorDlg.show();
+                }
             }
         }
     };
@@ -345,7 +349,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     protected void onResume() {
         super.onResume();
         MobclickAgent.onResume(this);
-        mListLisener = new ListListener();
+        mListListener = new ListListener();
         if (isFirstLoad) {
             try {
                 getMusicList();
@@ -378,7 +382,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     }
                     channelListAdapter = new ChannelListAdapter(MainActivity.this, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(channelListAdapter);
-                    mDrawerList.setOnItemClickListener(mListLisener);
+                    mDrawerList.setOnItemClickListener(mListListener);
                     isLoadingSuccess = true;
                     initPlayer();
                 } catch (JSONException e) {
@@ -415,6 +419,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
+                //如果当前有error dialog显示，关闭它
+                if (mErrorDlg != null && mErrorDlg.isShowing()) {
+                    mErrorDlg.dismiss();
+                }
                 //请求随机播放音乐文件信息
                 try {
                     JSONObject jo = jsonArray.getJSONObject(0);
@@ -995,6 +1003,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     Toast.makeText(MainActivity.this, "您已退出登录", Toast.LENGTH_SHORT).show();
                 } else if (resultCode == 200) {
                     //此代码需要保留，应该返回主界面有两种情况，这种情况不需要更新登录状态
+                }
+                break;
+            //设置wifi后返回(忽略是否设置成功)随机播放下一首，关闭Dialog
+            case Constants.REQUEST_WIFI_SETTING_CODE:
+                try {
+                    playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+                } catch (AuthFailureError authFailureError) {
+                    authFailureError.printStackTrace();
                 }
                 break;
         }

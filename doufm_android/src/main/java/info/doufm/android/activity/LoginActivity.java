@@ -203,7 +203,7 @@ public class LoginActivity extends ActionBarActivity implements View.OnClickList
                     //从response的jsonObject中取出cookie的值，存入sharePreference
                     Log.w("LOG", "jsonObject from onResponse " + jsonObject.toString());
                     try {
-                        if(!jsonObject.getString("Cookie").equals("")){
+                        if (!jsonObject.getString("Cookie").equals("")) {
                             SharedPreferencesUtils.putString(LoginActivity.this, Constants.COOKIE, jsonObject.getString("Cookie"));
                         }
                     } catch (JSONException e) {

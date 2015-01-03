@@ -8,7 +8,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.provider.Settings;
-import android.widget.Toast;
 
 import com.umeng.analytics.MobclickAgent;
 
