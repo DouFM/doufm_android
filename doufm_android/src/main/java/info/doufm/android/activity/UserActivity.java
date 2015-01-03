@@ -75,7 +75,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         setSupportActionBar(mToolbar);
         getSupportActionBar().setDisplayShowHomeEnabled(true);
         ivUserLogo.setImageDrawable(UserUtil.getCircleImage(this, R.drawable.default_artist_300));
-        tvUserName.setText(getSharedPreferences("user", MODE_PRIVATE).getString("username", ""));
+        tvUserName.setText(SharedPreferencesUtils.getString(this, Constants.LOGIN_USR_NAME, ""));
         btnUserQuit.setOnClickListener(this);
         rlUserHistory.setOnClickListener(this);
         rlUserLove.setOnClickListener(this);

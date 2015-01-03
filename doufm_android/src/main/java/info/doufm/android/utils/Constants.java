@@ -9,7 +9,7 @@ public class Constants {
     public static final int UPDATE_TIME = 2000;
     public static final int REQUEST_LOGIN_CODE = 300;
     public static final int REQUEST_USER_CODE = 400;
-
+    public static final int REQUEST_WIFI_SETTING_CODE = 500;
     //action
     public static final String ACTION_CHOOSE_MUSIC = "info.doufm.android.action.CHOOSE_MUSIC";
     //extra

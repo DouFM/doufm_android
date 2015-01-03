@@ -48,6 +48,7 @@ public class JsonObjectPostRequest extends Request<JSONObject> {
                     new String(response.data, HttpHeaderParser.parseCharset(response.headers));
             mHeader = response.headers.toString();
             Log.w("LOG", "get headers in parseNetworkResponse " + response.headers.toString());
+            cookieFromResponse = "";
             //使用正则表达式从reponse的头中提取cookie内容的子串
             Pattern pattern = Pattern.compile("Set-Cookie.*?;");
             Matcher m = pattern.matcher(mHeader);

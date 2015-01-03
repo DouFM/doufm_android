@@ -54,6 +54,7 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -107,9 +108,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     private boolean playLoopFlag = false;
 
     private int colorNum;
+    private SweetAlertDialog mErrorDlg;
 
     //菜单列表监听器
-    private ListListener mListLisener;
+    private ListListener mListListener;
 
     //播放界面相关
     private Button btnPlay;
@@ -184,17 +186,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
     };
 
-    private boolean firstErrorFlag = true;
+    //private boolean firstErrorFlag = true;
 
     private Response.ErrorListener errorListener = new Response.ErrorListener() {
         @Override
         public void onErrorResponse(VolleyError volleyError) {
-            timerTask.cancel();
-            if (firstErrorFlag) {
-                firstErrorFlag = false;
-                new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
+            if (mErrorDlg == null) {
+                mErrorDlg = new SweetAlertDialog(MainActivity.this, SweetAlertDialog.WARNING_TYPE)
                         .setTitleText("网络连接出错啦...")
-                        .setCancelText("检测网络设置")
+                        .setCancelText("设置网络")
                         .setConfirmText("退出应用")
                         .showCancelButton(true)
                         .setCancelClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -211,7 +211,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                                     intent.setComponent(componentName);
                                     intent.setAction("android.intent.action.VIEW");
                                 }
-                                startActivity(intent);
+                                startActivityForResult(intent, Constants.REQUEST_WIFI_SETTING_CODE);
                             }
                         })
                         .setConfirmClickListener(new SweetAlertDialog.OnSweetClickListener() {
@@ -219,7 +219,12 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             public void onClick(SweetAlertDialog sDialog) {
                                 MainActivity.this.finish();
                             }
-                        }).show();
+                        });
+                mErrorDlg.show();
+            } else {
+                if (!mErrorDlg.isShowing()) {
+                    mErrorDlg.show();
+                }
             }
         }
     };
@@ -324,7 +329,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             e.printStackTrace();
         }
 
-        mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 12);
+        mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 13);
         mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[mThemeNum]));
         mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
         mPlayListNum = SharedPreferencesUtils.getInt(context, Constants.PLAYLIST, 0);
@@ -344,7 +349,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     protected void onResume() {
         super.onResume();
         MobclickAgent.onResume(this);
-        mListLisener = new ListListener();
+        mListListener = new ListListener();
         if (isFirstLoad) {
             try {
                 getMusicList();
@@ -377,7 +382,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     }
                     channelListAdapter = new ChannelListAdapter(MainActivity.this, mLeftResideMenuItemTitleList);
                     mDrawerList.setAdapter(channelListAdapter);
-                    mDrawerList.setOnItemClickListener(mListLisener);
+                    mDrawerList.setOnItemClickListener(mListListener);
                     isLoadingSuccess = true;
                     initPlayer();
                 } catch (JSONException e) {
@@ -414,6 +419,10 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(MUSIC_URL, new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
+                //如果当前有error dialog显示，关闭它
+                if (mErrorDlg != null && mErrorDlg.isShowing()) {
+                    mErrorDlg.dismiss();
+                }
                 //请求随机播放音乐文件信息
                 try {
                     JSONObject jo = jsonArray.getJSONObject(0);
@@ -534,13 +543,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     private void updateLoveBtn() {
         Realm realm = Realm.getInstance(this);
-        RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
-        if (realmResults.size() > 0) {
-            loveFlag = true;
-            btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
-        } else {
-            loveFlag = false;
-            btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+        if (playMusicInfo.getAudio() != null) {
+            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("musicURL", playMusicInfo.getAudio()).findAll();
+            if (realmResults.size() > 0) {
+                loveFlag = true;
+                btnLove.setBackgroundResource(R.drawable.bg_btn_loved);
+            } else {
+                loveFlag = false;
+                btnLove.setBackgroundResource(R.drawable.bg_btn_love);
+            }
         }
     }
 
@@ -987,12 +998,20 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     //此代码需要保留，应该返回主界面有两种情况，这种情况不需要更新登录状态
                 }
                 break;
+            //设置wifi后返回(忽略是否设置成功)随机播放下一首，关闭Dialog
+            case Constants.REQUEST_WIFI_SETTING_CODE:
+                try {
+                    playRandomMusic(mPlaylistInfoList.get(mPlayListNum).getKey());
+                } catch (AuthFailureError authFailureError) {
+                    authFailureError.printStackTrace();
+                }
+                break;
         }
     }
 
     private void saveUserListenHistory() {
         if (User.getInstance().getLogin()) {
-            //本地保存
+/*            //本地保存
             Realm realm = Realm.getInstance(this);
             //如果历史记录已存在，这不在保存
             if (playMusicInfo.getAudio() != null) {
@@ -1009,7 +1028,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     userHistoryInfo.setMusicURL(playMusicInfo.getAudio());
                     userHistoryInfo.setCover(playMusicInfo.getCover());
                     realm.commitTransaction();
-                }
+                }*/
                 //上传服务器
                 if (playMusicInfo.getKey() != null) {
                     try {
@@ -1018,7 +1037,6 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         authFailureError.printStackTrace();
                     }
                 }
-            }
         }
     }
 
@@ -1120,21 +1138,23 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         RequestManager.getRequestQueue().add(jsonObjectRequestWithCookie);
     }
 
-    private MusicInfo findMusic(byte listType, int musicId) {
+    private MusicInfo findMusic(Intent intent) {
         MusicInfo tempMusicInfo = new MusicInfo();
-        Realm realm = Realm.getInstance(this);
+        byte listType = intent.getByteExtra(Constants.EXTRA_LIST_TYPE, (byte) -1);
         if (listType == Constants.HISTORY_TYPE) {
-            RealmResults<UserHistoryInfo> realmResults = realm.where(UserHistoryInfo.class).equalTo("history_id", musicId).findAll();
-            tempMusicInfo.setTitle(realmResults.get(0).getTitle());
-            tempMusicInfo.setArtist(realmResults.get(0).getSinger());
-            tempMusicInfo.setAudio(realmResults.get(0).getMusicURL());
-            tempMusicInfo.setCover(realmResults.get(0).getCover());
+            UserHistoryInfo userHistoryInfo = (UserHistoryInfo) intent.getSerializableExtra(Constants.EXTRA_MUSIC_ID);
+            tempMusicInfo.setKey(userHistoryInfo.getKey());
+            tempMusicInfo.setTitle(userHistoryInfo.getTitle());
+            tempMusicInfo.setArtist(userHistoryInfo.getSinger());
+            tempMusicInfo.setAudio(userHistoryInfo.getMusicURL());
+            tempMusicInfo.setCover(userHistoryInfo.getCover());
         } else if (listType == Constants.LOVE_TYPE) {
-            RealmResults<UserLoveMusicInfo> realmResults = realm.where(UserLoveMusicInfo.class).equalTo("love_id", musicId).findAll();
-            tempMusicInfo.setTitle(realmResults.get(0).getTitle());
-            tempMusicInfo.setArtist(realmResults.get(0).getSinger());
-            tempMusicInfo.setAudio(realmResults.get(0).getMusicURL());
-            tempMusicInfo.setCover(realmResults.get(0).getCover());
+            UserLoveMusicInfo userLoveMusicInfo = (UserLoveMusicInfo) intent.getSerializableExtra(Constants.EXTRA_MUSIC_ID);
+            tempMusicInfo.setKey(userLoveMusicInfo.getKey());
+            tempMusicInfo.setTitle(userLoveMusicInfo.getTitle());
+            tempMusicInfo.setArtist(userLoveMusicInfo.getSinger());
+            tempMusicInfo.setAudio(userLoveMusicInfo.getMusicURL());
+            tempMusicInfo.setCover(userLoveMusicInfo.getCover());
         }
         return tempMusicInfo;
     }
@@ -1149,7 +1169,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             }
             preMusicInfo = playMusicInfo;
             btnPreSong.setClickable(true);
-            playMusicInfo = findMusic(intent.getByteExtra(Constants.EXTRA_LIST_TYPE, (byte) -1), intent.getIntExtra(Constants.EXTRA_MUSIC_ID, -1));
+            playMusicInfo = findMusic(intent);
             String key = CacheUtil.hashKeyForDisk(playMusicInfo.getAudio());
             try {
                 if (mDiskLruCache.get(key) != null) {
@@ -1157,6 +1177,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     mMainMediaPlayer.setDataSource(cacheDir.toString() + "/" + key + ".0");
                     mMainMediaPlayer.prepare();
                     seekBar.setSecondaryProgress(seekBar.getMax());
+                    saveUserListenHistory();
                 } else {
                     changeMusic(false);
                     mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio());

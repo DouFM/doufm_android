@@ -26,7 +26,6 @@ import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.UserLoveMusicInfo;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.SharedPreferencesUtils;
-import io.realm.Realm;
 import io.realm.RealmResults;
 
 public class UserLikeActivity extends ActionBarActivity {
@@ -89,34 +88,35 @@ public class UserLikeActivity extends ActionBarActivity {
     }
 
     private void LoadingLoveMusic() {
-        Realm realm = Realm.getInstance(this);
+        /*Realm realm = Realm.getInstance(this);
         if (realm != null) {
             userLoveInfoList = realm.where(UserLoveMusicInfo.class).findAll();
             adapter = new UserLoveListAdapter(UserLikeActivity.this, userLoveInfoList);
             adapter.notifyDataSetChanged();
             lvLove.setAdapter(adapter);
-        }
-        //如果缓存不可用，从服务器获取用户的收藏列表
-        else {
-            JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=favor&start=0&end=30", new Response.Listener<JSONArray>() {
-                @Override
-                public void onResponse(JSONArray jsonArray) {
-                    userMusicAdapter = new UserMusicAdapter(UserLikeActivity.this, jsonArray);
-                    lvLove.setAdapter(userMusicAdapter);
-                }
-            }, new Response.ErrorListener() {
-                @Override
-                public void onErrorResponse(VolleyError volleyError) {
-                    Log.w("LOG", "show favor history error " + volleyError);
-                }
-            });
-            try {
-                String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
-                jsonArrayRequestWithCookie.setCookie(localCookie);
-            } catch (AuthFailureError authFailureError) {
-                authFailureError.printStackTrace();
+        }*/
+
+        //如果从服务器获取用户历史记录，则可以显示该账号在多台设备的历史记录。如果处理从realm和从服务器获取历史记录的关系？ 之前写的if else好像不好用
+        //else {
+        JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=favor&start=0&end=30", new Response.Listener<JSONArray>() {
+            @Override
+            public void onResponse(JSONArray jsonArray) {
+                userMusicAdapter = new UserMusicAdapter(UserLikeActivity.this, jsonArray);
+                lvLove.setAdapter(userMusicAdapter);
             }
-            RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.w("LOG", "show favor history error " + volleyError);
+            }
+        });
+        try {
+            String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
+            jsonArrayRequestWithCookie.setCookie(localCookie);
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
         }
+        RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
+        // }
     }
 }
