@@ -177,16 +177,23 @@ public class UserHistoryActivity extends ActionBarActivity {
                             userHistoryInfo.setSinger(jo.getString("artist"));
                             userHistoryInfo.setMusicURL(jo.getString("audio"));
                             userHistoryInfo.setCover(jo.getString("cover"));
+                            int index = MusicIsExist(userHistoryInfo);
+                            /*
+                                FIXME 仍存在BUG：历史歌曲列表 有时候会加载重复的歌曲
+                             */
+                            if (index != -1) {
+                                userHistoryInfoList.remove(index);
+                            }
                             userHistoryInfoList.add(userHistoryInfo);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        adapter.notifyDataSetChanged();
                     }
 /*                    realm.commitTransaction();
                     realm.close();*/
-                    adapter.notifyDataSetChanged();
+                    startId = startId + sum;
                 }
-                startId = startId + sum;
             }
         }, new Response.ErrorListener() {
             @Override
@@ -201,5 +208,13 @@ public class UserHistoryActivity extends ActionBarActivity {
             authFailureError.printStackTrace();
         }
         RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
+    }
+
+    private int MusicIsExist(UserHistoryInfo userHistoryInfo) {
+        for (int i = 0; i < userHistoryInfoList.size(); i++) {
+            if (userHistoryInfo.getKey() == userHistoryInfoList.get(i).getKey())
+                return i;
+        }
+        return -1;
     }
 }
