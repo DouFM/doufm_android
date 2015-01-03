@@ -54,7 +54,6 @@ import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.Serializable;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.util.ArrayList;
@@ -1029,14 +1028,14 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     userHistoryInfo.setCover(playMusicInfo.getCover());
                     realm.commitTransaction();
                 }*/
-                //上传服务器
-                if (playMusicInfo.getKey() != null) {
-                    try {
-                        uploadUserOp("listened", playMusicInfo.getKey());
-                    } catch (AuthFailureError authFailureError) {
-                        authFailureError.printStackTrace();
-                    }
+            //上传服务器
+            if (playMusicInfo.getKey() != null) {
+                try {
+                    uploadUserOp("listened", playMusicInfo.getKey());
+                } catch (AuthFailureError authFailureError) {
+                    authFailureError.printStackTrace();
                 }
+            }
         }
     }
 
@@ -1192,7 +1191,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
 
     private void updateLoginArea() {
         if (User.getInstance().getLogin()) {
-            tvUserLoginTitle.setText("你好," + SharedPreferencesUtils.getString(this, Constants.LOGIN_USR_NAME, ""));
+            tvUserLoginTitle.setText("你好, " + SharedPreferencesUtils.getString(this, Constants.LOGIN_USR_NAME, ""));
         } else {
             tvUserLoginTitle.setText("使用睿思账号登陆");
         }

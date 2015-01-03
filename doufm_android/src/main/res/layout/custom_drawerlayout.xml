@@ -3,6 +3,7 @@
     android:id="@+id/drawer_layout"
     android:background="@color/bg"
     android:layout_width="match_parent"
+    android:fitsSystemWindows="true"
     android:layout_height="match_parent">
 
     <RelativeLayout
@@ -176,7 +177,8 @@
         android:id="@+id/ll_left_slide_menu"
         android:orientation="vertical"
         android:layout_width="match_parent"
-        android:layout_gravity="start"
+        android:layout_gravity="start|left"
+        android:fitsSystemWindows="true"
         android:layout_height="match_parent">
 
         <RelativeLayout

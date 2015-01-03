@@ -8,6 +8,8 @@
         <item name="colorAccent">@color/Indigo_accentColor</item>
         <!--返回键样式-->
         <item name="drawerArrowStyle">@style/AppTheme.DrawerArrowToggle</item>
+        <item name="windowActionModeOverlay">true</item>
+        <item name="colorControlNormal">#ffffff</item>
     </style>
 
     <!--Toolbar Toggle Button Style-->
@@ -26,12 +28,12 @@
         <item name="android:subtitleTextStyle">@style/ActionBar.SubtitleText</item>
     </style>
 
-    <style name="ActionBar.TitleText" parent="android:TextAppearance.Holo.Widget.ActionBar.Title">
+    <style name="ActionBar.TitleText">
         <item name="android:textColor">@android:color/white</item>
         <item name="android:textSize">18sp</item>
     </style>
 
-    <style name="ActionBar.SubtitleText" parent="android:TextAppearance.Holo.Widget.ActionBar.Subtitle">
+    <style name="ActionBar.SubtitleText">
         <item name="android:textColor">#DCDCDC</item>
         <item name="android:textSize">12sp</item>
     </style>
@@ -45,13 +47,6 @@
         <item name="android:thumb">@drawable/play_ctrl_thumb</item>
         <item name="android:thumbOffset">11dip</item>
         <item name="android:focusable">true</item>
-    </style>
-
-    <style name="GoogleProgressDialog" parent="Theme.AppCompat.Light.Dialog">
-        <item name="android:windowFrame">@null</item>
-        <item name="android:windowBackground">@android:color/transparent</item>
-        <item name="android:windowNoTitle">true</item>
-        <item name="android:colorBackground">@android:color/transparent</item>
     </style>
 
     <style name="login_dialog" parent="android:Theme.Dialog">
