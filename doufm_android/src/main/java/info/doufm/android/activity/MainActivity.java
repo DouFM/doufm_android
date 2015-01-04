@@ -470,12 +470,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             e.printStackTrace();
                         }
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置", Toast.LENGTH_SHORT).show();
-                    }
-                })
+                }, errorListener)
         );
     }
 

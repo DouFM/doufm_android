@@ -26,14 +26,12 @@ import java.util.ArrayList;
 
 import info.doufm.android.R;
 import info.doufm.android.adapter.UserLoveListAdapter;
-import info.doufm.android.adapter.UserMusicAdapter;
 import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.User;
 import info.doufm.android.user.UserLoveMusicInfo;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.SharedPreferencesUtils;
-import io.realm.RealmResults;
 
 public class UserLikeActivity extends ActionBarActivity {
 
@@ -73,9 +71,9 @@ public class UserLikeActivity extends ActionBarActivity {
         lvLove.setOnScrollListener(new AbsListView.OnScrollListener() {
             @Override
             public void onScrollStateChanged(AbsListView absListView, int scrollState) {
-                if(canGetMore){
-                    if(scrollState == SCROLL_STATE_IDLE){
-                        if(absListView.getLastVisiblePosition()+1== absListView.getCount()){
+                if (canGetMore) {
+                    if (scrollState == SCROLL_STATE_IDLE) {
+                        if (absListView.getLastVisiblePosition() + 1 == absListView.getCount()) {
                             getMoreLove();
                         }
                     }
@@ -131,18 +129,18 @@ public class UserLikeActivity extends ActionBarActivity {
         lvLove.setAdapter(adapter);
     }
 
-    private void getMoreLove(){
+    private void getMoreLove() {
         //从服务器获取喜欢列表信息
-        JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=favor&start="+startId+"&end="+(startId+num), new Response.Listener<JSONArray>() {
+        JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=favor&start=" + startId + "&end=" + (startId + num), new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
                 int sum = jsonArray.length();
-                if(sum==0){
-                    Toast.makeText(context,"已经到底了",Toast.LENGTH_SHORT).show();
+                Log.i("TAG", "sum:" + sum);
+                if (sum == 0 && canGetMore) {
+                    Toast.makeText(context, "已经到底了", Toast.LENGTH_SHORT).show();
                     canGetMore = false;
-                }
-                else{
-                    for(int i=0;i<sum;i++){
+                } else {
+                    for (int i = 0; i < sum; i++) {
                         UserLoveMusicInfo userLoveMusicInfo = new UserLoveMusicInfo();
                         try {
                             JSONObject jsonObject = jsonArray.getJSONObject(i);
@@ -158,7 +156,7 @@ public class UserLikeActivity extends ActionBarActivity {
                         }
                         adapter.notifyDataSetChanged();
                     }
-                    startId += sum;
+
                 }
             }
         }, new Response.ErrorListener() {
@@ -167,6 +165,7 @@ public class UserLikeActivity extends ActionBarActivity {
                 Log.w("LOG", "show favor history error " + volleyError);
             }
         });
+        startId += num;
         try {
             String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
             jsonArrayRequestWithCookie.setCookie(localCookie);
@@ -176,7 +175,6 @@ public class UserLikeActivity extends ActionBarActivity {
         RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
         // }
     }
-
 
 
 }
