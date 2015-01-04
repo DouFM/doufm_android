@@ -460,6 +460,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                     public void onResponse(JSONArray jsonArray) {
                         try {
                             JSONObject jo = jsonArray.getJSONObject(0);
+                            nextMusicInfo.setKey(jo.getString("key"));
                             nextMusicInfo.setTitle(jo.getString("title"));
                             nextMusicInfo.setArtist(jo.getString("artist"));
                             nextMusicInfo.setAudio(jo.getString("audio"));
@@ -470,12 +471,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                             e.printStackTrace();
                         }
                     }
-                }, new Response.ErrorListener() {
-                    @Override
-                    public void onErrorResponse(VolleyError volleyError) {
-                        Toast.makeText(MainActivity.this, "网络出错啦，请检查校园网设置", Toast.LENGTH_SHORT).show();
-                    }
-                })
+                }, errorListener)
         );
     }
 
@@ -789,6 +785,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
                         changeMusic(false);
                         mMainMediaPlayer.setDataSource(Constants.BASE_URL + playMusicInfo.getAudio());
                         mMainMediaPlayer.prepareAsync();
+                        saveUserListenHistory();
                     }
                 } catch (IOException e) {
                     e.printStackTrace();

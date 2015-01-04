@@ -8,6 +8,8 @@ import android.widget.BaseAdapter;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import java.util.ArrayList;
+
 import info.doufm.android.R;
 import info.doufm.android.user.UserLoveMusicInfo;
 import io.realm.RealmResults;
@@ -19,11 +21,11 @@ import io.realm.RealmResults;
  */
 public class UserLoveListAdapter extends BaseAdapter {
 
-    private RealmResults<UserLoveMusicInfo> userLoveMusicInfos;
+    private ArrayList<UserLoveMusicInfo> userLoveMusicInfos;
     private Context context;
     private LayoutInflater layoutInflater;
 
-    public UserLoveListAdapter(Context context, RealmResults<UserLoveMusicInfo> userLoveMusicInfos) {
+    public UserLoveListAdapter(Context context, ArrayList<UserLoveMusicInfo> userLoveMusicInfos) {
         this.context = context;
         this.userLoveMusicInfos = userLoveMusicInfos;
         layoutInflater = LayoutInflater.from(context);

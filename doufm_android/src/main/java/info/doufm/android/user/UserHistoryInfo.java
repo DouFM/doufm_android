@@ -76,4 +76,6 @@ public class UserHistoryInfo extends RealmObject implements Serializable {
     public void setKey(String key) {
         this.key = key;
     }
+
+
 }

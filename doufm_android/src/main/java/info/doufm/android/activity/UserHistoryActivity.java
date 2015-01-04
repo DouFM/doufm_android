@@ -31,12 +31,8 @@ import info.doufm.android.network.JsonArrayRequestWithCookie;
 import info.doufm.android.network.RequestManager;
 import info.doufm.android.user.User;
 import info.doufm.android.user.UserHistoryInfo;
-import info.doufm.android.user.UserLoveMusicInfo;
 import info.doufm.android.utils.Constants;
 import info.doufm.android.utils.SharedPreferencesUtils;
-import io.realm.Realm;
-import io.realm.RealmChangeListener;
-import io.realm.RealmResults;
 
 public class UserHistoryActivity extends ActionBarActivity {
 
@@ -157,10 +153,10 @@ public class UserHistoryActivity extends ActionBarActivity {
         JsonArrayRequestWithCookie jsonArrayRequestWithCookie = new JsonArrayRequestWithCookie(Constants.USER_MUSIC_URL + "?type=listened&start=" + String.valueOf(startId) + "&end=" + String.valueOf(startId + num), new Response.Listener<JSONArray>() {
             @Override
             public void onResponse(JSONArray jsonArray) {
-                //要测试
+
                 int sum = jsonArray.length();
                 Log.i("TAG", "sum:" + sum);
-                if (sum == 0) {
+                if (sum == 0 && canGetMore) {
                     Toast.makeText(UserHistoryActivity.this, "已经到底了", Toast.LENGTH_SHORT).show();
                     canGetMore = false;
                 } else {
@@ -177,16 +173,20 @@ public class UserHistoryActivity extends ActionBarActivity {
                             userHistoryInfo.setSinger(jo.getString("artist"));
                             userHistoryInfo.setMusicURL(jo.getString("audio"));
                             userHistoryInfo.setCover(jo.getString("cover"));
+                            //int index = MusicIsExist(userHistoryInfo);
+                            //if (index != -1) {
+                            //    userHistoryInfoList.remove(index);
+                            //}
                             userHistoryInfoList.add(userHistoryInfo);
                         } catch (JSONException e) {
                             e.printStackTrace();
                         }
+                        adapter.notifyDataSetChanged();
                     }
 /*                    realm.commitTransaction();
                     realm.close();*/
-                    adapter.notifyDataSetChanged();
+
                 }
-                startId = startId + sum;
             }
         }, new Response.ErrorListener() {
             @Override
@@ -194,6 +194,7 @@ public class UserHistoryActivity extends ActionBarActivity {
                 Log.w("LOG", "show listen history error " + volleyError);
             }
         });
+        startId = startId + num;
         try {
             String localCookie = SharedPreferencesUtils.getString(context, Constants.COOKIE, "");
             jsonArrayRequestWithCookie.setCookie(localCookie);
@@ -202,4 +203,12 @@ public class UserHistoryActivity extends ActionBarActivity {
         }
         RequestManager.getRequestQueue().add(jsonArrayRequestWithCookie);
     }
+
+/*    private int MusicIsExist(UserHistoryInfo userHistoryInfo) {
+        for (int i = 0; i < userHistoryInfoList.size(); i++) {
+            if (userHistoryInfo.getKey()。equals( userHistoryInfoList.get(i).getKey()))
+                return i;
+        }
+        return -1;
+    }*/
 }
