@@ -329,6 +329,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
         }
 
         mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 13);
+        SharedPreferencesUtils.putInt(this, Constants.THEME, mThemeNum);
         mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[mThemeNum]));
         mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
         mPlayListNum = SharedPreferencesUtils.getInt(context, Constants.PLAYLIST, 0);
@@ -726,6 +727,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             mThemeNum = colorIndex;
             SharedPreferencesUtils.putInt(context, Constants.THEME, mThemeNum);
             SharedPreferencesUtils.putInt(context, Constants.PLAYLIST, mPlayListNum);
+            updateRLUserLoginBg();
         }
         return super.onOptionsItemSelected(item);
     }
@@ -1190,10 +1192,15 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
     }
 
     private void updateLoginArea() {
+        updateRLUserLoginBg();
         if (User.getInstance().getLogin()) {
             tvUserLoginTitle.setText("你好, " + SharedPreferencesUtils.getString(this, Constants.LOGIN_USR_NAME, ""));
         } else {
             tvUserLoginTitle.setText("使用睿思账号登陆");
         }
+    }
+
+    private void updateRLUserLoginBg() {
+        rlUserLogin.setBackgroundResource(Constants.SLIDE_MENU_HEADERS[SharedPreferencesUtils.getInt(this, Constants.THEME, 13)]);
     }
 }
