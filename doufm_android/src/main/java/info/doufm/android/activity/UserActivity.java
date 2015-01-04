@@ -43,6 +43,8 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
     private Button btnUserQuit;
     private String localCookieStr;
     private Map<String, String> sendHeader = new HashMap<String, String>();
+    private TextView tvLoveNum;
+    private TextView tvHistoryNum;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -65,6 +67,9 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         rlUserHistory = (RelativeLayout) findViewById(R.id.rl_activity_user_history);
         rlUserLove = (RelativeLayout) findViewById(R.id.rl_activity_user_like);
         rlUserMain.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[themeNum]));
+        tvLoveNum = (TextView)findViewById(R.id.tv_love_num);
+        tvHistoryNum = (TextView)findViewById(R.id.tv_history_num);
+
     }
 
     private void initViews() {
@@ -79,6 +84,46 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         btnUserQuit.setOnClickListener(this);
         rlUserHistory.setOnClickListener(this);
         rlUserLove.setOnClickListener(this);
+
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        //放在onStart方法中，从从userHistoryActivity或userLikeActivity回到UserActivity时会更新
+        try {
+            getHistoryAndLoveNum();
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
+        }
+    }
+
+    //总感觉加载速度有点慢
+    private void getHistoryAndLoveNum() throws AuthFailureError{
+        JsonObjectRequestWithCookie jsonObjectRequestWithCookie = new JsonObjectRequestWithCookie(
+                Constants.USER_PROFILE_URL, null,new Response.Listener<JSONObject>() {
+            @Override
+            public void onResponse(JSONObject jsonObject) {
+                try {
+                    int favorNum = jsonObject.getInt("favor");
+                    int listenedNum = jsonObject.getInt("listened");
+                    int shareNum = jsonObject.getInt("share");
+                    int dislikeNum = jsonObject.getInt("dislike");
+                    tvHistoryNum.setText(String.valueOf(listenedNum));
+                    tvLoveNum.setText(String.valueOf(favorNum));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+        },new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError volleyError) {
+                Log.w("LOG", volleyError.getMessage(), volleyError);
+                Toast.makeText(UserActivity.this, "网络错误，稍后再试", Toast.LENGTH_SHORT).show();
+            }
+        });
+        jsonObjectRequestWithCookie.setCookie(localCookieStr);
+        RequestManager.getRequestQueue().add(jsonObjectRequestWithCookie);
     }
 
     @Override

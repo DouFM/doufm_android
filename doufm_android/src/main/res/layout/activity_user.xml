@@ -88,6 +88,14 @@
                     android:layout_toRightOf="@+id/iv_activity_user_like"
                     android:text="我的收藏" />
 
+                <TextView
+                    android:id="@+id/tv_love_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="30dp"/>
+
                 <ImageView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -132,6 +140,14 @@
                     android:layout_marginLeft="7dp"
                     android:layout_toRightOf="@+id/iv_activity_user_history"
                     android:text="听歌历史" />
+
+                <TextView
+                    android:id="@+id/tv_history_num"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_alignParentRight="true"
+                    android:layout_centerVertical="true"
+                    android:layout_marginRight="30dp"/>
 
                 <ImageView
                     android:layout_width="wrap_content"

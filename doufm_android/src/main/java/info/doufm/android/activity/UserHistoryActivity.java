@@ -206,7 +206,7 @@ public class UserHistoryActivity extends ActionBarActivity {
 
 /*    private int MusicIsExist(UserHistoryInfo userHistoryInfo) {
         for (int i = 0; i < userHistoryInfoList.size(); i++) {
-            if (userHistoryInfo.getKey() == userHistoryInfoList.get(i).getKey())
+            if (userHistoryInfo.getKey()。equals( userHistoryInfoList.get(i).getKey()))
                 return i;
         }
         return -1;
