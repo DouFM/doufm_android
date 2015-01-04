@@ -45,6 +45,7 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
     private Map<String, String> sendHeader = new HashMap<String, String>();
     private TextView tvLoveNum;
     private TextView tvHistoryNum;
+    private boolean isCreate;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -84,6 +85,13 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
         btnUserQuit.setOnClickListener(this);
         rlUserHistory.setOnClickListener(this);
         rlUserLove.setOnClickListener(this);
+        try {
+            getHistoryAndLoveNum();
+        } catch (AuthFailureError authFailureError) {
+            authFailureError.printStackTrace();
+        }
+        isCreate = true;
+
 
     }
 
@@ -91,11 +99,14 @@ public class UserActivity extends ActionBarActivity implements View.OnClickListe
     protected void onStart() {
         super.onStart();
         //放在onStart方法中，从从userHistoryActivity或userLikeActivity回到UserActivity时会更新
-        try {
-            getHistoryAndLoveNum();
-        } catch (AuthFailureError authFailureError) {
-            authFailureError.printStackTrace();
-        }
+       if(!isCreate){
+           try {
+               getHistoryAndLoveNum();
+           } catch (AuthFailureError authFailureError) {
+               authFailureError.printStackTrace();
+           }
+       }
+       isCreate = false;
     }
 
     //总感觉加载速度有点慢
