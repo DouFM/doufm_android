@@ -12,7 +12,7 @@
         android:layout_height="24dp"
         android:layout_marginLeft="16dp"
         android:layout_centerVertical="true"
-        android:src="@drawable/ic_cloud_circle_grey600_48dp" />
+        android:src="@drawable/ic_queue_music_grey600_48dp" />
 
     <TextView
         android:layout_toRightOf="@id/ivLoveIcon"
