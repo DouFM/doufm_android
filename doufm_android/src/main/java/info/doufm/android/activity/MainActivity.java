@@ -328,7 +328,7 @@ public class MainActivity extends ActionBarActivity implements MediaPlayer.OnCom
             e.printStackTrace();
         }
 
-        mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 13);
+        mThemeNum = SharedPreferencesUtils.getInt(context, Constants.THEME, 11);
         SharedPreferencesUtils.putInt(this, Constants.THEME, mThemeNum);
         mToolbar.setBackgroundColor(Color.parseColor(Constants.ACTIONBAR_COLORS[mThemeNum]));
         mDrawerLayout.setBackgroundColor(Color.parseColor(Constants.BACKGROUND_COLORS[mThemeNum]));
