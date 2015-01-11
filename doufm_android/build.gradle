@@ -8,14 +8,14 @@ android {
         minSdkVersion 14
         targetSdkVersion 21
         versionCode 1
-        versionName "2.0.0"
+        versionName "2.1.0"
     }
     buildTypes {
         release {
              //Automatically remove unused resources
-             minifyEnabled true;
+             minifyEnabled false;
              shrinkResources true
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+             proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
         }
     }
 }
