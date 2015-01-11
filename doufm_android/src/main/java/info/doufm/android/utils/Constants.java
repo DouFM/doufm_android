@@ -18,10 +18,7 @@ public class Constants {
     public static final String EXTRA_THEME = "info.doufm.android.theme";
     public static final String EXTRA_MUSIC_ID = "info.doufm.android.music_id";
     public static final String EXTRA_LIST_TYPE = "info.doufm.android.list_type";
-
-    //测试api
-    //public static final String BASE_URL = "http://115.29.140.122:5001";
-    public static final String BASE_URL = "http://doufm.info:5001";
+    public static final String BASE_URL = "http://doufm.info";
     public static final String PLAYLIST_URL = BASE_URL + "/api/playlist/";
     public static final String MUSIC_IN_PLAYLIST_URL = BASE_URL + "/api/playlist/";
     public static final String LOGIN_URL = BASE_URL + "/api/app_auth/";
